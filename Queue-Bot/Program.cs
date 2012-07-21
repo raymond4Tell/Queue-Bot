@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using BenTools.Data;
 
 /* Plan:
- * 1: PQueue to hold the jobs. 
- * 1a: Jobs class; Time needed, cost of time, name of job.
+ * 1: PQueue to hold the jobs. Check
+ * 1a: Jobs class; Time needed, cost of time, name of job. Check.
  * 1b: Sorting- find min(sum(Ti * Pi)). 
  * 2: Find BEWT; sum(Pi * Ti - BEWT) = balance
  * 3: Work out how much everybody owes.
@@ -18,6 +18,12 @@ namespace Queue_Bot
     class Program
     {
         private static BinaryPriorityQueue jobQueue = new BinaryPriorityQueue();
+        private static double balance = 0.0;
+        public static double Balance
+        {
+            get { return balance; }
+        }
+        public static double BEWT;
         static void Main(string[] args)
         {
             jobQueue.Push(new Job(2, 2.5, "Rotate tires"));
@@ -27,13 +33,35 @@ namespace Queue_Bot
             Job foo = new Job(3, 1.4, "Destroy the GOP");
             jobQueue.Push(foo);
             jobQueue.updateWaits();
+            BEWT = findBEWT();
             foreach (Job thisJob in jobQueue)
             {
                 Console.WriteLine(thisJob.ToString());
+                double tempBalance = thisJob.findBalance(BEWT);
+                if (tempBalance > 0)
+                    Console.WriteLine("Customer is owed: {0:C2}", tempBalance);
+                else
+                    Console.WriteLine("Customer owes: {0:C2}", tempBalance);
+                Console.WriteLine("--------------------------");
             }
             Console.Read();
         }
 
+        private static double findBEWT()
+        {
+            /* Balance = sum (Pi * (Ti - BEWT)) = sum(Pi * Ti - Pi * BEWT)
+             * sum(Pi) * BEWT = sum(Pi * Ti) - balance
+             */
+            double sumPi = 0.0, sumPiTi = 0.0;
+            foreach (Job thisJob in jobQueue)
+            {
+                sumPi += thisJob.Price;
+                sumPiTi += (thisJob.Price * thisJob.timeWaited);
+            }
+            double BEWT = (sumPiTi - balance) / sumPi;
+            Console.WriteLine("Break Even Wait Time is : {0}", BEWT);
+            return BEWT;
+        }
     }
 
     class Job : IComparable
@@ -42,15 +70,8 @@ namespace Queue_Bot
         private double timePrice;
         private String name;
         public int timeWaited;
-        public int Length
-        {
-            get
-            { return timeNeeded; }
-        }
-        public double Price
-        {
-            get { return timePrice; }
-        }
+        public int Length { get { return timeNeeded; } }
+        public double Price { get { return timePrice; } }
         public Job(int hoursNeeded, double timePrice, String name)
         {
             this.timeNeeded = hoursNeeded;
@@ -58,9 +79,10 @@ namespace Queue_Bot
             this.name = name;
             timeWaited = 0;
         }
-        public string ToString()
+        public override string ToString()
         {
-            string output = String.Format("Name: {2}\tTime needed: {0}\tTime waited: {1}\n---------", timeNeeded, timeWaited, name);
+            string output = String.Format("Name: {2}\tTime needed: {0}\nTime spent waiting: {1}\tPrice of Time Waited: {3}",
+                timeNeeded, timeWaited, name, timePrice * timeWaited);
             return output;
         }
         public static bool operator ==(Job job1, Job job2)
@@ -87,7 +109,12 @@ namespace Queue_Bot
                 return 0;
             double comp1 = this.timeNeeded / this.timePrice;
             double comp2 = job1.Length / job1.Price;
-            return (comp1 > comp2) ? -1 : 1;
+            return (comp1 < comp2) ? -1 : 1;
+        }
+
+        public double findBalance(double BEWT)
+        {
+            return timePrice * (timeWaited - BEWT);
         }
     }
 }
