@@ -9,7 +9,8 @@ using BenTools.Data;
 /* Plan:
  * 1: PQueue to hold the jobs. Check
  * 1a: Jobs class; Time needed, cost of time, name of job. Check.
- * 1b: Sorting- find min(sum(Ti * Pi)). 
+ * 1b: Sorting- find min(sum(Ti * Pi)). Can possibly be done using backtracking and hamiltonian cycle. 
+ * 1bb: Side project to try that.
  * 2: Find BEWT; sum(Pi * Ti - BEWT) = balance
  * 3: Work out how much everybody owes.
  */
@@ -19,10 +20,6 @@ namespace Queue_Bot
     {
         private static BinaryPriorityQueue jobQueue = new BinaryPriorityQueue();
         private static double balance = 0.0;
-        public static double Balance
-        {
-            get { return balance; }
-        }
         public static double BEWT;
         static void Main(string[] args)
         {
