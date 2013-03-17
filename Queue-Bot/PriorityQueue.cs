@@ -1,17 +1,16 @@
 using System;
 using System.Collections;
-using Queue_Bot;
 
-namespace BenTools.Data
+namespace Queue_Bot
 {
-    public interface IPriorityQueue : ICollection, ICloneable, IList
+    public interface IPriorityQueue : ICloneable, IList
     {
         int Push(object O);
         object Pop();
         object Peek();
         void Update(int i);
     }
-    public class BinaryPriorityQueue : IPriorityQueue, ICollection, ICloneable, IList
+    public class BinaryPriorityQueue : IPriorityQueue
     {
         protected ArrayList InnerList = new ArrayList();
         protected IComparer Comparer;

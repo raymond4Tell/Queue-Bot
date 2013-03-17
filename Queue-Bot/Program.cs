@@ -1,16 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BenTools.Data;
 
 /* Plan:
  * 1: PQueue to hold the jobs. Check
  * 1a: Jobs class; Time needed, cost of time, name of job. Check.
  * 1b: Sorting- find min(sum(Ti * Pi)). Can possibly be done using backtracking and hamiltonian cycle. 
- * 1bb: Side project to try that.
  * 2: Find BEWT; sum(Pi * Ti - BEWT) = balance
  * 3: Work out how much everybody owes.
  */
@@ -21,7 +14,7 @@ namespace Queue_Bot
         private static BinaryPriorityQueue jobQueue = new BinaryPriorityQueue();
         private static double balance = 0.0;
         public static double BEWT;
-        static void Main(string[] args)
+        static void Main()
         {
             jobQueue.Push(new Job(2, 2.5, "Rotate tires"));
             jobQueue.Push(new Job(4, .5, "Hoover the roof"));
@@ -55,17 +48,33 @@ namespace Queue_Bot
                 sumPi += thisJob.Price;
                 sumPiTi += (thisJob.Price * thisJob.timeWaited);
             }
-            double BEWT = (sumPiTi - balance) / sumPi;
-            Console.WriteLine("Break Even Wait Time is : {0}", BEWT);
-            return BEWT;
+            double localBEWT = (sumPiTi - balance) / sumPi;
+            Console.WriteLine("Break Even Wait Time is : {0}", localBEWT);
+            return localBEWT;
         }
     }
 
     class Job : IComparable
     {
-        private int timeNeeded;
-        private double timePrice;
-        private String name;
+        protected bool Equals(Job other)
+        {
+            return timeNeeded == other.timeNeeded && timePrice.Equals(other.timePrice) && string.Equals(name, other.name);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = timeNeeded;
+                hashCode = (hashCode * 397) ^ timePrice.GetHashCode();
+                hashCode = (hashCode * 397) ^ (name != null ? name.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+
+        private readonly int timeNeeded;
+        private readonly double timePrice;
+        private readonly String name;
         public int timeWaited;
         public int Length { get { return timeNeeded; } }
         public double Price { get { return timePrice; } }
@@ -82,27 +91,17 @@ namespace Queue_Bot
                 timeNeeded, timeWaited, name, timePrice * timeWaited);
             return output;
         }
-        public static bool operator ==(Job job1, Job job2)
-        {
-            return (job1.timeNeeded == job2.timeNeeded) && (job1.timePrice.Equals(job2.timePrice));
-        }
-
-        public static bool operator !=(Job job1, Job job2)
-        {
-            return (job1.timeNeeded != job2.timeNeeded) || !(job1.timePrice.Equals(job2.timePrice));
-        }
-
         public override bool Equals(object job2)
         {
             if ((job2 == null) || !(job2 is Job)) return false;
-            return this == (Job)job2;
+            return this == job2;
         }
 
         public int CompareTo(object obj)
         {
             if ((obj == null) || !(obj is Job)) return 1;
             Job job1 = (Job)obj;
-            if (job1 == this)
+            if (job1.Equals(this))
                 return 0;
             double comp1 = this.timeNeeded / this.timePrice;
             double comp2 = job1.Length / job1.Price;
