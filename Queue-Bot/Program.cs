@@ -3,9 +3,10 @@
 /* Plan:
  * 1: PQueue to hold the jobs. Check
  * 1a: Jobs class; Time needed, cost of time, name of job. Check.
- * 1b: Sorting- find min(sum(Ti * Pi)). Can possibly be done using backtracking and hamiltonian cycle. 
+ * 1b: Sorting- find min(sum(Ti * Pi)). Simplest method is to sort by Ti/Pi
  * 2: Find BEWT; sum(Pi * Ti - BEWT) = balance
  * 3: Work out how much everybody owes.
+ * TODO: Add owner class and ability to pop jobs off the queue.
  */
 namespace Queue_Bot
 {
@@ -28,10 +29,7 @@ namespace Queue_Bot
             {
                 Console.WriteLine(thisJob.ToString());
                 double tempBalance = thisJob.findBalance(BEWT);
-                if (tempBalance > 0)
-                    Console.WriteLine("Customer is owed: {0:C2}", tempBalance);
-                else
-                    Console.WriteLine("Customer owes: {0:C2}", tempBalance);
+                Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
                 Console.WriteLine("--------------------------");
             }
             Console.Read();
@@ -103,7 +101,7 @@ namespace Queue_Bot
             Job job1 = (Job)obj;
             if (job1.Equals(this))
                 return 0;
-            double comp1 = this.timeNeeded / this.timePrice;
+            double comp1 = this.Length / this.Price;
             double comp2 = job1.Length / job1.Price;
             return (comp1 < comp2) ? -1 : 1;
         }
