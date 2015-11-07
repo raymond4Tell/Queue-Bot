@@ -1,12 +1,31 @@
 ﻿using System;
 
-/* Plan:
- * 1: PQueue to hold the jobs. Check
- * 1a: Jobs class; Time needed, cost of time, name of job. Check.
- * 1b: Sorting- find min(sum(Ti * Pi)). Simplest method is to sort by Ti/Pi
- * 2: Find BEWT; sum(Pi * Ti - BEWT) = balance
- * 3: Work out how much everybody owes.
- * TODO: Add owner class and ability to pop jobs off the queue.
+/* Workflow runs in two (async?) loops. Probably just functions
+ * on a service; users can add/modify jobs, service automatically pops jobs.
+ * 1. Add jobs to PQueue. Jobs have jobName, Owner (with name and
+ * time-value), jobDuration, time enqueued, and balance. Last two may belong
+ * to owner instead of job. Adding job will also require updating
+ * ordering, and therefore BEWT and each job's balance. 
+ * 2. Remove jobs from PQueue, with payment and at proper time.
+ * Am uncertain whether to handle this as operator requesting
+ * next job, or service sending job to operator. Probably best
+ * to send from service.
+ * 
+ * Alternate structure: Queue of persons that have job fields.
+ * Also allows for limited list of possible jobs, useful for controlling user input.
+ * 
+ * Desired sorting order: Minimize value of total time spent in queue across all users.
+ * IE, person Alpha worth $20/hr who spends 4 hours waiting to be served
+ * and person Bravo worth $15 who waits 20 minutes have a combined wait-time-value of $85.
+ * Best method is probably O(n!) combinatorial brute force, or something cunning in dynamic programming.
+ * Simplest and current is just sorting on timeValue/jobDuration, so busy customers
+ * and quick jobs get sorted first, regardless of actual time in queue.
+ * 
+ * Break-Even Wait Time calculation: Balance = sum (timeValue * (timeWaiting - BEWT))
+ * BEWT is the "average" wait time, so that
+ * (payments from people who wait less than BEWT) + (payments to people who wait longer than BEWT) = Balance on computer.
+ * Balance is initially 0, but will change as people leave the queue and pay/get paid for their wait.
+ * May also change over time due to the cost of operating this service; bandwidth costs, electricity, ETC.
  */
 namespace Queue_Bot
 {
@@ -38,6 +57,7 @@ namespace Queue_Bot
         private static double findBEWT()
         {
             /* Balance = sum (Pi * (Ti - BEWT)) = sum(Pi * Ti - Pi * BEWT)
+             * Balance = sum(Pi * Ti) - sum(Pi * BEWT) = sum(Pi * Ti) - (sum(Pi) * BEWT)
              * sum(Pi) * BEWT = sum(Pi * Ti) - balance
              */
             double sumPi = 0.0, sumPiTi = 0.0;
@@ -97,7 +117,7 @@ namespace Queue_Bot
 
         public int CompareTo(object obj)
         {
-            if ((obj == null) || !(obj is Job)) return 1;
+            if (!(obj is Job)) return 1;
             Job job1 = (Job)obj;
             if (job1.Equals(this))
                 return 0;

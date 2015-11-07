@@ -162,6 +162,8 @@ namespace Queue_Bot
         }
         /// <summary>
         /// Updates the wait times for each item in the list.
+        /// Should be called whenever the queue is updated, either
+        /// adding or removing an item.
         /// </summary>
         public void updateWaits()
         {
