@@ -1,297 +1,163 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace Queue_Bot
-{
-    public interface IPriorityQueue : ICloneable, IList
+{ /// <summary> Generic priority queue interface. </summary>
+    /// <remarks> David Venegoni, Jan 02 2014. </remarks>
+    /// <typeparam name="T"> Generic type parameter.  Must implement the IComparable interface. </typeparam>
+    public interface IPriorityQueue<T> : IEnumerable<T> where T : IComparable<T>
     {
-        int Push(object O);
-        object Pop();
-        object Peek();
-        void Update(int i);
+        /// <summary> Gets the number of items in the priority queue. </summary>
+        /// <value> The number of items in the priority queue. </value>
+        Int32 Count { get; }
+
+        /// <summary> Adds an item to the priority queue, inserting it with respect to its priority. </summary>
+        /// <param name="item"> The item to add. </param>
+        void Add(T item);
+
+        /// <summary> Adds a range of items to the priority queue, inserting them with respect to their priority. </summary>
+        /// <param name="itemsToAdd"> An IEnumerable&lt;T&gt; of items to add to the priority queue. </param>
+        void AddRange(IEnumerable<T> itemsToAdd);
+
+        /// <summary> Clears all the items from the priority queue. </summary>
+        void Clear();
+
+        /// <summary> Clears all the items starting at the specified start index. </summary>
+        /// <param name="startIndex"> The start index. </param>
+        /// <returns> The number of items that were removed from the priority queue. </returns>
+        Int32 Clear(Int32 startIndex);
+
+        /// <summary> Clears the number of items specified by count from the priority queue starting at specified start index. </summary>
+        /// <param name="startIndex"> The start index. </param>
+        /// <param name="count">      Number of items to remove. </param>
+        void Clear(Int32 startIndex, Int32 count);
+
+        /// <summary> Clears all the items that satisfy the specified predicate function. </summary>
+        /// <param name="predicateFunction"> The predicate function to use in determining which items should be removed. </param>
+        /// <returns> The number of items that were removed from the priority queue. </returns>
+        Int32 ClearWhere(Func<T, Boolean> predicateFunction);
+
+        /// <summary> Pops an item from the front of the queue. </summary>
+        /// <returns> An item from the front of the queue. </returns>
+        T PopFront();
+
+        /// <summary> Pops an item from the back of the queue. </summary>
+        /// <returns> An item from the back of the queue. </returns>
+        T PopBack();
+
+        /// <summary> Peeks at the item at the front of the queue, but does not remove it from the queue. </summary>
+        /// <returns> The item that is at the front of the queue. </returns>
+        T PeekFront();
+
+        /// <summary> Peek at the item at the back of the queue, but does not remove it from the queue. </summary>
+        /// <returns> The item that is at the back of the queue. </returns>
+        T PeekBack();
+
+        /// <summary> Pops the specified number of items from the front of the queue. </summary>
+        /// <param name="numberToPop"> Number of items to pop from the front of the queue. </param>
+        /// <returns> The items that were popped from the front of the queue. </returns>
+        IEnumerable<T> PopFront(Int32 numberToPop);
+
+        /// <summary> Pops the specified number of items from the back of the queue. </summary>
+        /// <param name="numberToPop"> Number of items to pop from the back of the queue. </param>
+        /// <returns> The items that were popped from the back of the queue. </returns>
+        IEnumerable<T> PopBack(Int32 numberToPop);
+
+        /// <summary> Queries if the priority queue is empty. </summary>
+        /// <returns> true if the priority queue is empty, false if not. </returns>
+        Boolean IsEmpty();
     }
-    public class BinaryPriorityQueue : IPriorityQueue
+
+    [Serializable]
+    public class PriorityQueue<T> : IEnumerable<T>, IPriorityQueue<T>
+        where T : IComparable<T>
     {
-        protected ArrayList InnerList = new ArrayList();
-        protected IComparer Comparer;
-
-        #region contructors
-        public BinaryPriorityQueue()
-            : this(System.Collections.Comparer.Default)
-        { }
-        public BinaryPriorityQueue(IComparer c)
+        private SortedSet<T> internalSet;
+        public PriorityQueue() { internalSet = new SortedSet<T>(); }
+        public IEnumerator<T> GetEnumerator()
         {
-            Comparer = c;
-        }
-        public BinaryPriorityQueue(int C)
-            : this(System.Collections.Comparer.Default, C)
-        { }
-        public BinaryPriorityQueue(IComparer c, int Capacity)
-        {
-            Comparer = c;
-            InnerList.Capacity = Capacity;
+            return internalSet.GetEnumerator();
         }
 
-        protected BinaryPriorityQueue(ArrayList Core, IComparer Comp, bool Copy)
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            if (Copy)
-                InnerList = Core.Clone() as ArrayList;
-            else
-                InnerList = Core;
-            Comparer = Comp;
-        }
-
-        #endregion
-        protected void SwitchElements(int i, int j)
-        {
-            object h = InnerList[i];
-            InnerList[i] = InnerList[j];
-            InnerList[j] = h;
-        }
-
-        protected virtual int OnCompare(int i, int j)
-        {
-            return Comparer.Compare(InnerList[i], InnerList[j]);
-        }
-
-        #region public methods
-        /// <summary>
-        /// Push an object onto the PQ
-        /// </summary>
-        /// <param name="O">The new object</param>
-        /// <returns>The index in the list where the object is _now_. This will change when objects are taken from or put onto the PQ.</returns>
-        public int Push(object O)
-        {
-            int p = InnerList.Count, p2;
-            InnerList.Add(O); // E[p] = O
-            do
-            {
-                if (p == 0)
-                    break;
-                p2 = (p - 1) / 2;
-                if (OnCompare(p, p2) < 0)
-                {
-                    SwitchElements(p, p2);
-                    p = p2;
-                }
-                else
-                    break;
-            } while (true);
-            return p;
-        }
-
-        /// <summary>
-        /// Get the smallest object and remove it.
-        /// </summary>
-        /// <returns>The smallest object</returns>
-        public object Pop()
-        {
-            object result = InnerList[0];
-            int p = 0, p1, p2, pn;
-            InnerList[0] = InnerList[InnerList.Count - 1];
-            InnerList.RemoveAt(InnerList.Count - 1);
-            do
-            {
-                pn = p;
-                p1 = 2 * p + 1;
-                p2 = 2 * p + 2;
-                if (InnerList.Count > p1 && OnCompare(p, p1) > 0) // links kleiner
-                    p = p1;
-                if (InnerList.Count > p2 && OnCompare(p, p2) > 0) // rechts noch kleiner
-                    p = p2;
-
-                if (p == pn)
-                    break;
-                SwitchElements(p, pn);
-            } while (true);
-            return result;
-        }
-
-        /// <summary>
-        /// Notify the PQ that the object at position i has changed
-        /// and the PQ needs to restore order.
-        /// Since you dont have access to any indexes (except by using the
-        /// explicit IList.this) you should not call this function without knowing exactly
-        /// what you do.
-        /// </summary>
-        /// <param name="i">The index of the changed object.</param>
-        public void Update(int i)
-        {
-            int p = i, pn;
-            int p1, p2;
-            do	// aufsteigen
-            {
-                if (p == 0)
-                    break;
-                p2 = (p - 1) / 2;
-                if (OnCompare(p, p2) < 0)
-                {
-                    SwitchElements(p, p2);
-                    p = p2;
-                }
-                else
-                    break;
-            } while (true);
-            if (p < i)
-                return;
-            do	   // absteigen
-            {
-                pn = p;
-                p1 = 2 * p + 1;
-                p2 = 2 * p + 2;
-                if (InnerList.Count > p1 && OnCompare(p, p1) > 0) // links kleiner
-                    p = p1;
-                if (InnerList.Count > p2 && OnCompare(p, p2) > 0) // rechts noch kleiner
-                    p = p2;
-
-                if (p == pn)
-                    break;
-                SwitchElements(p, pn);
-            } while (true);
-        }
-
-        /// <summary>
-        /// Get the smallest object without removing it.
-        /// </summary>
-        /// <returns>The smallest object</returns>
-        public object Peek()
-        {
-            if (InnerList.Count > 0)
-                return InnerList[0];
-            return null;
-        }
-        /// <summary>
-        /// Updates the wait times for each item in the list.
-        /// Should be called whenever the queue is updated, either
-        /// adding or removing an item.
-        /// </summary>
-        public void updateWaits()
-        {
-            int cmltivWait = 0;
-            for (int i = 0; i < InnerList.Count; i++)
-            {
-                if (InnerList[i] is Job)
-                {
-                    //Can't do this in-place, apparently.
-                    Job temp = InnerList[i] as Job;
-                    temp.timeWaited = cmltivWait;
-                    InnerList[i] = temp;
-                    cmltivWait += temp.Length;
-                }
-            }
-        }
-
-        public bool Contains(object value)
-        {
-            return InnerList.Contains(value);
-        }
-
-        public void Clear()
-        {
-            InnerList.Clear();
+            return GetEnumerator();
         }
 
         public int Count
         {
-            get
+            get { return internalSet.Count; }
+        }
+        public void Add(T item)
+        {
+            internalSet.Add(item);
+        }
+
+        public void AddRange(IEnumerable<T> itemsToAdd)
+        {
+            foreach (var item in itemsToAdd)
             {
-                return InnerList.Count;
-            }
-        }
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return InnerList.GetEnumerator();
-        }
-
-        public void CopyTo(Array array, int index)
-        {
-            InnerList.CopyTo(array, index);
-        }
-
-        public object Clone()
-        {
-            return new BinaryPriorityQueue(InnerList, Comparer, true);
-        }
-
-        public bool IsSynchronized
-        {
-            get
-            {
-                return InnerList.IsSynchronized;
+                Add(item);
             }
         }
 
-        public object SyncRoot
+        public void Clear()
         {
-            get
-            {
-                return this;
-            }
-        }
-        #endregion
-        #region explicit implementation
-        bool IList.IsReadOnly
-        {
-            get
-            {
-                return false;
-            }
+            internalSet = new SortedSet<T>();
         }
 
-        object IList.this[int index]
+        public int Clear(int startIndex)
         {
-            get
-            {
-                return InnerList[index];
-            }
-            set
-            {
-                InnerList[index] = value;
-                Update(index);
-            }
+            throw new NotImplementedException();
         }
 
-        int IList.Add(object o)
+        public void Clear(int startIndex, int count)
         {
-            return Push(o);
+            throw new NotImplementedException();
         }
 
-        void IList.RemoveAt(int index)
+        public int ClearWhere(Func<T, bool> predicateFunction)
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
 
-        void IList.Insert(int index, object value)
+        public T PopFront()
         {
-            throw new NotSupportedException();
+            var foo = internalSet.Min;
+            internalSet.Remove(foo);
+            return foo;
         }
 
-        void IList.Remove(object value)
+        public T PopBack()
         {
-            throw new NotSupportedException();
+            throw new NotImplementedException();
         }
 
-        int IList.IndexOf(object value)
+        public T PeekFront()
         {
-            throw new NotSupportedException();
+            return internalSet.Max;
         }
 
-        bool IList.IsFixedSize
+        public T PeekBack()
         {
-            get
-            {
-                return false;
-            }
+            throw new NotImplementedException();
         }
 
-        public static BinaryPriorityQueue Syncronized(BinaryPriorityQueue P)
+        public IEnumerable<T> PopFront(int numberToPop)
         {
-            return new BinaryPriorityQueue(ArrayList.Synchronized(P.InnerList), P.Comparer, false);
+            throw new NotImplementedException();
         }
-        public static BinaryPriorityQueue ReadOnly(BinaryPriorityQueue P)
+
+        public IEnumerable<T> PopBack(int numberToPop)
         {
-            return new BinaryPriorityQueue(ArrayList.ReadOnly(P.InnerList), P.Comparer, false);
+            throw new NotImplementedException();
         }
-        #endregion
+
+        public bool IsEmpty()
+        {
+            return Count == 0;
+        }
     }
 }

@@ -21,6 +21,10 @@
  * Simplest and current is just sorting on timeValue/jobDuration, so busy customers
  * and quick jobs get sorted first, regardless of actual time in queue.
  * 
+ * Technical issue: Need PQueue that maintains internal sorted order, not just heap.
+ * Best option is probably something based on SortedList. Later worry, though. Right now,
+ * focus is on getting Angular frontend set up.
+ * 
  * Break-Even Wait Time calculation: Balance = sum (timeValue * (timeWaiting - BEWT))
  * BEWT is the "average" wait time, so that
  * (payments from people who wait less than BEWT) + (payments to people who wait longer than BEWT) = Balance on computer.
@@ -31,82 +35,97 @@ namespace Queue_Bot
 {
     class Program
     {
-        private static BinaryPriorityQueue jobQueue = new BinaryPriorityQueue();
-        private static double balance = 0.0;
-        public static double BEWT;
+        private static readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
+        private static double MachineBalance = 0.0;
+        public static TimeSpan BEWT;
         static void Main()
         {
-            jobQueue.Push(new Job(2, 2.5, "Rotate tires"));
-            jobQueue.Push(new Job(4, .5, "Hoover the roof"));
-            jobQueue.Push(new Job(1, 3.5, "Square the circle"));
-            jobQueue.Push(new Job(1, 4, "Dispose of vodka"));
-            Job foo = new Job(3, 1.4, "Destroy the GOP");
-            jobQueue.Push(foo);
-            jobQueue.updateWaits();
-            BEWT = findBEWT();
-            foreach (Job thisJob in jobQueue)
+            var jobList = new Job[] { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
+                new Job(new TimeSpan(0, 30, 0), "Hoover the roof") ,
+            new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+            new Job(new TimeSpan(2, 30,0),  "Dispose of vodka"),
+            new Job(new TimeSpan(3, 0,0), "Destroy the GOP")
+            };
+            var bob = new Customer("Bob", 1.2, jobList[0]);
+            JobQueue.Add(bob);
+            JobQueue.Add(new Customer("Ethel", 1.5, jobList[1]));
+            UpdateWaits(JobQueue);
+            BEWT = FindBEWT();
+            int count = JobQueue.Count;
+            for (int i = 0; i < count; i++)
             {
-                Console.WriteLine(thisJob.ToString());
-                double tempBalance = thisJob.findBalance(BEWT);
+                var tempCustomer = JobQueue.PopFront();
+                Console.WriteLine(tempCustomer.ToString());
+                var tempBalance = tempCustomer.findBalance(BEWT);
                 Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
                 Console.WriteLine("--------------------------");
             }
             Console.Read();
         }
 
-        private static double findBEWT()
+        /// <summary>
+        /// Updates the wait times for each item in the list.
+        /// Should be called whenever the queue is updated, either
+        /// adding or removing an item.
+        /// </summary>
+        public static void UpdateWaits(IPriorityQueue<Customer> PQueue)
+        {
+            TimeSpan cmltivWait = TimeSpan.Zero;
+            foreach (Customer customer in PQueue)
+            {
+                customer.waitTime = cmltivWait;
+                cmltivWait += customer.JobLength;
+            }
+        }
+        private static TimeSpan FindBEWT()
         {
             /* Balance = sum (Pi * (Ti - BEWT)) = sum(Pi * Ti - Pi * BEWT)
              * Balance = sum(Pi * Ti) - sum(Pi * BEWT) = sum(Pi * Ti) - (sum(Pi) * BEWT)
              * sum(Pi) * BEWT = sum(Pi * Ti) - balance
              */
             double sumPi = 0.0, sumPiTi = 0.0;
-            foreach (Job thisJob in jobQueue)
+            foreach (Customer foo in JobQueue)
             {
-                sumPi += thisJob.Price;
-                sumPiTi += (thisJob.Price * thisJob.timeWaited);
+                sumPi += foo.TimeValue;
+                sumPiTi += (foo.TimeValue * foo.waitTime.TotalHours);
             }
-            double localBEWT = (sumPiTi - balance) / sumPi;
-            Console.WriteLine("Break Even Wait Time is : {0}", localBEWT);
-            return localBEWT;
+            double localBEWT = (sumPiTi - MachineBalance) / sumPi;
+
+            Console.WriteLine("Break Even Wait Time is : {0} hours", localBEWT);
+
+            return TimeSpan.FromHours(localBEWT);
         }
     }
 
-    class Job : IComparable
+    class Job
     {
         protected bool Equals(Job other)
         {
-            return timeNeeded == other.timeNeeded && timePrice.Equals(other.timePrice) && string.Equals(name, other.name);
+            return duration == other.duration && string.Equals(name, other.name);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = timeNeeded;
-                hashCode = (hashCode * 397) ^ timePrice.GetHashCode();
+                int hashCode = duration.GetHashCode();
                 hashCode = (hashCode * 397) ^ (name != null ? name.GetHashCode() : 0);
                 return hashCode;
             }
         }
 
-        private readonly int timeNeeded;
-        private readonly double timePrice;
+        private readonly TimeSpan duration;
         private readonly String name;
-        public int timeWaited;
-        public int Length { get { return timeNeeded; } }
-        public double Price { get { return timePrice; } }
-        public Job(int hoursNeeded, double timePrice, String name)
+        public TimeSpan Length { get { return duration; } }
+        public Job(TimeSpan duration, String name)
         {
-            this.timeNeeded = hoursNeeded;
-            this.timePrice = timePrice;
+            this.duration = duration;
             this.name = name;
-            timeWaited = 0;
         }
         public override string ToString()
         {
-            string output = String.Format("Name: {2}\tTime needed: {0}\nTime spent waiting: {1}\tPrice of Time Waited: {3}",
-                timeNeeded, timeWaited, name, timePrice * timeWaited);
+            string output = String.Format("Name: {1}\tTime needed: {0}",
+                duration, name);
             return output;
         }
         public override bool Equals(object job2)
@@ -115,20 +134,108 @@ namespace Queue_Bot
             return this == job2;
         }
 
-        public int CompareTo(object obj)
+    }
+
+    class Customer : IComparable<Customer>
+    {
+        protected bool Equals(Customer other)
         {
-            if (!(obj is Job)) return 1;
-            Job job1 = (Job)obj;
-            if (job1.Equals(this))
-                return 0;
-            double comp1 = this.Length / this.Price;
-            double comp2 = job1.Length / job1.Price;
+            return timeEnqueued.Equals(other.timeEnqueued) && desiredJob.Equals(other.desiredJob) && string.Equals(Name, other.Name);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = timeEnqueued.GetHashCode();
+                hashCode = (hashCode * 397) ^ desiredJob.GetHashCode();
+                hashCode = (hashCode * 397) ^ Name.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        public override string ToString()
+        {
+            return String.Format("Name: {2}\tTime needed: {0:N2}\nTime spent waiting: {1:N2}\tPrice of Time Waited: {3:C2}",
+                 JobLength.TotalHours, waitTime.TotalHours, Name, (TimeValue * waitTime.TotalHours));
+        }
+
+        /// <summary>
+        /// Name of customer. Will probably want to add other
+        /// identifying/contact info in future development.
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Value the customer places on their time,
+        /// expressed as an hourly rate. 
+        /// </summary>
+        public double TimeValue { get; private set; }
+
+        /// <summary>
+        /// When the customer joined the queue and began
+        /// waiting for service. 
+        /// </summary>
+        private readonly DateTime timeEnqueued;
+        /// <summary>
+        /// When the customer can expect to be served, 
+        /// provisionally, barring significant rearrangement
+        /// of the queue.
+        /// </summary>
+        private DateTime timeOfExpectedService;
+        /// <summary>
+        /// A *small* deposit paid in when the customer joins the queue, to be
+        /// refunded when the customer is finally served (plus/minus any payments
+        /// for their time). Primes the pump for payments, and ensures everybody
+        /// has some skin in the game.
+        /// </summary>
+        private double deposit;
+        /// <summary>
+        /// The job the customer wants done. Should be selected from a
+        /// controlled list of options.
+        /// </summary>
+        private readonly Job desiredJob;
+        /// <summary>
+        /// Time spent waiting for service. As much as I hate cleverness, 
+        /// we're going to get a little cunning here. Get is the total duration;
+        /// timeOfExpectedService - timeEnqueued. Set is the time in the future,
+        /// how much longer to wait; timeOfExpectedService - Now
+        /// </summary>
+        public TimeSpan waitTime
+        {
+            get { return timeOfExpectedService - timeEnqueued; }
+            set { timeOfExpectedService = DateTime.Now + value; }
+        }
+        public TimeSpan JobLength { get { return desiredJob.Length; } }
+
+        public Customer(string name, double timeValue, Job desiredJob)
+        {
+            Name = name;
+            TimeValue = timeValue;
+            timeEnqueued = DateTime.Now;
+            deposit = 1.00;
+            this.desiredJob = desiredJob;
+        }
+
+        public int CompareTo(Customer other)
+        {
+            if (Equals(other)) return 0;
+            var comp1 = this.JobLength.TotalHours / this.TimeValue;
+            var comp2 = other.JobLength.TotalHours / other.TimeValue;
             return (comp1 < comp2) ? -1 : 1;
         }
 
-        public double findBalance(double BEWT)
+        public override bool Equals(object obj)
         {
-            return timePrice * (timeWaited - BEWT);
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((Customer)obj);
+        }
+
+        public double findBalance(TimeSpan BEWT)
+        {
+            return TimeValue * (waitTime - BEWT).TotalHours;
         }
     }
 }

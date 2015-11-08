@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 11
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Queue-Bot", "Queue-Bot\Queue-Bot.csproj", "{7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825}"
 EndProject
 Global
