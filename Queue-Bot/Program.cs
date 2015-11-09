@@ -40,7 +40,7 @@ namespace Queue_Bot
         public static TimeSpan BEWT;
         static void Main()
         {
-            var jobList = new Job[] { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
+            var jobList = new[] { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
                 new Job(new TimeSpan(0, 30, 0), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
             new Job(new TimeSpan(2, 30,0),  "Dispose of vodka"),
@@ -51,12 +51,10 @@ namespace Queue_Bot
             JobQueue.Add(new Customer("Ethel", 1.5, jobList[1]));
             UpdateWaits(JobQueue);
             BEWT = FindBEWT();
-            int count = JobQueue.Count;
-            for (int i = 0; i < count; i++)
+            foreach (var tempCustomer in JobQueue)
             {
-                var tempCustomer = JobQueue.PopFront();
                 Console.WriteLine(tempCustomer.ToString());
-                var tempBalance = tempCustomer.findBalance(BEWT);
+                var tempBalance = tempCustomer.FindBalance(BEWT);
                 Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
                 Console.WriteLine("--------------------------");
             }
@@ -73,7 +71,7 @@ namespace Queue_Bot
             TimeSpan cmltivWait = TimeSpan.Zero;
             foreach (Customer customer in PQueue)
             {
-                customer.waitTime = cmltivWait;
+                customer.WaitTime = cmltivWait;
                 cmltivWait += customer.JobLength;
             }
         }
@@ -87,7 +85,7 @@ namespace Queue_Bot
             foreach (Customer foo in JobQueue)
             {
                 sumPi += foo.TimeValue;
-                sumPiTi += (foo.TimeValue * foo.waitTime.TotalHours);
+                sumPiTi += (foo.TimeValue * foo.WaitTime.TotalHours);
             }
             double localBEWT = (sumPiTi - MachineBalance) / sumPi;
 
@@ -96,7 +94,6 @@ namespace Queue_Bot
             return TimeSpan.FromHours(localBEWT);
         }
     }
-
     class Job
     {
         protected bool Equals(Job other)
@@ -135,7 +132,6 @@ namespace Queue_Bot
         }
 
     }
-
     class Customer : IComparable<Customer>
     {
         protected bool Equals(Customer other)
@@ -157,7 +153,7 @@ namespace Queue_Bot
         public override string ToString()
         {
             return String.Format("Name: {2}\tTime needed: {0:N2}\nTime spent waiting: {1:N2}\tPrice of Time Waited: {3:C2}",
-                 JobLength.TotalHours, waitTime.TotalHours, Name, (TimeValue * waitTime.TotalHours));
+                 JobLength.TotalHours, WaitTime.TotalHours, Name, (TimeValue * WaitTime.TotalHours));
         }
 
         /// <summary>
@@ -165,13 +161,11 @@ namespace Queue_Bot
         /// identifying/contact info in future development.
         /// </summary>
         public string Name { get; private set; }
-
         /// <summary>
         /// Value the customer places on their time,
         /// expressed as an hourly rate. 
         /// </summary>
         public double TimeValue { get; private set; }
-
         /// <summary>
         /// When the customer joined the queue and began
         /// waiting for service. 
@@ -189,7 +183,7 @@ namespace Queue_Bot
         /// for their time). Primes the pump for payments, and ensures everybody
         /// has some skin in the game.
         /// </summary>
-        private double deposit;
+        private readonly double deposit;
         /// <summary>
         /// The job the customer wants done. Should be selected from a
         /// controlled list of options.
@@ -199,9 +193,10 @@ namespace Queue_Bot
         /// Time spent waiting for service. As much as I hate cleverness, 
         /// we're going to get a little cunning here. Get is the total duration;
         /// timeOfExpectedService - timeEnqueued. Set is the time in the future,
-        /// how much longer to wait; timeOfExpectedService - Now
+        /// how much longer to wait; timeOfExpectedService - DateTime.Now
+        /// Basically it's English; WaitTime as a question or as a statement.
         /// </summary>
-        public TimeSpan waitTime
+        public TimeSpan WaitTime
         {
             get { return timeOfExpectedService - timeEnqueued; }
             set { timeOfExpectedService = DateTime.Now + value; }
@@ -220,7 +215,7 @@ namespace Queue_Bot
         public int CompareTo(Customer other)
         {
             if (Equals(other)) return 0;
-            var comp1 = this.JobLength.TotalHours / this.TimeValue;
+            var comp1 = JobLength.TotalHours / TimeValue;
             var comp2 = other.JobLength.TotalHours / other.TimeValue;
             return (comp1 < comp2) ? -1 : 1;
         }
@@ -229,13 +224,13 @@ namespace Queue_Bot
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Customer)obj);
         }
 
-        public double findBalance(TimeSpan BEWT)
+        public double FindBalance(TimeSpan BEWT)
         {
-            return TimeValue * (waitTime - BEWT).TotalHours;
+            return TimeValue * (WaitTime - BEWT).TotalHours;
         }
     }
 }
