@@ -1,0 +1,12 @@
+﻿<h2>List of jobs to do.</h2>
+<div ng-controller="TaskListCtrl">
+    <ol>
+        <li ng-repeat="job in jobListing">
+            Name: {{job.Name}}
+            Job: {{job.JobName}}
+            Time in Queue: {{job.WaitTime}}
+        </li>
+    </ol>
+
+
+</div>

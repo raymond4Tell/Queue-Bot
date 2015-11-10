@@ -33,22 +33,26 @@
  */
 namespace Queue_Bot
 {
-    class Program
+    public class Program
     {
-        private static readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
-        private static double MachineBalance = 0.0;
+        public static readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
+        public static double MachineBalance = 0.0;
         public static TimeSpan BEWT;
-        static void Main()
-        {
-            var jobList = new[] { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
+        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
                 new Job(new TimeSpan(0, 30, 0), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
             new Job(new TimeSpan(2, 30,0),  "Dispose of vodka"),
             new Job(new TimeSpan(3, 0,0), "Destroy the GOP")
             };
+
+        public static void Main()
+        {
+            JobQueue.Clear();
             var bob = new Customer("Bob", 1.2, jobList[0]);
             JobQueue.Add(bob);
             JobQueue.Add(new Customer("Ethel", 1.5, jobList[1]));
+            JobQueue.Add(new Customer("Alfred", 1.91, jobList[3]));
+            JobQueue.Add(new Customer("Jasmine", 2.17, jobList[2]));
             UpdateWaits(JobQueue);
             BEWT = FindBEWT();
             foreach (var tempCustomer in JobQueue)
@@ -58,7 +62,7 @@ namespace Queue_Bot
                 Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
                 Console.WriteLine("--------------------------");
             }
-            Console.Read();
+            //Console.Read();
         }
 
         /// <summary>
@@ -75,7 +79,7 @@ namespace Queue_Bot
                 cmltivWait += customer.JobLength;
             }
         }
-        private static TimeSpan FindBEWT()
+        public static TimeSpan FindBEWT()
         {
             /* Balance = sum (Pi * (Ti - BEWT)) = sum(Pi * Ti - Pi * BEWT)
              * Balance = sum(Pi * Ti) - sum(Pi * BEWT) = sum(Pi * Ti) - (sum(Pi) * BEWT)
@@ -94,7 +98,7 @@ namespace Queue_Bot
             return TimeSpan.FromHours(localBEWT);
         }
     }
-    class Job
+    public class Job
     {
         protected bool Equals(Job other)
         {
@@ -112,7 +116,7 @@ namespace Queue_Bot
         }
 
         private readonly TimeSpan duration;
-        private readonly String name;
+        public readonly String name;
         public TimeSpan Length { get { return duration; } }
         public Job(TimeSpan duration, String name)
         {
@@ -132,7 +136,7 @@ namespace Queue_Bot
         }
 
     }
-    class Customer : IComparable<Customer>
+    public class Customer : IComparable<Customer>
     {
         protected bool Equals(Customer other)
         {
@@ -176,7 +180,7 @@ namespace Queue_Bot
         /// provisionally, barring significant rearrangement
         /// of the queue.
         /// </summary>
-        private DateTime timeOfExpectedService;
+        public DateTime timeOfExpectedService;
         /// <summary>
         /// A *small* deposit paid in when the customer joins the queue, to be
         /// refunded when the customer is finally served (plus/minus any payments
@@ -188,7 +192,7 @@ namespace Queue_Bot
         /// The job the customer wants done. Should be selected from a
         /// controlled list of options.
         /// </summary>
-        private readonly Job desiredJob;
+        public readonly Job desiredJob;
         /// <summary>
         /// Time spent waiting for service. As much as I hate cleverness, 
         /// we're going to get a little cunning here. Get is the total duration;
@@ -202,7 +206,7 @@ namespace Queue_Bot
             set { timeOfExpectedService = DateTime.Now + value; }
         }
         public TimeSpan JobLength { get { return desiredJob.Length; } }
-
+        public string JobName { get { return desiredJob.name; } }
         public Customer(string name, double timeValue, Job desiredJob)
         {
             Name = name;
