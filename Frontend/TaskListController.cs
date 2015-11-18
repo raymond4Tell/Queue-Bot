@@ -22,9 +22,17 @@ namespace App.Frontend
             return "value";
         }
 
+        //Dammit. Can't return actual Customer, since that has too many fields to initialize
+        //client-side, and can't just take object, since that can have any fields it likes.
         // POST api/<controller>
-        public void Post([FromBody]string value)
+        public IEnumerable<Customer> Post(Customer value)
         {
+            Console.Write(value);
+
+            //var foo = new Customer(value.name, value.timeValue, value.desiredJob);
+            Program.JobQueue.Add(value);
+
+            return Program.JobQueue;
         }
 
         // PUT api/<controller>/5

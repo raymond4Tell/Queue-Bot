@@ -8,5 +8,22 @@
         </li>
     </ol>
 
+    <form ng-submit="addJob()">
+        <label>
+            Customer name
+            <input type="text" ng-model="newJobData.name" />
+        </label>
+        <br />
+        <label>
+            Customer time-rate<input type="number" ng-model="newJobData.timeValue" />
+        </label>
+        <br />
+        <label ng-repeat="job in otherJobListing">
+            <input type="radio" value="{{job}}" name="actualJob" ng-model="newJobData.desiredJob" />
+            {{job.name}}
 
+        </label>
+        <br />
+        <button type="submit">Add job to queue</button>
+    </form>
 </div>

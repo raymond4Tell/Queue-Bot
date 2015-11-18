@@ -50,6 +50,18 @@ angular.module('app.controllers', [])
         $http.get("api/TaskList").success(function (data) {
             $scope.jobListing = data;
         });
+        //Names are hard. :(
+        $scope.otherJobListing = [];
+        $http.get("api/Job").success(function (data) {
+            $scope.otherJobListing = data;
+        });
+
+        $scope.newJobData = {};
+        $scope.addJob = function() {
+            $http.post("api/TaskList", $scope.newJobData).success(function(data) {
+                $scope.jobListing = data;
+            });
+        };
         $scope.$on('$viewContentLoaded', function () {
             $window.ga('send', 'pageview', { 'page': $location.path(), 'title': $scope.$root.title });
         });

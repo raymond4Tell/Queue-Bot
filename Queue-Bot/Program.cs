@@ -41,30 +41,50 @@ namespace Queue_Bot
         public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
                 new Job(new TimeSpan(0, 30, 0), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-            new Job(new TimeSpan(2, 30,0),  "Dispose of vodka"),
-            new Job(new TimeSpan(3, 0,0), "Destroy the GOP")
+            new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+            new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
             };
 
         public static void Main()
         {
             JobQueue.Clear();
             var bob = new Customer("Bob", 1.2, jobList[0]);
-            JobQueue.Add(bob);
-            JobQueue.Add(new Customer("Ethel", 1.5, jobList[1]));
-            JobQueue.Add(new Customer("Alfred", 1.91, jobList[3]));
-            JobQueue.Add(new Customer("Jasmine", 2.17, jobList[2]));
-            UpdateWaits(JobQueue);
-            BEWT = FindBEWT();
-            foreach (var tempCustomer in JobQueue)
-            {
-                Console.WriteLine(tempCustomer.ToString());
-                var tempBalance = tempCustomer.FindBalance(BEWT);
-                Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
-                Console.WriteLine("--------------------------");
-            }
-            //Console.Read();
+            AddCustomer(bob);
+            AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
+            AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
+            AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
+            //foreach (var tempCustomer in JobQueue)
+            //{
+            //    Console.WriteLine(tempCustomer.ToString());
+            //    var tempBalance = tempCustomer.FindBalance(BEWT);
+            //    Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
+            //    Console.WriteLine("--------------------------");
+            //}
         }
 
+        /// <summary>
+        /// Encapsulates jobQueue, so we don't have to interface with it directly, and can replace it as needed.
+        /// Also consolidates the boilerplate involved in object addition, so we don't have to call it in every function.
+        /// </summary>
+        /// <param name="customer">Customer object to add to the queue</param>
+        public static void AddCustomer(Customer customer)
+        {
+            JobQueue.Add(customer);
+            UpdateWaits(JobQueue);
+            BEWT = FindBEWT();
+        }
+        /// <summary>
+        /// Encapsulates jobQueue, so calling functions will not lose functionality if we need to replace it.
+        /// Also consolidates boilerplate, so calling functions do not need to change as we add more nonsense.
+        /// </summary>
+        /// <returns>The next customer to be served</returns>
+        public static Customer RemoveCustomer()
+        {
+            var foo = JobQueue.PopFront();
+            UpdateWaits(JobQueue);
+            BEWT = FindBEWT();
+            return foo;
+        }
         /// <summary>
         /// Updates the wait times for each item in the list.
         /// Should be called whenever the queue is updated, either
@@ -79,11 +99,19 @@ namespace Queue_Bot
                 cmltivWait += customer.JobLength;
             }
         }
+        /// <summary>
+        /// Calculates the Break-Even Waiting time, an "average" waiting time
+        /// for people in the queue. Used in calculating payments; people who wait
+        /// less than BEWT pay for their time savings, while people who wait longer
+        /// get paid for their patience. 
+        /// TODO: Really should make this take JobQueue as a parameter, rather than reaching out for it as a global.
+        /// </summary>
+        /// <returns></returns>
         public static TimeSpan FindBEWT()
         {
-            /* Balance = sum (Pi * (Ti - BEWT)) = sum(Pi * Ti - Pi * BEWT)
-             * Balance = sum(Pi * Ti) - sum(Pi * BEWT) = sum(Pi * Ti) - (sum(Pi) * BEWT)
-             * sum(Pi) * BEWT = sum(Pi * Ti) - balance
+            /* MachineBalance = sum (customer.TimeValue * (Customer.WaitTime - BEWT))
+             * Given that we know everything except BEWT in this equation, it's simple algebra to calculate BEWT.
+             * BEWT = (sum(customer.TimeValue * customer.WaitTime) - MachineBalance) / sum(customer.TimeValue)
              */
             double sumPi = 0.0, sumPiTi = 0.0;
             foreach (Customer foo in JobQueue)
@@ -153,7 +181,10 @@ namespace Queue_Bot
                 return hashCode;
             }
         }
-
+        /// <summary>
+        /// TODO: Really ought to make this less ugly and return more useful data. OTOH, that's what the GUI is for.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return String.Format("Name: {2}\tTime needed: {0:N2}\nTime spent waiting: {1:N2}\tPrice of Time Waited: {3:C2}",
