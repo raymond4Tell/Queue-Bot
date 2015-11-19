@@ -7,6 +7,15 @@ using System.Web.Http;
 using Queue_Bot;
 namespace App.Frontend
 {
+    /// <summary>
+    /// Just used so the POST endpoint has a structure to accept.
+    /// </summary>
+    public class CustomerDTO
+    {
+        public string name;
+        public double timeValue;
+        public int desiredJob;
+    }
     public class TaskListController : ApiController
     {
         // GET api/<controller>
@@ -25,12 +34,11 @@ namespace App.Frontend
         //Dammit. Can't return actual Customer, since that has too many fields to initialize
         //client-side, and can't just take object, since that can have any fields it likes.
         // POST api/<controller>
-        public IEnumerable<Customer> Post(Customer value)
+        public IEnumerable<Customer> Post(CustomerDTO value)
         {
-            Console.Write(value);
-
-            //var foo = new Customer(value.name, value.timeValue, value.desiredJob);
-            Program.JobQueue.Add(value);
+            var bar = Program.jobList.First(item => item.Identifier == value.desiredJob);
+            var foo = new Customer(value.name, value.timeValue, bar);
+            Program.AddCustomer(foo);
 
             return Program.JobQueue;
         }

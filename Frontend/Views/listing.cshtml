@@ -3,26 +3,32 @@
     <ol>
         <li ng-repeat="job in jobListing">
             Name: {{job.Name}}
-            Job: {{job.JobName}}
+            Job: {{job.desiredJob.Name}}
             Time in Queue: {{job.WaitTime}}
         </li>
     </ol>
 
-    <form ng-submit="addJob()">
+    <form ng-submit="addJob()" class="form-box">
+        <div style="float: right; width: 40%;">
+            <h2>Available Jobs</h2>
+            <label style="float: left; width: 50%" ng-repeat="job in otherJobListing">
+                <input type="radio" value="{{job.Identifier}}" name="actualJob" ng-model="newJobData.desiredJob"/>
+                {{job.Name}}
+
+            </label>
+        </div>
+        <h2>Customer Info</h2>
         <label>
             Customer name
             <input type="text" ng-model="newJobData.name" />
         </label>
         <br />
         <label>
-            Customer time-rate<input type="number" ng-model="newJobData.timeValue" />
+            Customer time-rate
+            <input type="number" ng-model="newJobData.timeValue" />
         </label>
         <br />
-        <label ng-repeat="job in otherJobListing">
-            <input type="radio" value="{{job}}" name="actualJob" ng-model="newJobData.desiredJob" />
-            {{job.name}}
 
-        </label>
         <br />
         <button type="submit">Add job to queue</button>
     </form>

@@ -33,7 +33,7 @@
  */
 namespace Queue_Bot
 {
-    public class Program
+    public static class Program
     {
         public static readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
         public static double MachineBalance = 0.0;
@@ -60,6 +60,30 @@ namespace Queue_Bot
             //    Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
             //    Console.WriteLine("--------------------------");
             //}
+        }
+
+        /// <summary>
+        /// Extension method, used for rounding times for display.
+        /// While computers may appreciate millisecond-accuracy, I
+        /// prefer slightly rounder time.
+        /// </summary>
+        /// <example>DateTime nowTrimmedToSeconds = now.Trim(TimeSpan.TicksPerSecond);</example>
+        /// <param name="date">Date to trim</param>
+        /// <param name="ticks">ticks per round unit.</param>
+        /// <returns></returns>
+        public static DateTime Trim(this DateTime date, long ticks)
+        {
+            return new DateTime(date.Ticks - (date.Ticks % ticks));
+        }
+        /// <summary>
+        /// Cousin of the above, used for trimming TimeSpans
+        /// </summary>
+        /// <param name="duration">TimeSpan to trim</param>
+        /// <param name="ticks">Ticks per round unit.</param>
+        /// <returns></returns>
+        public static TimeSpan Trim(this TimeSpan duration, long ticks)
+        {
+            return new TimeSpan(duration.Ticks - (duration.Ticks % ticks));
         }
 
         /// <summary>
@@ -130,31 +154,31 @@ namespace Queue_Bot
     {
         protected bool Equals(Job other)
         {
-            return duration == other.duration && string.Equals(name, other.name);
+            return Length == other.Length && string.Equals(Name, other.Name);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = duration.GetHashCode();
-                hashCode = (hashCode * 397) ^ (name != null ? name.GetHashCode() : 0);
+                int hashCode = Length.GetHashCode();
+                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
                 return hashCode;
             }
         }
 
-        private readonly TimeSpan duration;
-        public readonly String name;
-        public TimeSpan Length { get { return duration; } }
+        public string Name { get; private set; }
+        public TimeSpan Length { get; private set; }
+        public int Identifier { get { return GetHashCode(); } }
         public Job(TimeSpan duration, String name)
         {
-            this.duration = duration;
-            this.name = name;
+            Length = duration;
+            Name = name;
         }
         public override string ToString()
         {
             string output = String.Format("Name: {1}\tTime needed: {0}",
-                duration, name);
+                Length, Name);
             return output;
         }
         public override bool Equals(object job2)
@@ -233,11 +257,11 @@ namespace Queue_Bot
         /// </summary>
         public TimeSpan WaitTime
         {
-            get { return timeOfExpectedService - timeEnqueued; }
+            get { return (timeOfExpectedService - timeEnqueued).Trim(TimeSpan.TicksPerSecond); }
             set { timeOfExpectedService = DateTime.Now + value; }
         }
         public TimeSpan JobLength { get { return desiredJob.Length; } }
-        public string JobName { get { return desiredJob.name; } }
+        public string JobName { get { return desiredJob.Name; } }
         public Customer(string name, double timeValue, Job desiredJob)
         {
             Name = name;
