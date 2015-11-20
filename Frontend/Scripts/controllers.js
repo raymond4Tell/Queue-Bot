@@ -57,8 +57,13 @@ angular.module('app.controllers', [])
         });
 
         $scope.newJobData = {};
-        $scope.addJob = function() {
-            $http.post("api/TaskList", $scope.newJobData).success(function(data) {
+        $scope.addJob = function () {
+            $http.post("api/TaskList", $scope.newJobData).success(function (data) {
+                $scope.jobListing = data;
+            });
+        };
+        $scope.popJob = function () {
+            $http.delete("api/TaskList").success(function (data) {
                 $scope.jobListing = data;
             });
         };

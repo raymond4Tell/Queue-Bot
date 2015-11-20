@@ -1,7 +1,6 @@
 Queue-Bot
 =========
-
-A system for ensuring prompt service.
+A system for ensuring prompt service, to be used in places of non-urgent/-triaged service. DMV, post office, walk-in clinic, repair shops, any place where customers can wait indefinitely before being served.
 
 Two primary innovations:
 * Jobs/customers are stored in a Priority Queue that sorts by customerTimeValue / taskDuration, so busy customers or ones with quick and simple tasks get served before more patient customers with more involved requests. This is done to minimize the total value of time lost in lines and waiting rooms. Bill Gates is a busy man, and we should not ask him to wait behind somebody who wants to know *all* their options for sending Grandmama's china to Outer Mongolia by combination slow boat and air freight.
@@ -18,8 +17,7 @@ On the other hand, this is vulnerable to customers lying about their time-value,
 1. ~~Need to allow for persons arriving at different times.~~
   * Everybody just has timeEnqueued and timeSpentWaiting values, and calculations are made based on those.
 2. Need to add/test flags for priority tasks or C-level/VIP customers.
-  * Can likely be handled by the simple fact that a VIP has a higher time-rate than other customers?
-  * Still need solution for handling priority drop-everything-and-put-out-these-fires tasks.
+  * Can likely be handled by the simple fact that a VIP/priority task has a higher time-rate than other customers? 
 3. Need to add a graphical/web interface, probably in Angular.
   * In progress.
 4. Need to add some better testing mocks.
@@ -29,5 +27,12 @@ On the other hand, this is vulnerable to customers lying about their time-value,
   * Possible problem: This might require substantial refactoring, as simple PQueue is no longer sufficient to represent sorted ordering.
 7. Need capability for customers to change their timeValues after creating job, to adjust how much they're really willing to pay for service. This may conflict with or solve point 5 above.
 
+## Major Issues
+* Scheduling is dependent on accurately estimating how long each customer's service will take. Will cause issues if somebody's simple checkup balloons into a major examination.
+  * Best solution probably to a) err on the side of caution and set service time at average + 1 standard deviation and b) consider job complete when customer leaves your hands. Doesn't matter if customer's going to waiting room or MRI, NEXT PATIENT!
+* Similar to above, is dependent on customers accurately stating what service they require. Will also cause issues if a customer who was in line for a pack of stamps decides they also want a list of options for shipping a TV.
+  * Favorite solution is public execution for customers who lie about what service they need, *pour encourager les autres*. Best solution would be to leave it to business's discretion whether customer gets served or sent back in line.
+* Still don't have good method for handling open-ended tasks.
+  * Let me get back to you on that.
 ## Credit and Inspiration
 This system is based on David Jones's Daedalus columns, specifically [the Op-time-miser system described in the 16 Feb 1989 issue of Nature](http://www.nature.com/nature/journal/v337/n6208/pdf/337604a0.pdf)

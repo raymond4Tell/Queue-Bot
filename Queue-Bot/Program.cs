@@ -214,7 +214,6 @@ namespace Queue_Bot
             return String.Format("Name: {2}\tTime needed: {0:N2}\nTime spent waiting: {1:N2}\tPrice of Time Waited: {3:C2}",
                  JobLength.TotalHours, WaitTime.TotalHours, Name, (TimeValue * WaitTime.TotalHours));
         }
-
         /// <summary>
         /// Name of customer. Will probably want to add other
         /// identifying/contact info in future development.
@@ -246,8 +245,9 @@ namespace Queue_Bot
         /// <summary>
         /// The job the customer wants done. Should be selected from a
         /// controlled list of options.
+        /// TODO: Do we need this public field, or the two properties based on it?
         /// </summary>
-        public readonly Job desiredJob;
+        private readonly Job desiredJob;
         /// <summary>
         /// Time spent waiting for service. As much as I hate cleverness, 
         /// we're going to get a little cunning here. Get is the total duration;
@@ -260,8 +260,21 @@ namespace Queue_Bot
             get { return (timeOfExpectedService - timeEnqueued).Trim(TimeSpan.TicksPerSecond); }
             set { timeOfExpectedService = DateTime.Now + value; }
         }
+        /// <summary>
+        /// Public property encapsulating the desiredJob field.
+        /// </summary>
         public TimeSpan JobLength { get { return desiredJob.Length; } }
+        /// <summary>
+        /// Public property encapsulating the desiredJob field.
+        /// </summary>
         public string JobName { get { return desiredJob.Name; } }
+/// <summary>
+/// Annoys the hell out of me, because we need to reach over to read Program.BEWT. OTOH, this needs to be publicly accessible for the GUI.
+/// </summary>
+/// <param name="name"></param>
+/// <param name="timeValue"></param>
+/// <param name="desiredJob"></param>
+        public double Balance { get { return TimeValue * (WaitTime - Program.BEWT).TotalHours - deposit; } }
         public Customer(string name, double timeValue, Job desiredJob)
         {
             Name = name;
@@ -286,7 +299,8 @@ namespace Queue_Bot
             if (obj.GetType() != GetType()) return false;
             return Equals((Customer)obj);
         }
-
+        //Aggravating. I want this to be a property that I can pass to the front-end,
+        //And I also want it to explicitly take BEWT as a parameter.
         public double FindBalance(TimeSpan BEWT)
         {
             return TimeValue * (WaitTime - BEWT).TotalHours;

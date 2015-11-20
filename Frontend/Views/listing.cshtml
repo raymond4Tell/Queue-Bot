@@ -3,7 +3,7 @@
     <ol>
         <li ng-repeat="job in jobListing">
             Name: {{job.Name}}
-            Job: {{job.desiredJob.Name}}
+            Job: {{job.JobName}}
             Time in Queue: {{job.WaitTime}}
         </li>
     </ol>
@@ -20,16 +20,18 @@
         <h2>Customer Info</h2>
         <label>
             Customer name
-            <input type="text" ng-model="newJobData.name" />
+            <input type="text" ng-model="newJobData.name"/>
         </label>
-        <br />
+        <br/>
         <label>
             Customer time-rate
-            <input type="number" ng-model="newJobData.timeValue" />
+            <input type="number" ng-model="newJobData.timeValue"/>
         </label>
-        <br />
+        <br/>
 
-        <br />
+        <br/>
         <button type="submit">Add job to queue</button>
     </form>
+
+    <button type="submit" ng-click="popJob()">Take job off queue</button>
 </div>
