@@ -35,6 +35,9 @@
  * (payments from people who wait less than BEWT) + (payments to people who wait longer than BEWT) = Balance on computer.
  * Balance is initially 0, but will change as people leave the queue and pay/get paid for their wait.
  * May also change over time due to the cost of operating this service; bandwidth costs, electricity, ETC.
+ * 
+ * Consistency issue: What's a negative MachineBalance mean? Means machine owes money, yes? Doesn't much matter which
+ * we go with, but for the love of God, keep it consistent.
  */
 namespace Queue_Bot
 {
@@ -44,7 +47,7 @@ namespace Queue_Bot
         public static double MachineBalance = 0.0;
         public static TimeSpan BEWT;
         public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
-                new Job(new TimeSpan(0, 30, 0), "Hoover the roof") ,
+                new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
             new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
             new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
@@ -52,19 +55,23 @@ namespace Queue_Bot
 
         public static void Main()
         {
-            JobQueue.Clear();
-            var bob = new Customer("Bob", 1.2, jobList[0]);
-            AddCustomer(bob);
-            AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
-            AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
-            AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
-            //foreach (var tempCustomer in JobQueue)
-            //{
-            //    Console.WriteLine(tempCustomer.ToString());
-            //    var tempBalance = tempCustomer.FindBalance(BEWT);
-            //    Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
-            //    Console.WriteLine("--------------------------");
-            //}
+            if (JobQueue.Count == 0)
+            {
+                //Initialization.
+                JobQueue.Clear();
+                var bob = new Customer("Bob", 1.2, jobList[0]);
+                AddCustomer(bob);
+                AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
+                AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
+                AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
+            }
+            foreach (var tempCustomer in JobQueue)
+            {
+                Console.WriteLine(tempCustomer.ToString());
+                var tempBalance = tempCustomer.FindBalance(BEWT);
+                Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
+                Console.WriteLine("--------------------------");
+            }
         }
 
         /// <summary>
@@ -149,7 +156,7 @@ namespace Queue_Bot
                 sumPi += foo.TimeValue;
                 sumPiTi += (foo.TimeValue * foo.WaitTime.TotalHours);
             }
-            double localBEWT = (sumPiTi - MachineBalance) / sumPi;
+            double localBEWT = (sumPiTi + MachineBalance) / sumPi;
 
             Console.WriteLine("Break Even Wait Time is : {0} hours", localBEWT);
 
