@@ -540,7 +540,6 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="JobController.cs" />
     <Compile Include="Routing\DefaultRoute.cs" />
     <Compile Include="Routing\DefaultRouteHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -20,12 +20,12 @@ namespace App.Frontend
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
             config.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{id}",
+                name: "ActionApi",
+                routeTemplate: "api/{controller}/{action}/{id}",
                 defaults: new { id = RouteParameter.Optional }
-            );
+                );
 
-            app.UseWebApi(config); 
+            app.UseWebApi(config);
             //// For more information on how to configure your application, visit:
             //// http://go.microsoft.com/fwlink/?LinkID=316888
 

@@ -34,39 +34,60 @@ angular.module('app.controllers', [])
         });
     }])
 
-    // Path: /error/404
-    .controller('Error404Ctrl', ['$scope', '$location', '$window', function ($scope, $location, $window) {
-        $scope.$root.title = 'Error 404: Page Not Found';
+    //My QBot API.
+    .controller('TaskListCtrl', ['$scope', '$location', '$window', "$http", function ($scope, $location, $window, $http) {
+        $scope.$root.title = 'Job Listing';
+
+        /* 
+         * Really tempted to have the API just send the full Program state on each go;
+         * we need to update jobListing and AverageWait on just about every call, and as it stands
+         * we keep getting caught on synchrony problems, like BEWT being received before the JobQueue
+         * is fully stocked.
+         */
+        $scope.jobListing = [];
+        $http.get("api/TaskList/GetCustomers").success(function (data) {
+            $scope.jobListing = data;
+        });
+
+        $scope.availableServices = [];
+        $http.get("api/TaskList/GetServices").success(function (data) {
+            $scope.availableServices = data;
+        });
+
+        $scope.AverageWait = 0;
+        $http.get("api/TaskList/GetBEWT").success(function (data) {
+            $scope.AverageWait = data;
+        });
+
+        $scope.newJobData = {};
+        $scope.addJob = function () {
+            $http.post("api/TaskList/NewCustomer", $scope.newJobData).success(function (data) {
+                $scope.jobListing = data;
+                $http.get("api/TaskList/GetBEWT").success(function (data) {
+                    $scope.AverageWait = data;
+                });
+            });
+        };
+        $scope.popJob = function () {
+            $http.get("api/TaskList/RemoveCustomer").success(function (data) {
+                $scope.nextCustomer = data;
+                $http.get("api/TaskList/GetCustomers").success(function (data) {
+                    $scope.jobListing = data;
+                });
+                $http.get("api/TaskList/GetBEWT").success(function (data) {
+                    $scope.AverageWait = data;
+                });
+            });
+        };
         $scope.$on('$viewContentLoaded', function () {
             $window.ga('send', 'pageview', { 'page': $location.path(), 'title': $scope.$root.title });
         });
     }])
 
-    //My QBot API.
-    .controller('TaskListCtrl', ['$scope', '$location', '$window', "$http", function ($scope, $location, $window, $http) {
-        $scope.$root.title = 'Job Listing';
 
-        $scope.jobListing = [];
-        $http.get("api/TaskList").success(function (data) {
-            $scope.jobListing = data;
-        });
-        //Names are hard. :(
-        $scope.otherJobListing = [];
-        $http.get("api/Job").success(function (data) {
-            $scope.otherJobListing = data;
-        });
-
-        $scope.newJobData = {};
-        $scope.addJob = function () {
-            $http.post("api/TaskList", $scope.newJobData).success(function (data) {
-                $scope.jobListing = data;
-            });
-        };
-        $scope.popJob = function () {
-            $http.delete("api/TaskList").success(function (data) {
-                $scope.jobListing = data;
-            });
-        };
+    // Path: /error/404
+    .controller('Error404Ctrl', ['$scope', '$location', '$window', function ($scope, $location, $window) {
+        $scope.$root.title = 'Error 404: Page Not Found';
         $scope.$on('$viewContentLoaded', function () {
             $window.ga('send', 'pageview', { 'page': $location.path(), 'title': $scope.$root.title });
         });

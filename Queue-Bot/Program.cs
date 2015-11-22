@@ -2,6 +2,11 @@
 
 /* Workflow runs in two (async?) loops. Probably just functions
  * on a service; users can add/modify jobs, service automatically pops jobs.
+ * Would be cool to make this as an event system that everybody subscribes to;
+ * GUI sends event adding new customer, which JobQueue picks up on and updates itself, then
+ * sends an event indicating to everybody else that JobQueue is new. OTOH, how much benefit
+ * would that really give over current?
+ * 
  * 1. Add jobs to PQueue. Jobs have jobName, Owner (with name and
  * time-value), jobDuration, time enqueued, and balance. Last two may belong
  * to owner instead of job. Adding job will also require updating
@@ -107,6 +112,7 @@ namespace Queue_Bot
             var foo = JobQueue.PopFront();
             UpdateWaits(JobQueue);
             BEWT = FindBEWT();
+            MachineBalance += foo.Balance;
             return foo;
         }
         /// <summary>
@@ -147,7 +153,7 @@ namespace Queue_Bot
 
             Console.WriteLine("Break Even Wait Time is : {0} hours", localBEWT);
 
-            return TimeSpan.FromHours(localBEWT);
+            return TimeSpan.FromHours(localBEWT).Trim(TimeSpan.TicksPerSecond);
         }
     }
     public class Job
@@ -268,19 +274,23 @@ namespace Queue_Bot
         /// Public property encapsulating the desiredJob field.
         /// </summary>
         public string JobName { get { return desiredJob.Name; } }
-/// <summary>
-/// Annoys the hell out of me, because we need to reach over to read Program.BEWT. OTOH, this needs to be publicly accessible for the GUI.
-/// </summary>
-/// <param name="name"></param>
-/// <param name="timeValue"></param>
-/// <param name="desiredJob"></param>
-        public double Balance { get { return TimeValue * (WaitTime - Program.BEWT).TotalHours - deposit; } }
+        /// <summary>
+        /// Annoying as all hell, since we need to break encapsulation to access BEWT. 
+        /// On the other hand, this must be public so we can display it on the GUI.
+        /// </summary>
+        public double Balance
+        {
+            get
+            {
+                return TimeValue * (WaitTime - Program.BEWT).TotalHours - deposit;
+            }
+        }
         public Customer(string name, double timeValue, Job desiredJob)
         {
             Name = name;
             TimeValue = timeValue;
             timeEnqueued = DateTime.Now;
-            deposit = 1.00;
+            deposit = 0.00;
             this.desiredJob = desiredJob;
         }
 
