@@ -68,6 +68,7 @@ angular.module('app.controllers', [])
                 });
             });
         };
+        $scope.nextCustomer = {};
         $scope.popJob = function () {
             $http.get("api/TaskList/RemoveCustomer").success(function (data) {
                 $scope.nextCustomer = data;

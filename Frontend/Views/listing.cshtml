@@ -36,6 +36,14 @@
         <br />
         <button type="submit">Add job to queue</button>
     </form>
-
-    <button type="submit" ng-click="popJob()">Take job off queue</button>
+    <form ng-submit="popJob()">
+        <button type="submit">Take job off queue</button>
+        <div>
+            <h2>Next Customer</h2>
+            Name: {{nextCustomer.Name}}<br/>
+            Job: {{nextCustomer.JobName}}<br/>
+            Time in Queue: {{nextCustomer.WaitTime}}<br/>
+            Customer Paid: ${{-1 * nextCustomer.Balance.toFixed(2)}}<br />
+        </div>
+    </form>
 </div>
