@@ -26,13 +26,15 @@ On the other hand, this is vulnerable to customers lying about their time-value,
 6. Need also to improve scheduling to handle multiple servers. I know I saw an algorithm for this, but do not recall it at this time. Will find it later.
   * Possible problem: This might require substantial refactoring, as simple PQueue is no longer sufficient to represent sorted ordering.
 7. Need capability for customers to change their timeValues after creating job, to adjust how much they're really willing to pay for service. This may conflict with or solve point 5 above.
-
+8. Need user-editable way to add services. INI file? XML? SQL database is probably overkill, but quite possible that most clients will already have database listing services; how else will they draw up their menus?
+9. Need scheduling method, so app can send new customers to server, or at least offer 5-minute warning.
 ## Major Issues
 * Scheduling is dependent on accurately estimating how long each customer's service will take. Will cause issues if somebody's simple checkup balloons into a major examination.
-  * Best solution probably to a) err on the side of caution and set service time at average + 1 standard deviation and b) consider job complete when customer leaves your hands. Doesn't matter if customer's going to waiting room or MRI, NEXT PATIENT!
+  * Best solution probably to a) err on the side of caution and set service time at average + 1 standard deviation and b) consider job complete when customer leaves your hands. Doesn't matter if they're going to waiting room or MRI, NEXT PATIENT!
 * Similar to above, is dependent on customers accurately stating what service they require. Will also cause issues if a customer who was in line for a pack of stamps decides they also want a list of options for shipping a TV.
   * Favorite solution is public execution for customers who lie about what service they need, *pour encourager les autres*. Best solution would be to leave it to business's discretion whether customer gets served or sent back in line.
 * Still don't have good method for handling open-ended tasks.
   * Let me get back to you on that.
+
 ## Credit and Inspiration
 This system is based on David Jones's Daedalus columns, specifically [the Op-time-miser system described in the 16 Feb 1989 issue of Nature](http://www.nature.com/nature/journal/v337/n6208/pdf/337604a0.pdf)
