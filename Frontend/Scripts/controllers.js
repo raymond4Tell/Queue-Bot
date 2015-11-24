@@ -59,6 +59,11 @@ angular.module('app.controllers', [])
             $scope.AverageWait = data;
         });
 
+        $scope.Balance = 0;
+        $http.get("api/TaskList/GetBalance").success(function (data) {
+            $scope.Balance = data;
+        });
+
         $scope.newJobData = {};
         $scope.addJob = function () {
             $http.post("api/TaskList/NewCustomer", $scope.newJobData).success(function (data) {
@@ -74,6 +79,9 @@ angular.module('app.controllers', [])
                 $scope.nextCustomer = data;
                 $http.get("api/TaskList/GetCustomers").success(function (data) {
                     $scope.jobListing = data;
+                });
+                $http.get("api/TaskList/GetBalance").success(function (data) {
+                    $scope.Balance = data;
                 });
                 $http.get("api/TaskList/GetBEWT").success(function (data) {
                     $scope.AverageWait = data;

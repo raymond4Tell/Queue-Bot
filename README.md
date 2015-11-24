@@ -17,17 +17,20 @@ On the other hand, this is vulnerable to customers lying about their time-value,
 1. ~~Need to allow for persons arriving at different times.~~
   * Everybody just has timeEnqueued and timeSpentWaiting values, and calculations are made based on those.
 2. Need to add/test flags for priority tasks or C-level/VIP customers.
-  * Can likely be handled by the simple fact that a VIP/priority task has a higher time-rate than other customers? 
+  * Can likely be handled by the simple fact that a VIP/priority task has a higher time-rate than other customers?
 3. Need to add a graphical/web interface, probably in Angular.
   * In progress.
 4. Need to add some better testing mocks.
+ * Unfortunately, at the moment it's all mocks.
 5. Need to improve sorting algorithm to better model the value of people's time, and how it increases over time spent in the waiting room. IE, somebody who valued their time at $15/hr when enqueued 2hr previously may value it at $20/hr after so long spent waiting.
   * Can probably add a config value and check in the comparator, like `if (timeSpentWaiting > unreasonableWait) timeValue *= 2`
 6. Need also to improve scheduling to handle multiple servers. I know I saw an algorithm for this, but do not recall it at this time. Will find it later.
   * Possible problem: This might require substantial refactoring, as simple PQueue is no longer sufficient to represent sorted ordering.
 7. Need capability for customers to change their timeValues after creating job, to adjust how much they're really willing to pay for service. This may conflict with or solve point 5 above.
 8. Need user-editable way to add services. INI file? XML? SQL database is probably overkill, but quite possible that most clients will already have database listing services; how else will they draw up their menus?
-9. Need scheduling method, so app can send new customers to server, or at least offer 5-minute warning.
+9. Need scheduling method, so app can send new customers to human server, or at least offer 5-minute warning.
+ * Probably best to do it through long-polling and WebSockets? Now how to do *that*. Swear I saw an ng-websockets module somewhere. 
+
 ## Major Issues
 * Scheduling is dependent on accurately estimating how long each customer's service will take. Will cause issues if somebody's simple checkup balloons into a major examination.
   * Best solution probably to a) err on the side of caution and set service time at average + 1 standard deviation and b) consider job complete when customer leaves your hands. Doesn't matter if they're going to waiting room or MRI, NEXT PATIENT!

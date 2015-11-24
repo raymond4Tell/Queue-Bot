@@ -2,6 +2,7 @@
 
 <div ng-controller="TaskListCtrl">
     <h2>Current BEWT: {{AverageWait}}</h2>
+    <h2>Current Balance On Machine: {{Balance}} </h2>
     <h2>List of jobs to do.</h2> <ol>
         <li ng-repeat="job in jobListing">
             Name: {{job.Name}}
@@ -40,9 +41,9 @@
         <button type="submit">Take job off queue</button>
         <div>
             <h2>Next Customer</h2>
-            Name: {{nextCustomer.Name}}<br/>
-            Job: {{nextCustomer.JobName}}<br/>
-            Time in Queue: {{nextCustomer.WaitTime}}<br/>
+            Name: {{nextCustomer.Name}}<br />
+            Job: {{nextCustomer.JobName}}<br />
+            Time in Queue: {{nextCustomer.WaitTime}}<br />
             Customer Paid: ${{-1 * nextCustomer.Balance.toFixed(2)}}<br />
         </div>
     </form>
