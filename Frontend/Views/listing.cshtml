@@ -15,7 +15,7 @@
 
     <form ng-submit="addJob()" class="form-box">
         <div style="float: right; width: 40%;">
-            <h2>Available Jobs</h2>
+            <h2>Provided Services</h2>
             <label style="float: left; width: 50%" ng-repeat="job in availableServices">
                 <input type="radio" value="{{job.Identifier}}" name="actualJob" ng-model="newJobData.desiredJob" />
                 {{job.Name}}<br />
@@ -37,7 +37,7 @@
         <br />
         <button type="submit">Add job to queue</button>
     </form>
-    <form ng-submit="popJob()">
+    <form ng-submit="popJob()" class="form-box">
         <button type="submit">Take job off queue</button>
         <div>
             <h2>Next Customer</h2>

@@ -119,13 +119,14 @@ namespace Queue_Bot
             var foo = JobQueue.PopFront();
             UpdateWaits(JobQueue);
             BEWT = FindBEWT();
-            MachineBalance += foo.Balance;
+            MachineBalance -= foo.Balance;
             return foo;
         }
         /// <summary>
         /// Updates the wait times for each item in the list.
         /// Should be called whenever the queue is updated, either
         /// adding or removing an item.
+        /// TODO: If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
         /// </summary>
         public static void UpdateWaits(IPriorityQueue<Customer> PQueue)
         {
