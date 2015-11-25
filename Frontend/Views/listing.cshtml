@@ -2,14 +2,14 @@
 
 <div ng-controller="TaskListCtrl">
     <h2>Current BEWT: {{AverageWait}}</h2>
-    <h2>Current Balance On Machine: {{Balance}} </h2>
+    <h2>Current Balance On Machine: {{Balance | currency}} </h2>
     <h2>List of jobs to do.</h2> <ol>
         <li ng-repeat="job in jobListing">
             Name: {{job.Name}}
             Job: {{job.JobName}}
             Time in Queue: {{job.WaitTime}}
-            Time Value: {{job.TimeValue}}
-            <br />Payment: {{job.Balance}}
+            Time Value: {{job.TimeValue | currency}} per hour
+            <br />Their balance is: {{job.Balance | currency}}
         </li>
     </ol>
 

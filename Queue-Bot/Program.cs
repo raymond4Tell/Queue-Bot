@@ -117,9 +117,9 @@ namespace Queue_Bot
         public static Customer RemoveCustomer()
         {
             var foo = JobQueue.PopFront();
+            MachineBalance -= foo.Balance;
             UpdateWaits(JobQueue);
             BEWT = FindBEWT();
-            MachineBalance -= foo.Balance;
             return foo;
         }
         /// <summary>
