@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Microsoft.AspNet.SignalR;
 using Queue_Bot;
 namespace App.Frontend
 {
@@ -21,10 +22,18 @@ namespace App.Frontend
     //TODO: Rename Program to something more descriptive.
     public class TaskListController : ApiController
     {
+        Lazy<IHubContext> hub = new Lazy<IHubContext>(
+        () => GlobalHost.ConnectionManager.GetHubContext<JobHub>()
+            );
+        protected IHubContext Hub
+        {
+            get { return hub.Value; }
+        }
         // GET api/<controller>
         public IEnumerable<Customer> GetCustomers()
         {
             Program.Main();
+            Hub.Clients.All.Hello();
             return Program.JobQueue;
         }
 
@@ -53,6 +62,7 @@ namespace App.Frontend
             var foo = new Customer(value.name, value.timeValue, bar);
             Program.AddCustomer(foo);
 
+            Hub.Clients.All.Hello();
             return Program.JobQueue;
         }
 

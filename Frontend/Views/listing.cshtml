@@ -1,6 +1,4 @@
-﻿
-
-<div ng-controller="TaskListCtrl">
+﻿<div ng-controller="TaskListCtrl">
     <h2>Current BEWT: {{AverageWait}}</h2>
     <h2>Current Balance On Machine: {{Balance | currency}} </h2>
     <h2>List of jobs to do.</h2> <ol>
@@ -12,7 +10,10 @@
             <br />Their balance is: {{job.Balance | currency}}
         </li>
     </ol>
-
+    <h3>Connections</h3>
+    <ul>
+        <li ng-repeat="id in employees.connected" ng-bind="id"></li>
+    </ul>
     <form ng-submit="addJob()" class="form-box">
         <div style="float: right; width: 40%;">
             <h2>Provided Services</h2>
