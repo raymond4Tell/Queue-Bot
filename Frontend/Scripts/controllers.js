@@ -65,8 +65,8 @@ angular.module('app.controllers', ["SignalR"])
                     employee[key] = value;
                     $rootScope.$apply();
                 },
-                'addEmployee': function (employee) {
-                    JobJunk.all.push(new Employee(employee));
+                'refreshJobs': function (jobQueue) {
+                    JobJunk.all = jobQueue;
                     $rootScope.$apply();
                 },
                 'removeEmployee': function (id) {

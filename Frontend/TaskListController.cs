@@ -62,7 +62,7 @@ namespace App.Frontend
             var foo = new Customer(value.name, value.timeValue, bar);
             Program.AddCustomer(foo);
 
-            Hub.Clients.All.Hello();
+            Hub.Clients.All.refreshJobs(Program.JobQueue);
             return Program.JobQueue;
         }
 
