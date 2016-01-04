@@ -124,7 +124,6 @@ angular.module('app.controllers', ["SignalR"])
          * is fully stocked.
          */
         $scope.JobHub = JobData;
-        $scope.jobListing = JobData.all;
 
 
         $scope.availableServices = [];

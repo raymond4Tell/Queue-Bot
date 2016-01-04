@@ -29,11 +29,12 @@ namespace App.Frontend
         {
             get { return hub.Value; }
         }
+
         // GET api/<controller>
         public IEnumerable<Customer> GetCustomers()
         {
-            Program.Main();
-            Hub.Clients.All.Hello();
+            //Program.Main();
+            //Hub.Clients.All.Hello();
             return Program.JobQueue;
         }
 
@@ -71,7 +72,9 @@ namespace App.Frontend
         [HttpGet]
         public Customer RemoveCustomer()
         {
-            return Program.RemoveCustomer();
+            var nextServed = Program.RemoveCustomer();
+            Hub.Clients.All.refreshJobs(Program.JobQueue);
+            return nextServed;
         }
     }
 }
