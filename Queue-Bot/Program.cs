@@ -45,7 +45,7 @@ namespace Queue_Bot
     {
         public static readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
         public static double MachineBalance = 0.0;
-        public static TimeSpan BEWT;
+        public static TimeSpan BEWT = TimeSpan.Zero;
         public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
                 new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
@@ -126,7 +126,7 @@ namespace Queue_Bot
         /// Updates the wait times for each item in the list.
         /// Should be called whenever the queue is updated, either
         /// adding or removing an item.
-        /// TODO: If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
+        /// TODO If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
         /// </summary>
         public static void UpdateWaits(IPriorityQueue<Customer> PQueue)
         {
@@ -147,6 +147,10 @@ namespace Queue_Bot
         /// <returns></returns>
         public static TimeSpan FindBEWT()
         {
+            //Degenerate case; if the queue's empty, wait time is zero.
+            if (0 == JobQueue.Count)
+                return TimeSpan.Zero;
+
             /* MachineBalance = sum (customer.TimeValue * (Customer.WaitTime - BEWT))
              * Given that we know everything except BEWT in this equation, it's simple algebra to calculate BEWT.
              * BEWT = (sum(customer.TimeValue * customer.WaitTime) - MachineBalance) / sum(customer.TimeValue)
