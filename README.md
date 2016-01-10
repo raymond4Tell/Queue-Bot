@@ -13,12 +13,14 @@ On the other hand, this is vulnerable to customers lying about their time-value,
   BEWT is calculated such that sum(each customer's payment) == balanceOnMachine  
   balanceOnMachine is initially and usually 0, but will change as customers leave the queue, making and receiving payments.
 
-## Current Priorities
+* Note for employers*: Yeah, I know it's terrible. I'm not writing it for you, though, nor for the market, I'm writing for my own education. If you think it might be worth something, let me know and I'll polish/finish it. Otherwise, this is just to please me, and barely even that.
+
+## Current Priorities 
 1. ~~Need to allow for persons arriving at different times.~~
   * Everybody just has timeEnqueued and timeSpentWaiting values, and calculations are made based on those.
 2. Need to add/test flags for priority tasks or C-level/VIP customers.
   * Can likely be handled by the simple fact that a VIP/priority task has a higher time-rate than other customers?
-3. Need to add a graphical/web interface, probably in Angular.
+3. ~~Need to add a graphical/web interface, probably in Angular.~~
   * In progress.
 4. Need to add some better testing mocks.
  * Unfortunately, at the moment it's all mocks.
@@ -28,7 +30,7 @@ On the other hand, this is vulnerable to customers lying about their time-value,
   * Possible problem: This might require substantial refactoring, as simple PQueue is no longer sufficient to represent sorted ordering.
 7. Need capability for customers to change their timeValues after creating job, to adjust how much they're really willing to pay for service. This may conflict with or solve point 5 above.
 8. Need user-editable way to add services. INI file? XML? SQL database is probably overkill, but quite possible that most clients will already have database listing services; how else will they draw up their menus?
-9. Need scheduling method, so app can send new customers to human server, or at least offer 5-minute warning.
+9. ~~Need scheduling method, so app can send new customers to human server, or at least offer 5-minute warning.~~
  * Probably best to do it through long-polling and WebSockets? Now how to do *that*. Swear I saw an ng-websockets module somewhere. 
 
 ## Major Issues
