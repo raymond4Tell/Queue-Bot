@@ -26,9 +26,9 @@ This system is based on David Jones's Daedalus columns, specifically [the Op-tim
     * Working on it.
 
 ### Should-Have
+1. Database support for persisting and listing services and customers.
 1. Adjust user/service request; changing time-value, PII, requested task, as needed.
 1. Automatically and proactively forward to admins/servers customers ready for service, rather than requiring admins to manually request new customer.
-1. Database support for persisting and listing services and customers.
 1. Authentication tying to Facebook/Google/Whatever.
 
 ### Could-Have

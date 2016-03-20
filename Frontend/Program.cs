@@ -1,4 +1,6 @@
 ﻿using System;
+using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
 
 /* Workflow runs in two (async?) loops. Probably just functions
  * on a service; users can add/modify jobs, service automatically pops jobs.
@@ -41,39 +43,11 @@
  */
 namespace Queue_Bot
 {
-    public static class Program
+    /// <summary>
+    /// Used only so that we have a static class to put these two methods.
+    /// </summary>
+    public static class Utilities
     {
-        public static readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
-        public static double MachineBalance = 0.0;
-        public static TimeSpan BEWT = TimeSpan.Zero;
-        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
-                new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-            new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-            new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-            new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-            };
-
-        public static void Main()
-        {
-            if (JobQueue.Count == 0)
-            {
-                //Initialization.
-                JobQueue.Clear();
-                var bob = new Customer("Bob", 1.2, jobList[0]);
-                AddCustomer(bob);
-                AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
-                AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
-                AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
-            }
-            foreach (var tempCustomer in JobQueue)
-            {
-                Console.WriteLine(tempCustomer.ToString());
-                var tempBalance = tempCustomer.FindBalance(BEWT);
-                Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
-                Console.WriteLine("--------------------------");
-            }
-        }
-
         /// <summary>
         /// Extension method, used for rounding times for display.
         /// While computers may appreciate millisecond-accuracy, I
@@ -87,6 +61,7 @@ namespace Queue_Bot
         {
             return new DateTime(date.Ticks - (date.Ticks % ticks));
         }
+
         /// <summary>
         /// Cousin of the above, used for trimming TimeSpans
         /// </summary>
@@ -97,13 +72,55 @@ namespace Queue_Bot
         {
             return new TimeSpan(duration.Ticks - (duration.Ticks % ticks));
         }
+    }
+    public class Program : Hub
+    {
+        private readonly static Lazy<Program> _instance = new Lazy<Program>(() => new Program(GlobalHost.ConnectionManager.GetHubContext<Program>().Clients as IHubCallerConnectionContext<dynamic>));
+        public static Program Instance
+        {
+            get
+            {
+                return _instance.Value;
+            }
+        }
+        public readonly IPriorityQueue<Customer> JobQueue = new PriorityQueue<Customer>();
+        public double MachineBalance = 0.0;
+        public TimeSpan BEWT;
+        public Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
+                new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+            new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+            new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+            new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+            };
 
+        private Program(IHubCallerConnectionContext<dynamic> clients)
+        {
+            Clients = clients;
+            JobQueue.Clear();
+            var bob = new Customer("Bob", 1.2, jobList[0]);
+            AddCustomer(bob);
+            AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
+            AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
+            AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
+        }
+
+        public IHubCallerConnectionContext<dynamic> Clients { get; set; }
+
+        private void BroadcastJobs(IPriorityQueue<Customer> jobQueue)
+        {
+            Clients.All.updateJobs(jobQueue);
+        }
+
+        public static void Main()
+        {
+            return;
+        }
         /// <summary>
         /// Encapsulates jobQueue, so we don't have to interface with it directly, and can replace it as needed.
         /// Also consolidates the boilerplate involved in object addition, so we don't have to call it in every function.
         /// </summary>
         /// <param name="customer">Customer object to add to the queue</param>
-        public static void AddCustomer(Customer customer)
+        public void AddCustomer(Customer customer)
         {
             JobQueue.Add(customer);
             UpdateWaits(JobQueue);
@@ -114,7 +131,7 @@ namespace Queue_Bot
         /// Also consolidates boilerplate, so calling functions do not need to change as we add more nonsense.
         /// </summary>
         /// <returns>The next customer to be served</returns>
-        public static Customer RemoveCustomer()
+        public Customer RemoveCustomer()
         {
             var foo = JobQueue.PopFront();
             MachineBalance -= foo.Balance;
@@ -126,7 +143,7 @@ namespace Queue_Bot
         /// Updates the wait times for each item in the list.
         /// Should be called whenever the queue is updated, either
         /// adding or removing an item.
-        /// TODO If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
+        /// TODO: If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
         /// </summary>
         public static void UpdateWaits(IPriorityQueue<Customer> PQueue)
         {
@@ -145,12 +162,8 @@ namespace Queue_Bot
         /// TODO: Really should make this take JobQueue as a parameter, rather than reaching out for it as a global.
         /// </summary>
         /// <returns></returns>
-        public static TimeSpan FindBEWT()
+        public TimeSpan FindBEWT()
         {
-            //Degenerate case; if the queue's empty, wait time is zero.
-            if (0 == JobQueue.Count)
-                return TimeSpan.Zero;
-
             /* MachineBalance = sum (customer.TimeValue * (Customer.WaitTime - BEWT))
              * Given that we know everything except BEWT in this equation, it's simple algebra to calculate BEWT.
              * BEWT = (sum(customer.TimeValue * customer.WaitTime) - MachineBalance) / sum(customer.TimeValue)
@@ -294,7 +307,7 @@ namespace Queue_Bot
         {
             get
             {
-                return TimeValue * (WaitTime - Program.BEWT).TotalHours - deposit;
+                return TimeValue * (WaitTime - Program.Instance.BEWT).TotalHours - deposit;
             }
         }
         public Customer(string name, double timeValue, Job desiredJob)

@@ -42,7 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PriorityQueue.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="JobQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -19,8 +19,7 @@ namespace App.Frontend
     }
 
     //Tempted to just return the one Program object, for some guarantee that everything is current. Also,
-    //TODO: Rename Program to something more descriptive.
-    public class TaskListController : ApiController
+        public class TaskListController : ApiController
     {
         Lazy<IHubContext> hub = new Lazy<IHubContext>(
         () => GlobalHost.ConnectionManager.GetHubContext<JobHub>()
@@ -35,22 +34,22 @@ namespace App.Frontend
         {
             //Program.Main();
             //Hub.Clients.All.Hello();
-            return Program.JobQueue;
+            return JobQueue.internalQueue;
         }
 
         public IEnumerable<Job> GetServices()
         {
-            return Program.jobList;
+            return JobQueue.jobList;
         }
 
         public TimeSpan GetBEWT()
         {
-            return Program.BEWT;
+            return JobQueue.BEWT;
         }
 
         public double GetBalance()
         {
-            return Program.MachineBalance;
+            return JobQueue.MachineBalance;
         }
 
         //Dammit. Can't return actual Customer, since that has too many fields to initialize
@@ -59,21 +58,20 @@ namespace App.Frontend
         [HttpPost]
         public IEnumerable<Customer> NewCustomer(CustomerDTO value)
         {
-            var bar = Program.jobList.First(item => item.Identifier == value.desiredJob);
+            var bar = JobQueue.jobList.First(item => item.Identifier == value.desiredJob);
             var foo = new Customer(value.name, value.timeValue, bar);
-            Program.AddCustomer(foo);
+            JobQueue.AddCustomer(foo);
 
-            Hub.Clients.All.refreshJobs(Program.JobQueue);
-            return Program.JobQueue;
+            Hub.Clients.All.refreshJobs(JobQueue.internalQueue);
+            return JobQueue.internalQueue;
         }
 
         //No ID param because we just want to pop the first item
-        //TODO: Need good way to return both updated JobQueue and also this customer data.
-        [HttpGet]
+                [HttpGet]
         public Customer RemoveCustomer()
         {
-            var nextServed = Program.RemoveCustomer();
-            Hub.Clients.All.refreshJobs(Program.JobQueue);
+            var nextServed = JobQueue.RemoveCustomer();
+            Hub.Clients.All.refreshJobs(JobQueue.internalQueue);
             return nextServed;
         }
     }

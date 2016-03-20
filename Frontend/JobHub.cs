@@ -13,12 +13,12 @@ namespace App.Frontend
     {
         public void Hello()
         {
-            Clients.All.refreshJobs(Program.JobQueue);
+            Clients.All.refreshJobs(JobQueue.internalQueue);
         }
 
         public void RefreshJobs()
         {
-            Clients.All.Clients.All.refreshJobs(Program.JobQueue);
+            Clients.All.Clients.All.refreshJobs(JobQueue.internalQueue);
         }
     }
 }
