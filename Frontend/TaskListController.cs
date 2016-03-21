@@ -19,7 +19,8 @@ namespace App.Frontend
     }
 
     //Tempted to just return the one Program object, for some guarantee that everything is current. Also,
-        public class TaskListController : ApiController
+    [System.Web.Http.Authorize]
+    public class TaskListController : ApiController
     {
         Lazy<IHubContext> hub = new Lazy<IHubContext>(
         () => GlobalHost.ConnectionManager.GetHubContext<JobHub>()
@@ -67,7 +68,7 @@ namespace App.Frontend
         }
 
         //No ID param because we just want to pop the first item
-                [HttpGet]
+        [HttpGet]
         public Customer RemoveCustomer()
         {
             var nextServed = JobQueue.RemoveCustomer();
