@@ -17,6 +17,7 @@ namespace App.Frontend
     {
         public void Configuration(IAppBuilder app)
         {
+            this.ConfigureAuth(app);
 
             // Configure Web API for self-host. 
             HttpConfiguration config = new HttpConfiguration();
@@ -33,7 +34,7 @@ namespace App.Frontend
             //// For more information on how to configure your application, visit:
             //// http://go.microsoft.com/fwlink/?LinkID=316888
 
-            this.ConfigureAuth(app);
+            
         }
     }
 }
