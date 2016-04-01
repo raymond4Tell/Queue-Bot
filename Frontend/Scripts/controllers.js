@@ -22,13 +22,43 @@ angular.module('app.controllers', ["SignalR"])
     }])
 
     // Path: /login
-    .controller('LoginCtrl', ['$scope', '$location', '$window', function ($scope, $location, $window) {
+    .controller('LoginCtrl', ['$scope', '$location', '$window', "User", function ($scope, $location, $window, User) {
         $scope.$root.title = 'AngularJS SPA | Sign In';
-        // TODO: Authorize a user
+        $scope.username = '';
+        $scope.password = '';
+        $scope.errors = [];
+
+
+        function disableLoginButton(message) {
+            if (typeof message !== 'string') {
+                message = 'Attempting login...';
+            }
+            jQuery('#login-form-submit-button').prop('disabled', true).prop('value', message);
+        }
+
+        function enableLoginButton(message) {
+            if (typeof message !== 'string') {
+                message = 'Submit';
+            }
+            jQuery('#login-form-submit-button').prop('disabled', false).prop('value', message);
+        }
+
+        function onSuccessfulLogin() {
+            $state.go('main');
+        }
+
+        function onFailedLogin(error) {
+            if (typeof error === 'string' && $scope.errors.indexOf(error) === -1) {
+                $scope.errors.push(error);
+            }
+            enableLoginButton();
+        }
+
         $scope.login = function () {
-            $location.path('/');
-            return false;
+            disableLoginButton();
+            User.authenticate($scope.username, $scope.password, onSuccessfulLogin, onFailedLogin);
         };
+
         $scope.$on('$viewContentLoaded', function () {
             $window.ga('send', 'pageview', { 'page': $location.path(), 'title': $scope.$root.title });
         });
