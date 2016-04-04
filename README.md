@@ -19,7 +19,7 @@ This system is based on David Jones's Daedalus columns, specifically [the Op-tim
 1. ~~Basic scheduling system, capable of handling multiple users with multiple tasks and enqueue-times, and calculating necessary properties for queue and customers.~~
 2. Register new users ~~and service requests~~.
 2. Register users as customers or admins.
-3. ~~Remove customers, pop requests off the queue. ~~
+3. ~~Remove customers, pop requests off the queue.~~
 1. Take payment as part of popping requests
     * Partly complete; still need to hook actual money APIs, but everything else is under control.
 1. Graphical UI, preferably Angular/ASP.NET MVC

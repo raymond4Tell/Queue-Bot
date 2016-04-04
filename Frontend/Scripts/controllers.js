@@ -22,7 +22,7 @@ angular.module('app.controllers', ["SignalR"])
     }])
 
     // Path: /login
-    .controller('LoginCtrl', ['$scope', '$location', '$window', "User", function ($scope, $location, $window, User) {
+    .controller('LoginCtrl', ['$scope', '$location', '$window', "$state", "User", function ($scope, $location, $window, $state, User) {
         $scope.$root.title = 'AngularJS SPA | Sign In';
         $scope.username = '';
         $scope.password = '';
@@ -44,7 +44,7 @@ angular.module('app.controllers', ["SignalR"])
         }
 
         function onSuccessfulLogin() {
-            $state.go('main');
+            $state.go('home');
         }
 
         function onFailedLogin(error) {
