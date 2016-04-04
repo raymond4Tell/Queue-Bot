@@ -21,6 +21,11 @@ angular.module('app.controllers', ["SignalR"])
         });
     }])
 
+    //Path: None; used for the header and login.
+    .controller('HeaderCtrl', ['$scope', 'User', function ($scope, User) {
+        $scope.user = User.getUserData();
+    }])
+
     // Path: /login
     .controller('LoginCtrl', ['$scope', '$location', '$window', "$state", "User", function ($scope, $location, $window, $state, User) {
         $scope.$root.title = 'AngularJS SPA | Sign In';
@@ -63,7 +68,10 @@ angular.module('app.controllers', ["SignalR"])
             $window.ga('send', 'pageview', { 'page': $location.path(), 'title': $scope.$root.title });
         });
     }])
-
+     .controller('LogoutCtrl', ['$state', 'User', function ($state, User) {
+         User.removeAuthentication();
+         $state.go('main');
+     }])
     //JobHub for use with SignalR
     .factory("JobData", ['$rootScope', "$http", 'Hub', function ($rootScope, $http, Hub) {
         var JobJunk = this;

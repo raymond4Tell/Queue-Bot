@@ -24,7 +24,7 @@
                 </button>
                 <a ui-sref="home" class="navbar-brand">AngularJS SPA Template</a>
             </div>
-            <nav class="collapse navbar-collapse spa-navbar-collapse" role="navigation">
+            <nav class="collapse navbar-collapse spa-navbar-collapse" role="navigation" ng-controller="HeaderCtrl">
                 <ul class="nav navbar-nav">
                     <li>
                         <a ui-sref="about">About</a>
@@ -32,9 +32,8 @@
                     <li><a ui-sref="JobListDisplay">Job Display Board</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a ui-sref="login">Sign In</a>
-                    </li>
+                    <li ng-hide="user.isAuthenticated"><a ui-sref="login">Login</a></li>
+                    <li ng-show="user.isAuthenticated"><a ui-sref="logout">Hello, {{user.username}}! Logout</a></li>
                 </ul>
             </nav>
         </div>

@@ -15,9 +15,22 @@ angular.module('app.services', [])
         this.getUserData = function () {
             return userData;
         }
+        function clearUserData() {
+            userData.isAuthenticated = false;
+            userData.username = '';
+            userData.bearerToken = '';
+            userData.expirationDate = null;
+        }
+
         function setHttpAuthHeader() {
             $http.defaults.headers.common.Authorization = 'Bearer ' + userData.bearerToken;
         }
+
+        this.removeAuthentication = function () {
+            clearUserData();
+            $http.defaults.headers.common.Authorization = null;
+        };
+
         this.authenticate = function (username, password, successCallback, errorCallback) {
             var config = {
                 method: 'POST',
