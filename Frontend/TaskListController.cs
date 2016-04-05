@@ -19,7 +19,6 @@ namespace App.Frontend
     }
 
     //Tempted to just return the one Program object, for some guarantee that everything is current. Also,
-    [System.Web.Http.Authorize]
     public class TaskListController : ApiController
     {
         Lazy<IHubContext> hub = new Lazy<IHubContext>(
@@ -57,6 +56,7 @@ namespace App.Frontend
         //client-side, and can't just take object, since that can have any fields it likes.
         //Created CustomerDTO class just so we can have some actual structure.
         [HttpPost]
+        [System.Web.Http.Authorize]
         public IEnumerable<Customer> NewCustomer(CustomerDTO value)
         {
             var bar = JobQueue.jobList.First(item => item.Identifier == value.desiredJob);
@@ -68,6 +68,7 @@ namespace App.Frontend
         }
 
         //No ID param because we just want to pop the first item
+        [System.Web.Http.Authorize]
         [HttpGet]
         public Customer RemoveCustomer()
         {
