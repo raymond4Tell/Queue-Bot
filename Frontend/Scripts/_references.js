@@ -1,4 +1,4 @@
-﻿/// <reference path="vendor/jquery-2.0.3.js" />
+﻿/// <reference path="jquery-2.2.3.js" />
 /// <reference path="vendor/angular.min.js" />
 /// <reference path="vendor/angular-animate.js" />
 /// <reference path="vendor/angular-cookies.js" />
