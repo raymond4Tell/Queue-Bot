@@ -1,16 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Queue-Bot", "Queue-Bot\Queue-Bot.csproj", "{7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Frontend", "Frontend\Frontend.csproj", "{6A4DD547-AA7F-406E-9414-471D34DC7EE3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A60B4FBA-3AFA-4494-9937-8D463B6C1E6A}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "FrontendMk2", "FrontendMk2\FrontendMk2.xproj", "{18CD04DA-A7D1-4A07-B8B4-9D846B9710D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +22,10 @@ Global
 		{7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6A4DD547-AA7F-406E-9414-471D34DC7EE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6A4DD547-AA7F-406E-9414-471D34DC7EE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6A4DD547-AA7F-406E-9414-471D34DC7EE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6A4DD547-AA7F-406E-9414-471D34DC7EE3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18CD04DA-A7D1-4A07-B8B4-9D846B9710D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18CD04DA-A7D1-4A07-B8B4-9D846B9710D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18CD04DA-A7D1-4A07-B8B4-9D846B9710D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18CD04DA-A7D1-4A07-B8B4-9D846B9710D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
