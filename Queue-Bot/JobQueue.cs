@@ -1,4 +1,7 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
+using System.Linq;
 
 /* SEE README.md; most of this is obsolete.
  * 
@@ -48,25 +51,29 @@ namespace Queue_Bot
         public static readonly IPriorityQueue<Customer> internalQueue = new PriorityQueue<Customer>();
         public static double MachineBalance = 0.0;
         public static TimeSpan BEWT = TimeSpan.Zero;
-        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"), 
+        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
                 new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
             new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
             new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
             };
+        private static JobContext dbAccess = new JobContext();
 
         public static void Main()
         {
-            if (internalQueue.Count == 0)
-            {
-                //Initialization.
-                internalQueue.Clear();
-                var bob = new Customer("Bob", 1.2, jobList[0]);
-                AddCustomer(bob);
-                AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
-                AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
-                AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
-            }
+
+            dbAccess.Jobs.AddRange(jobList);
+            dbAccess.SaveChanges();
+
+            //Initialization.
+            internalQueue.Clear();
+            var bob = new Customer("Bob", 1.2, dbAccess.Jobs.Find(2));
+            dbAccess.Customers.Add(bob);
+            dbAccess.SaveChanges();
+            AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
+            AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
+            AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
+
             foreach (var tempCustomer in internalQueue)
             {
                 Console.WriteLine(tempCustomer.ToString());
@@ -187,20 +194,24 @@ namespace Queue_Bot
                 return hashCode;
             }
         }
-
-        public string Name { get; private set; }
-        public TimeSpan Length { get; private set; }
-        public int Identifier { get { return GetHashCode(); } }
+        public string Name { get; set; }
+        public TimeSpan Length { get; set; }
+        public int Hash { get { return GetHashCode(); } }
+        public int Id { get; set; }
+        public Job() : this(TimeSpan.FromMinutes(30), "Get Plastered") { }
         public Job(TimeSpan duration, String name)
         {
             Length = duration;
             Name = name;
         }
-        public override string ToString()
+    }
+    public class JobContext : DbContext
+    {
+        public JobContext() : base("JobContext")
         {
-            return String.Format("Name: {1}\tTime needed: {0}",
-                Length, Name);
         }
+        public DbSet<Job> Jobs { get; set; }
+        public DbSet<Customer> Customers { get; set; }
     }
     public class Customer : IComparable<Customer>
     {
@@ -228,6 +239,11 @@ namespace Queue_Bot
             return String.Format("Name: {2}\tTime needed: {0:N2}\nTime spent waiting: {1:N2}\tPrice of Time Waited: {3:C2}",
                  JobLength.TotalHours, WaitTime.TotalHours, Name, (TimeValue * WaitTime.TotalHours));
         }
+        /// <summary>
+        /// ID used for connection with whichever authentication system we use. 
+        /// </summary>
+        [Key]
+        public string AuthID { get; private set; }
         /// <summary>
         /// Name of customer. Will probably want to add other
         /// identifying/contact info in future development.
@@ -294,6 +310,7 @@ namespace Queue_Bot
             timeEnqueued = DateTime.Now;
             deposit = 0.00;
             this.desiredJob = desiredJob;
+            AuthID = "foo";
         }
 
         public int CompareTo(Customer other)
