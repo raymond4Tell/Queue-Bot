@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
 
@@ -51,28 +52,20 @@ namespace Queue_Bot
         public static readonly IPriorityQueue<Customer> internalQueue = new PriorityQueue<Customer>();
         public static double MachineBalance = 0.0;
         public static TimeSpan BEWT = TimeSpan.Zero;
-        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
-                new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-            new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-            new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-            new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-            };
+        //public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+        //        new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+        //    new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+        //    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+        //    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+        //    };
         private static JobContext dbAccess = new JobContext();
 
         public static void Main()
         {
-
-            dbAccess.Jobs.AddRange(jobList);
-            dbAccess.SaveChanges();
-
             //Initialization.
             internalQueue.Clear();
             var bob = new Customer("Bob", 1.2, dbAccess.Jobs.Find(2));
-            dbAccess.Customers.Add(bob);
-            dbAccess.SaveChanges();
-            AddCustomer(new Customer("Ethel", 1.5, jobList[1]));
-            AddCustomer(new Customer("Alfred", 1.91, jobList[3]));
-            AddCustomer(new Customer("Jasmine", 2.17, jobList[2]));
+            AddCustomer(bob);
 
             foreach (var tempCustomer in internalQueue)
             {
@@ -81,6 +74,7 @@ namespace Queue_Bot
                 Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
                 Console.WriteLine("--------------------------");
             }
+            Console.Read();
         }
 
         /// <summary>
@@ -116,6 +110,7 @@ namespace Queue_Bot
         public static void AddCustomer(Customer customer)
         {
             internalQueue.Add(customer);
+            dbAccess.Customers.Add(customer);
             UpdateWaits(internalQueue);
             BEWT = FindBEWT(internalQueue);
         }
@@ -194,8 +189,9 @@ namespace Queue_Bot
                 return hashCode;
             }
         }
-        public string Name { get; set; }
+        public string Name { get; private set; }
         public TimeSpan Length { get; set; }
+        //TODO: Do we really still need a hash when we've got a proper key?
         public int Hash { get { return GetHashCode(); } }
         public int Id { get; set; }
         public Job() : this(TimeSpan.FromMinutes(30), "Get Plastered") { }
@@ -207,9 +203,7 @@ namespace Queue_Bot
     }
     public class JobContext : DbContext
     {
-        public JobContext() : base("JobContext")
-        {
-        }
+        public JobContext() : base("JobContext") { }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Customer> Customers { get; set; }
     }
@@ -245,24 +239,19 @@ namespace Queue_Bot
         [Key]
         public string AuthID { get; private set; }
         /// <summary>
-        /// Name of customer. Will probably want to add other
-        /// identifying/contact info in future development.
+        /// Name of customer. Will probably want to add other identifying/contact info in future development.
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
-        /// Value the customer places on their time,
-        /// expressed as an hourly rate. 
+        /// Value the customer places on their time, expressed as an hourly rate. Based either on income or price of an hour more/less spent waiting in queue.
         /// </summary>
         public double TimeValue { get; private set; }
         /// <summary>
-        /// When the customer joined the queue and began
-        /// waiting for service. 
+        /// When the customer joined the queue and began waiting for service. 
         /// </summary>
         private readonly DateTime timeEnqueued;
         /// <summary>
-        /// When the customer can expect to be served, 
-        /// provisionally, barring significant rearrangement
-        /// of the queue.
+        /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue.
         /// </summary>
         public DateTime timeOfExpectedService;
         /// <summary>
@@ -285,6 +274,7 @@ namespace Queue_Bot
         /// how much longer to wait; timeOfExpectedService - DateTime.Now
         /// Basically it's English; WaitTime as a question or as a statement.
         /// </summary>
+        [NotMapped]
         public TimeSpan WaitTime
         {
             get { return (timeOfExpectedService - timeEnqueued).Trim(TimeSpan.TicksPerSecond); }
@@ -308,9 +298,14 @@ namespace Queue_Bot
             Name = name;
             TimeValue = timeValue;
             timeEnqueued = DateTime.Now;
+            timeOfExpectedService = DateTime.Now.AddMinutes(20);
             deposit = 0.00;
             this.desiredJob = desiredJob;
-            AuthID = "foo";
+            AuthID = "bar";
+        }
+
+        public Customer()
+        {
         }
 
         public int CompareTo(Customer other)
