@@ -49,29 +49,30 @@ namespace Queue_Bot
 {
     public static class JobQueue
     {
-        public static readonly IPriorityQueue<Customer> internalQueue = new PriorityQueue<Customer>();
+        public static readonly IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
         public static double MachineBalance = 0.0;
         public static TimeSpan BEWT = TimeSpan.Zero;
-        //public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
-        //        new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-        //    new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-        //    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-        //    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-        //    };
+        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+                new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+            new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+            new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+            new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+            };
         private static JobContext dbAccess = new JobContext();
 
         public static void Main()
         {
             //Initialization.
+            dbAccess.Jobs.AddRange(jobList);
+            dbAccess.SaveChanges();
             internalQueue.Clear();
-            var bob = new Customer("Bob", 1.2, dbAccess.Jobs.Find(2));
-            AddCustomer(bob);
+            var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
+            //var bob = new Customer("Bob", 1.2, dbAccess.Jobs.Find(2));
+            AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
 
             foreach (var tempCustomer in internalQueue)
             {
                 Console.WriteLine(tempCustomer.ToString());
-                var tempBalance = tempCustomer.FindBalance(BEWT);
-                Console.WriteLine(tempBalance > 0 ? "Customer is owed: {0:C2}" : "Customer owes: {0:C2}", tempBalance);
                 Console.WriteLine("--------------------------");
             }
             Console.Read();
@@ -107,10 +108,17 @@ namespace Queue_Bot
         /// TODO: Probably ought to move half of this into the actual PQueue class, for the same reason above, particularly UpdateWaits.
         /// </summary>
         /// <param name="customer">Customer object to add to the queue</param>
-        public static void AddCustomer(Customer customer)
+        /// <param name="job">Job that customer wants done</param>
+        /// <param name="timeValue">Customer's timevalue</param>
+        public static void AddCustomer(Customer customer, Job job, double timeValue)
         {
-            internalQueue.Add(customer);
-            dbAccess.Customers.Add(customer);
+            if (!dbAccess.Customers.Any(registeredCustomers => customer.AuthID == registeredCustomers.AuthID))
+            {
+                dbAccess.Customers.Add(customer);
+            }
+            var newTask = new Task() { customer = customer, job = job, timeEnqueued = DateTime.Now, timePrice = timeValue };
+            dbAccess.Tasks.Add(newTask);
+            internalQueue.Add(newTask);
             UpdateWaits(internalQueue);
             BEWT = FindBEWT(internalQueue);
         }
@@ -119,7 +127,7 @@ namespace Queue_Bot
         /// Also consolidates boilerplate, so calling functions do not need to change as we add more nonsense.
         /// </summary>
         /// <returns>The next customer to be served</returns>
-        public static Customer RemoveCustomer()
+        public static Task RemoveCustomer()
         {
             var foo = internalQueue.PopFront();
             MachineBalance -= foo.Balance;
@@ -134,13 +142,13 @@ namespace Queue_Bot
         /// TODO If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
         /// TODO: Also need to set wait times according to when the next server is available. Doesn't help much to say customer 3 gets served 20m after customer 2, if customer 2 won't be served for 2 hours.
         /// </summary>
-        public static void UpdateWaits(IPriorityQueue<Customer> PQueue)
+        public static void UpdateWaits(IPriorityQueue<Task> PQueue)
         {
             TimeSpan cmltivWait = TimeSpan.Zero;
-            foreach (Customer customer in PQueue)
+            foreach (Task customer in PQueue)
             {
                 customer.WaitTime = cmltivWait;
-                cmltivWait += customer.JobLength;
+                cmltivWait += customer.job.Length;
             }
         }
         /// <summary>
@@ -150,7 +158,7 @@ namespace Queue_Bot
         /// get paid for their patience. 
         /// </summary>
         /// <returns>TimeSpan representing the break-even time.</returns>
-        public static TimeSpan FindBEWT(IPriorityQueue<Customer> PQueue)
+        public static TimeSpan FindBEWT(IPriorityQueue<Task> PQueue)
         {
             //Degenerate case; if the queue's empty, wait time is zero.
             if (0 == PQueue.Count)
@@ -161,10 +169,10 @@ namespace Queue_Bot
              * BEWT = (sum(customer.TimeValue * customer.WaitTime) - MachineBalance) / sum(customer.TimeValue)
              */
             double sumPi = 0.0, sumPiTi = 0.0;
-            foreach (Customer foo in PQueue)
+            foreach (Task foo in PQueue)
             {
-                sumPi += foo.TimeValue;
-                sumPiTi += (foo.TimeValue * foo.WaitTime.TotalHours);
+                sumPi += foo.timePrice;
+                sumPiTi += (foo.timePrice * foo.WaitTime.TotalHours);
             }
             double localBEWT = (sumPiTi + MachineBalance) / sumPi;
 
@@ -203,27 +211,46 @@ namespace Queue_Bot
     }
     public class JobContext : DbContext
     {
-        public JobContext() : base("JobContext") { }
+        public JobContext() : base("JobContext")
+        {
+            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<JobContext>());
+        }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Task> Tasks { get; set; }
     }
-    public class Customer : IComparable<Customer>
+    public class Customer
     {
-        protected bool Equals(Customer other)
+        /// <summary>
+        /// ID used for connection with whichever authentication system we use. 
+        /// </summary>
+        [Key]
+        public string AuthID { get; set; }
+        /// <summary>
+        /// Name of customer. Will probably want to add other identifying/contact info in future development.
+        /// </summary>
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// The actual undertaking that will get passed to operators; combination of Customer, DesiredJob, and scheduling info. 
+    /// TODO: Better fucking names, for this and the available-services class. Can't use Service, Task, Request, Operation, or Assignment lest they be confused with other terms in CS. Maybe Chores?
+    /// </summary>
+    public class Task : IComparable<Task>
+    {
+        public int CompareTo(Task other)
         {
-            return timeEnqueued.Equals(other.timeEnqueued) && desiredJob.Equals(other.desiredJob) && string.Equals(Name, other.Name);
+            if (Equals(other)) return 0;
+            var comp1 = job.Length.TotalHours / (double)timePrice;
+            var comp2 = other.job.Length.TotalHours / (double)other.timePrice;
+            return (comp1 < comp2) ? -1 : 1;
+
+        }
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
         }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = timeEnqueued.GetHashCode();
-                hashCode = (hashCode * 397) ^ desiredJob.GetHashCode();
-                hashCode = (hashCode * 397) ^ Name.GetHashCode();
-                return hashCode;
-            }
-        }
         /// <summary>
         /// TODO: Really ought to make this less ugly and return more useful data. OTOH, that's what the GUI is for.
         /// </summary>
@@ -231,48 +258,37 @@ namespace Queue_Bot
         public override string ToString()
         {
             return String.Format("Name: {2}\tTime needed: {0:N2}\nTime spent waiting: {1:N2}\tPrice of Time Waited: {3:C2}",
-                 JobLength.TotalHours, WaitTime.TotalHours, Name, (TimeValue * WaitTime.TotalHours));
+                 job.Length.TotalHours, WaitTime.TotalHours, customer.Name, (timePrice * WaitTime.TotalHours));
         }
+        [Key]
+        [Column(Order = 1)]
+        public Customer customer { get; set; }
         /// <summary>
-        /// ID used for connection with whichever authentication system we use. 
+        /// What the customer needs, chosen from a controlled list of options.
         /// </summary>
         [Key]
-        public string AuthID { get; private set; }
+        [Column(Order = 2)]
+        public Job job { get; set; }
         /// <summary>
-        /// Name of customer. Will probably want to add other identifying/contact info in future development.
+        /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings, or "I will pay $20 to get out of here an hour sooner".
         /// </summary>
-        public string Name { get; private set; }
+        /// <remarks>No, this isn't the right type, but for small amounts like this, it'll do and saves time casting everything.</remarks>
+        public double timePrice { get; set; }
         /// <summary>
-        /// Value the customer places on their time, expressed as an hourly rate. Based either on income or price of an hour more/less spent waiting in queue.
+        /// When the customer selected their desired job and joined the queue.
         /// </summary>
-        public double TimeValue { get; private set; }
-        /// <summary>
-        /// When the customer joined the queue and began waiting for service. 
-        /// </summary>
-        private readonly DateTime timeEnqueued;
+        [Key]
+        [Column(Order = 3)]
+        public DateTime timeEnqueued { get; set; }
         /// <summary>
         /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue.
         /// </summary>
-        public DateTime timeOfExpectedService;
+        public DateTime timeOfExpectedService { get; set; }
         /// <summary>
-        /// A *small* deposit paid in when the customer joins the queue, to be
-        /// refunded when the customer is finally served (plus/minus any payments
-        /// for their time). Primes the pump for payments, and ensures everybody
-        /// has some skin in the game.
-        /// </summary>
-        private readonly double deposit;
-        /// <summary>
-        /// The job the customer wants done. Should be selected from a
-        /// controlled list of options.
-        /// TODO: Do we need this public field, or the two properties based on it?
-        /// </summary>
-        private readonly Job desiredJob;
-        /// <summary>
-        /// Time spent waiting for service. As much as I hate clever code, 
-        /// we're going to get a little cunning here. Get is the total duration;
-        /// timeOfExpectedService - timeEnqueued. Set is the time in the future,
-        /// how much longer to wait; timeOfExpectedService - DateTime.Now
-        /// Basically it's English; WaitTime as a question or as a statement.
+        /// Time spent waiting for service. As much as I hate clever code, we're going to get a little cunning here.
+        /// Get is the total duration; timeOfExpectedService - timeEnqueued.
+        /// Set is the time in the future, how much longer to wait; timeOfExpectedService - DateTime.Now
+        /// Basically it's English; asking vs stating WaitTime.
         /// </summary>
         [NotMapped]
         public TimeSpan WaitTime
@@ -281,46 +297,18 @@ namespace Queue_Bot
             set { timeOfExpectedService = DateTime.Now + value; }
         }
         /// <summary>
-        /// Public property encapsulating the desiredJob field.
+        /// A *small* deposit paid in when the customer joins the queue, to be
+        /// refunded when the customer is finally served (plus/minus any payments
+        /// for their time). Primes the pump for payments, and ensures everybody
+        /// has some skin in the game.
         /// </summary>
-        public TimeSpan JobLength { get { return desiredJob.Length; } }
-        /// <summary>
-        /// Public property encapsulating the desiredJob field.
-        /// </summary>
-        public string JobName { get { return desiredJob.Name; } }
+        public double deposit { get; set; }
+
         /// <summary>
         /// Annoying as all hell, since we need to break encapsulation to access BEWT. 
         /// On the other hand, this must be public so we can display it on the GUI.
         /// </summary>
-        public double Balance { get { return TimeValue * (WaitTime - JobQueue.BEWT).TotalHours - deposit; } }
-        public Customer(string name, double timeValue, Job desiredJob)
-        {
-            Name = name;
-            TimeValue = timeValue;
-            timeEnqueued = DateTime.Now;
-            timeOfExpectedService = DateTime.Now.AddMinutes(20);
-            deposit = 0.00;
-            this.desiredJob = desiredJob;
-            AuthID = "bar";
-        }
+        public double Balance { get { return timePrice * (WaitTime - JobQueue.BEWT).TotalHours - deposit; } }
 
-        public Customer()
-        {
-        }
-
-        public int CompareTo(Customer other)
-        {
-            if (Equals(other)) return 0;
-            var comp1 = JobLength.TotalHours / TimeValue;
-            var comp2 = other.JobLength.TotalHours / other.TimeValue;
-            return (comp1 < comp2) ? -1 : 1;
-        }
-
-        //Aggravating. I want this to be a property that I can pass to the front-end,
-        //And I also want it to explicitly take BEWT as a parameter.
-        public double FindBalance(TimeSpan BEWT)
-        {
-            return TimeValue * (WaitTime - BEWT).TotalHours;
-        }
     }
 }
