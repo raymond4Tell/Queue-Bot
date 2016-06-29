@@ -116,11 +116,12 @@ namespace Queue_Bot
             {
                 dbAccess.Customers.Add(customer);
             }
-            var newTask = new Task() { customer = customer, job = job, timeEnqueued = DateTime.Now, timePrice = timeValue };
+            var newTask = new Task() { customer = dbAccess.Customers.Find(customer.AuthID), job = job, timeEnqueued = DateTime.Now, timePrice = timeValue };
             dbAccess.Tasks.Add(newTask);
             internalQueue.Add(newTask);
             UpdateWaits(internalQueue);
             BEWT = FindBEWT(internalQueue);
+            dbAccess.SaveChanges();
         }
         /// <summary>
         /// Encapsulates jobQueue, so calling functions will not lose functionality if we need to replace it.
@@ -263,12 +264,16 @@ namespace Queue_Bot
         [Key]
         [Column(Order = 1)]
         public Customer customer { get; set; }
+
+        public string AuthID { get; set; }
         /// <summary>
         /// What the customer needs, chosen from a controlled list of options.
         /// </summary>
         [Key]
         [Column(Order = 2)]
         public Job job { get; set; }
+        [ForeignKey("job")]
+        public int jobId { get; set; }
         /// <summary>
         /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings, or "I will pay $20 to get out of here an hour sooner".
         /// </summary>
