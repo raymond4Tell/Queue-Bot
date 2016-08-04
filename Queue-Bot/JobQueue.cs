@@ -75,7 +75,7 @@ namespace Queue_Bot
                 Console.WriteLine(tempCustomer.ToString());
                 Console.WriteLine("--------------------------");
             }
-            Console.Read();
+            Console.ReadKey();
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace Queue_Bot
     }
     public class JobContext : DbContext
     {
-        public JobContext() : base("JobContext")
+        public JobContext() : base("Queue_Bot.Properties.Settings.JobStoreConnectionString")
         {
             Database.SetInitializer(new DropCreateDatabaseIfModelChanges<JobContext>());
         }
