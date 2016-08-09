@@ -67,8 +67,8 @@ namespace Queue_Bot
             dbAccess.SaveChanges();
             internalQueue.Clear();
             var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
-            //var bob = new Customer("Bob", 1.2, dbAccess.Jobs.Find(2));
             AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
+            AddCustomer(new Customer { Name = "Gerald", AuthID = "u890asdf" }, dbAccess.Jobs.Find(4), 4.1);
 
             foreach (var tempCustomer in internalQueue)
             {
@@ -116,11 +116,12 @@ namespace Queue_Bot
             {
                 dbAccess.Customers.Add(customer);
             }
-            var newTask = new Task() { customer = dbAccess.Customers.Find(customer.AuthID), job = job, timeEnqueued = DateTime.Now, timePrice = timeValue };
-            dbAccess.Tasks.Add(newTask);
+            var newTask = new Task() { customer = dbAccess.Customers.Find(customer.AuthID), job = job, timeEnqueued = DateTime.Now,
+                timePrice = timeValue, timeOfExpectedService = DateTime.Now.AddHours(1) };
             internalQueue.Add(newTask);
             UpdateWaits(internalQueue);
             BEWT = FindBEWT(internalQueue);
+            dbAccess.Tasks.Add(newTask);
             dbAccess.SaveChanges();
         }
         /// <summary>
@@ -286,8 +287,9 @@ namespace Queue_Bot
         [Column(Order = 3)]
         public DateTime timeEnqueued { get; set; }
         /// <summary>
-        /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue.
+        /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue. Not stored in the DB, entirely handled in-program.
         /// </summary>
+        /// <remarks>Honestly I tried to map this to the DB, but a) It's all calculated here in any case, and b) it was giving me lip and causing concurrency errors.</remarks>
         public DateTime timeOfExpectedService { get; set; }
         /// <summary>
         /// Time spent waiting for service. As much as I hate clever code, we're going to get a little cunning here.
