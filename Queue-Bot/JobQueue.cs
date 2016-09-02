@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading;
 
 /* SEE README.md; most of this is obsolete.
  * 
@@ -68,14 +69,39 @@ namespace Queue_Bot
             internalQueue.Clear();
             var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
             AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
+            Thread.Sleep(1000);
             AddCustomer(new Customer { Name = "Gerald", AuthID = "u890asdf" }, dbAccess.Jobs.Find(4), 4.1);
-          
+            var changedTask = internalQueue.First(item => item.customer.Name == "Gerald");
+            var newTask = new Task
+            {
+                deposit = 4,
+                AuthID = changedTask.AuthID,
+                customer = changedTask.customer,
+                job = changedTask.job,
+                jobId = changedTask.jobId,
+                timeEnqueued = changedTask.timeEnqueued,
+                timePrice = changedTask.timePrice
+            };
+            updateTask(changedTask, newTask.timeEnqueued);
             foreach (var tempCustomer in internalQueue)
             {
                 Console.WriteLine(tempCustomer.ToString());
                 Console.WriteLine("--------------------------");
             }
             Console.ReadKey();
+        }
+
+        private static void updateTask(Task newTask, DateTime taskQTime)
+        {
+            var original = dbAccess.Tasks.Find(taskQTime);
+            dbAccess.SaveChanges();
+
+            if (original != null)
+            {
+                var foo = dbAccess.Entry(original);
+                dbAccess.Entry(original).CurrentValues.SetValues(newTask);
+                dbAccess.SaveChanges();
+            }
         }
 
         /// <summary>
@@ -271,7 +297,9 @@ namespace Queue_Bot
         [Key]
         [Column(Order = 1)]
         public Customer customer { get; set; }
-
+        /// <summary>
+        /// TODO: Which of these fields do we really need? 
+        /// </summary>
         public string AuthID { get; set; }
         /// <summary>
         /// What the customer needs, chosen from a controlled list of options.
