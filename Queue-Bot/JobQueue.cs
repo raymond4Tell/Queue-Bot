@@ -74,15 +74,15 @@ namespace Queue_Bot
             var changedTask = internalQueue.First(item => item.customer.Name == "Gerald");
             var newTask = new Task
             {
-                deposit = 4,
+                deposit = changedTask.deposit,
                 AuthID = changedTask.AuthID,
                 customer = changedTask.customer,
                 job = changedTask.job,
                 jobId = changedTask.jobId,
                 timeEnqueued = changedTask.timeEnqueued,
-                timePrice = changedTask.timePrice
+                timePrice = 4
             };
-            updateTask(changedTask, newTask.timeEnqueued);
+            updateTask(newTask, changedTask.timeEnqueued);
             foreach (var tempCustomer in internalQueue)
             {
                 Console.WriteLine(tempCustomer.ToString());
@@ -94,11 +94,9 @@ namespace Queue_Bot
         private static void updateTask(Task newTask, DateTime taskQTime)
         {
             var original = dbAccess.Tasks.Find(taskQTime);
-            dbAccess.SaveChanges();
 
             if (original != null)
             {
-                var foo = dbAccess.Entry(original);
                 dbAccess.Entry(original).CurrentValues.SetValues(newTask);
                 dbAccess.SaveChanges();
             }
