@@ -59,30 +59,33 @@ namespace Queue_Bot
             new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
             new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
             };
-        private static JobContext dbAccess = new JobContext();
 
         public static void Main()
         {
-            //Initialization.
-            dbAccess.Jobs.AddRange(jobList);
-            dbAccess.SaveChanges();
-            internalQueue.Clear();
-            var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
-            AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
-            Thread.Sleep(1000);
-            AddCustomer(new Customer { Name = "Gerald", AuthID = "u890asdf" }, dbAccess.Jobs.Find(4), 4.1);
-            var changedTask = internalQueue.First(item => item.customer.Name == "Gerald");
-            var newTask = new Task
+            using (var dbAccess = new JobContext())
             {
-                deposit = changedTask.deposit,
-                AuthID = changedTask.AuthID,
-                customer = changedTask.customer,
-                job = changedTask.job,
-                jobId = changedTask.jobId,
-                timeEnqueued = changedTask.timeEnqueued,
-                timePrice = 4
-            };
-            updateTask(newTask, changedTask.timeEnqueued);
+
+                //Initialization.
+                dbAccess.Jobs.AddRange(jobList);
+                dbAccess.SaveChanges();
+                internalQueue.Clear();
+                var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
+                AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
+                AddCustomer(new Customer { Name = "Gerald", AuthID = "u890asdf" }, dbAccess.Jobs.Find(1), 4.1);
+                var changedTask = internalQueue.First(item => item.customer.Name == "Gerald");
+                var newTask = new Task
+                {
+                    deposit = changedTask.deposit,
+                    AuthID = changedTask.AuthID,
+                    customer = changedTask.customer,
+                    job = changedTask.job,
+                    jobId = changedTask.jobId,
+                    timeEnqueued = changedTask.timeEnqueued,
+                    timePrice = 4,
+                    TaskId = changedTask.TaskId
+                };
+                updateTask(newTask, changedTask);
+            }
             foreach (var tempCustomer in internalQueue)
             {
                 Console.WriteLine(tempCustomer.ToString());
@@ -91,14 +94,17 @@ namespace Queue_Bot
             Console.ReadKey();
         }
 
-        private static void updateTask(Task newTask, DateTime taskQTime)
+        private static void updateTask(Task newTask, Task oldTask)
         {
-            var original = dbAccess.Tasks.Find(taskQTime);
-
-            if (original != null)
+            using (var dbAccess = new JobContext())
             {
-                dbAccess.Entry(original).CurrentValues.SetValues(newTask);
-                dbAccess.SaveChanges();
+                var original = dbAccess.Tasks.Find(oldTask.TaskId);
+
+                if (original != null)
+                {
+                    dbAccess.Entry(original).CurrentValues.SetValues(newTask);
+                    dbAccess.SaveChanges();
+                }
             }
         }
 
@@ -136,23 +142,26 @@ namespace Queue_Bot
         /// <param name="timeValue">Customer's timevalue</param>
         public static void AddCustomer(Customer customer, Job job, double timeValue)
         {
-            if (!dbAccess.Customers.Any(registeredCustomers => customer.AuthID == registeredCustomers.AuthID))
+            using (var dbAccess = new JobContext())
             {
-                dbAccess.Customers.Add(customer);
+                if (!dbAccess.Customers.Any(registeredCustomers => customer.AuthID == registeredCustomers.AuthID))
+                {
+                    dbAccess.Customers.Add(customer);
+                }
+                var newTask = new Task()
+                {
+                    customer = dbAccess.Customers.Find(customer.AuthID),
+                    job = dbAccess.Jobs.Find(job.JobId),
+                    timeEnqueued = DateTime.Now,
+                    timePrice = timeValue,
+                    timeOfExpectedService = DateTime.Now.AddHours(1)
+                };
+                internalQueue.Add(newTask);
+                UpdateWaits(internalQueue);
+                BEWT = FindBEWT(internalQueue);
+                dbAccess.Tasks.Add(newTask);
+                dbAccess.SaveChanges();
             }
-            var newTask = new Task()
-            {
-                customer = dbAccess.Customers.Find(customer.AuthID),
-                job = job,
-                timeEnqueued = DateTime.Now,
-                timePrice = timeValue,
-                timeOfExpectedService = DateTime.Now.AddHours(1)
-            };
-            internalQueue.Add(newTask);
-            UpdateWaits(internalQueue);
-            BEWT = FindBEWT(internalQueue);
-            dbAccess.Tasks.Add(newTask);
-            dbAccess.SaveChanges();
         }
         /// <summary>
         /// Encapsulates jobQueue, so calling functions will not lose functionality if we need to replace it.
@@ -233,7 +242,7 @@ namespace Queue_Bot
         public TimeSpan Length { get; set; }
         //TODO: Do we really still need a hash when we've got a proper key?
         public int Hash { get { return GetHashCode(); } }
-        public int Id { get; set; }
+        public int JobId { get; set; }
         public Job() : this(TimeSpan.FromMinutes(30), "Get Plastered") { }
         public Job(TimeSpan duration, String name)
         {
@@ -293,20 +302,19 @@ namespace Queue_Bot
                  job.Length.TotalHours, WaitTime.TotalHours, customer.Name, (timePrice * WaitTime.TotalHours));
         }
         [Key]
-        [Column(Order = 1)]
-        public Customer customer { get; set; }
+        public int TaskId { get; set; }
         /// <summary>
         /// TODO: Which of these fields do we really need? 
         /// </summary>
         public string AuthID { get; set; }
+        [ForeignKey("AuthID")]
+        public virtual Customer customer { get; set; }
         /// <summary>
         /// What the customer needs, chosen from a controlled list of options.
         /// </summary>
-        [Key]
-        [Column(Order = 2)]
-        public Job job { get; set; }
-        [ForeignKey("job")]
         public int jobId { get; set; }
+        [ForeignKey("jobId")]
+        public virtual Job job { get; set; }
         /// <summary>
         /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings, or "I will pay $20 to get out of here an hour sooner".
         /// </summary>
@@ -315,8 +323,6 @@ namespace Queue_Bot
         /// <summary>
         /// When the customer selected their desired job and joined the queue.
         /// </summary>
-        [Key]
-        [Column(Order = 3)]
         public DateTime timeEnqueued { get; set; }
         /// <summary>
         /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue. Not stored in the DB, entirely handled in-program.
