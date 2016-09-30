@@ -5,8 +5,8 @@ using System.Threading;
 
 namespace Queue_Bot
 { /// <summary> Generic priority queue interface. </summary>
-    /// <remarks> David Venegoni, Jan 02 2014. </remarks>
-    /// <typeparam name="T"> Generic type parameter.  Must implement the IComparable interface. </typeparam>
+  /// <remarks> David Venegoni, Jan 02 2014. </remarks>
+  /// <typeparam name="T"> Generic type parameter.  Must implement the IComparable interface. </typeparam>
     public interface IPriorityQueue<T> : IEnumerable<T> where T : IComparable<T>
     {
         /// <summary> Gets the number of items in the priority queue. </summary>
@@ -120,7 +120,7 @@ namespace Queue_Bot
 
         public int ClearWhere(Func<T, bool> predicateFunction)
         {
-            throw new NotImplementedException();
+            return internalSet.RemoveWhere(predicateFunction.Invoke);
         }
 
         public T PopFront()

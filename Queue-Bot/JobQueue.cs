@@ -102,6 +102,13 @@ namespace Queue_Bot
 
                 if (original != null)
                 {
+                    //var foo = internalQueue.First(item => item.TaskId == oldTask.TaskId);
+                    //foo.timePrice = 4;
+                    internalQueue.ClearWhere(item => item.TaskId == oldTask.TaskId);
+                    internalQueue.Add(newTask);
+                    UpdateWaits(internalQueue);
+                    BEWT = FindBEWT(internalQueue);
+
                     dbAccess.Entry(original).CurrentValues.SetValues(newTask);
                     dbAccess.SaveChanges();
                 }
