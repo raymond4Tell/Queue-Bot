@@ -86,12 +86,12 @@ namespace Queue_Bot
                 };
                 updateTask(newTask, changedTask);
             }
-            foreach (var tempCustomer in internalQueue)
-            {
-                Console.WriteLine(tempCustomer.ToString());
-                Console.WriteLine("--------------------------");
-            }
-            Console.ReadKey();
+            //foreach (var tempCustomer in internalQueue)
+            //{
+            //    Console.WriteLine(tempCustomer.ToString());
+            //    Console.WriteLine("--------------------------");
+            //}
+            //Console.ReadKey();
         }
 
         private static void updateTask(Task newTask, Task oldTask)
@@ -245,7 +245,7 @@ namespace Queue_Bot
                 return hashCode;
             }
         }
-        public string Name { get; private set; }
+        public string Name { get; set; }
         public TimeSpan Length { get; set; }
         //TODO: Do we really still need a hash when we've got a proper key?
         public int Hash { get { return GetHashCode(); } }
