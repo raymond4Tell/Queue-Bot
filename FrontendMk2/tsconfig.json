@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "commonjs",
+    "module": "system",
     "moduleResolution": "node",
     "sourceMap": true,
     "emitDecoratorMetadata": true,
@@ -13,9 +13,11 @@
     "outDir": "./Scripts/app"
   },
   "files": [
+    "./Scripts/app/queue-service.ts",
     "./Scripts/app/queue.ts",
     "./Scripts/app/model.ts",
     "./Scripts/app/main.ts",
+    "./Scripts/app/app.ts",
     "./typings/index.d.ts"
   ],
   "compileOnSave": true

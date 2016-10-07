@@ -8,7 +8,7 @@ using System.Web.Http;
 
 namespace FrontendMk2.Controllers
 {
-    [Authorize]
+    //[Authorize]
     public class QueueController : ApiController
     {
         // GET: api/Queue

@@ -313,6 +313,7 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="tsconfig.json" />
+    <Content Include="Scripts\system.config.js" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -334,9 +335,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Scripts\app\main.ts" />
+    <TypeScriptCompile Include="Scripts\app\app.ts" />
     <TypeScriptCompile Include="Scripts\app\model.ts" />
+    <TypeScriptCompile Include="Scripts\app\queue-service.ts" />
     <TypeScriptCompile Include="Scripts\app\queue.ts" />
+    <TypeScriptCompile Include="Scripts\app\rxjs-operators.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

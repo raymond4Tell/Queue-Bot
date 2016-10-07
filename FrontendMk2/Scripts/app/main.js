@@ -1,5 +1,20 @@
-"use strict";
-var browser_1 = require("angular2/platform/browser");
-var queue_1 = require("./queue");
-browser_1.bootstrap(queue_1.MyApp);
+System.register(['@angular/platform-browser-dynamic', './app'], function(exports_1, context_1) {
+    "use strict";
+    var __moduleName = context_1 && context_1.id;
+    var platform_browser_dynamic_1, app_1;
+    var platform;
+    return {
+        setters:[
+            function (platform_browser_dynamic_1_1) {
+                platform_browser_dynamic_1 = platform_browser_dynamic_1_1;
+            },
+            function (app_1_1) {
+                app_1 = app_1_1;
+            }],
+        execute: function() {
+            platform = platform_browser_dynamic_1.platformBrowserDynamic();
+            platform.bootstrapModule(app_1.AppModule);
+        }
+    }
+});
 //# sourceMappingURL=main.js.map
