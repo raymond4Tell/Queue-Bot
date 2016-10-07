@@ -20,7 +20,7 @@ var MyApp = (function () {
     MyApp = __decorate([
         core_1.Component({
             selector: "my-app",
-            template: "<div>Hello from </div>"
+            template: "<div>Hello from {{getCompiler()}} </div>"
         }), 
         __metadata('design:paramtypes', [])
     ], MyApp);

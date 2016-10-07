@@ -11,9 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendMk2", "FrontendMk2\FrontendMk2.csproj", "{1FE2EA36-0BC2-4EAC-ADB4-1F0EDE6F7831}"
-	ProjectSection(ProjectDependencies) = postProject
-		{7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825} = {7FA87AC8-D567-41E9-9A3C-2E6DB6AA1825}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontendMk2.Tests", "FrontendMk2.Tests\FrontendMk2.Tests.csproj", "{E9BCF762-93C9-4C18-B90D-76E6A5556065}"
 EndProject
