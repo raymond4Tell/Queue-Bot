@@ -8,11 +8,15 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "noEmitOnError": true,
+    "outDir": "./Scripts/app"
   },
-  "exclude": [
-    "node_modules",
-    "wwwroot"
+  "files": [
+    "./Scripts/app/queue.ts",
+    "./Scripts/app/model.ts",
+    "./Scripts/app/main.ts",
+    "./typings/index.d.ts"
   ],
   "compileOnSave": true
 }

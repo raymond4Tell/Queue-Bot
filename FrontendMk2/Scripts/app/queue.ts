@@ -1,13 +1,13 @@
-﻿import { Component } from "angular2/core"
-import { MyModel } from "./model"
+﻿import { Component } from "angular2/core";
+import { MyModel } from "./model";
 
 @Component({
     selector: `my-app`,
     template: `<div>Hello from </div>`
 })
-class MyApp {
+export class MyApp {
     model = new MyModel();
-    getCompiler() {
+    getCompiler(): string {
         return this.model.compiler;
     }
 }
