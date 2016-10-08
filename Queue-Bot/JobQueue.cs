@@ -157,6 +157,7 @@ namespace Queue_Bot
                 }
                 var newTask = new Task()
                 {
+                    TaskId = Guid.NewGuid(),
                     customer = dbAccess.Customers.Find(customer.AuthID),
                     job = dbAccess.Jobs.Find(job.JobId),
                     timeEnqueued = DateTime.Now,
@@ -309,7 +310,7 @@ namespace Queue_Bot
                  job.Length.TotalHours, WaitTime.TotalHours, customer.Name, (timePrice * WaitTime.TotalHours));
         }
         [Key]
-        public int TaskId { get; set; }
+        public Guid TaskId { get; set; }
         /// <summary>
         /// TODO: Which of these fields do we really need? 
         /// </summary>
