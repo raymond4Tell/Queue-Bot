@@ -83,11 +83,11 @@ namespace FrontendMk2
             //    appId: "",
             //    appSecret: "");
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            {
+                ClientId = "471955578344-74eq9b3qr7vev93i177nu3qm5k8uv3rd.apps.googleusercontent.com",
+                ClientSecret = "cFWjU_yD_ge4Cue_JzjYVGPM"
+            });
         }
     }
 }
