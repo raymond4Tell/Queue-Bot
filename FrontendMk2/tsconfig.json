@@ -22,6 +22,7 @@
     "./Scripts/app/task-detail-component.ts",
     "./Scripts/app/user-service.ts",
     "./Scripts/app/login-component.ts",
+    "./Scripts/app/auth-guard.ts",
     "./Scripts/app/rxjs-operators.ts",
     "./Scripts/app/model.ts",
     "./typings/index.d.ts"

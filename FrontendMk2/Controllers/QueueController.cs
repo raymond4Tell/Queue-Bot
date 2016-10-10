@@ -20,9 +20,9 @@ namespace FrontendMk2.Controllers
         }
 
         // GET: api/Queue/5
-        public string Get(int id)
+        public Task Get(Guid id)
         {
-            return "value";
+            return JobQueue.internalQueue.FirstOrDefault(item => item.TaskId == id);
         }
 
         // POST: api/Queue
@@ -31,8 +31,9 @@ namespace FrontendMk2.Controllers
         }
 
         // PUT: api/Queue/5
-        public void Put(int id, [FromBody]string value)
+        public void Put(Guid id, [FromBody]Task value)
         {
+            JobQueue.updateTask(value, id);
         }
 
         // DELETE: api/Queue/5

@@ -5,37 +5,31 @@ import "./rxjs-operators";
 
 import { Task } from "./model";
 import { QueueService } from "./queue-service";
+import { UserService } from "./user-service";
 
 @Component({
-    selector: 'my-task-detail',
-    template: `<div *ngIf="task">
+    selector: 'add-task-form',
+    template: `<div>
     <h2>{{task.customer.name}} / {{task.job.name }}</h2>
     <div>    <label>id: </label>{{task.authId}}</div>
     <div>
     <label>name: </label>
-    <input [(ngModel)]='task.timePrice' placeholder= "name" />
+    <input #task.timePrice placeholder= "name" />
     </div>
     <button (click)="goBack()"> Back </button>
   <button (click)="save()">Save</button>
     </div>`,
 })
-export class TaskDetailComponent implements OnInit {
+export class AddTaskComponent {
     task: Task;
 
     constructor(
         private queueService: QueueService,
         private route: ActivatedRoute,
         private location: Location
-    ) { }
-
-    ngOnInit(): void {
-        this.route.params.forEach((params: Params) => {
-            let id: string = params['id'];
-            this.queueService.getTask(id)
-                .then(
-                task => this.task = task
-                );
-        });
+    ) {
+        this.task = new Task();
+        this.task.authID = sessionStorage.getItem('auth_token');
     }
 
     save(): void {

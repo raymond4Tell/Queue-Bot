@@ -9,7 +9,7 @@ export class QueueService {
 
     private headers = new Headers({
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + sessionStorage.getItem("accessToken")
+        'Authorization': 'Bearer ' + sessionStorage.getItem("auth_token")
     });
 
     constructor(private http: Http) { }
@@ -22,10 +22,20 @@ export class QueueService {
     }
 
     getTask(id: string): Promise<Task> {
-        return this.getHeroes()
-            .then(heroes => heroes.find(
-                hero => hero.taskId === id
-            ));
+        const url = `${this.queueUrl}/${id}`;
+        return this.http.get(url)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    }
+
+    update(task: Task): Promise<Task> {
+        const url = `${this.queueUrl}/${task.taskId}`;
+        return this.http
+            .put(url, JSON.stringify(task), { headers: this.headers })
+            .toPromise()
+            .then(() => task)
+            .catch(this.handleError);
     }
 
     private extractData(res: Response) {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
@@ -64,9 +65,29 @@ namespace Queue_Bot
         {
             using (var dbAccess = new JobContext())
             {
+                if (dbAccess.Jobs.Any())
+                {//Just refresh the queue and return.
+                    internalQueue.Clear();
+                    foreach (var item in dbAccess.Tasks)
+                    {
+                        internalQueue.Add(new Task
+                        {
+                            deposit = item.deposit,
+                            AuthID = item.AuthID,
+                            customer = item.customer,
+                            job = item.job,
+                            jobId = item.jobId,
+                            timeEnqueued = item.timeEnqueued,
+                            timePrice = item.timePrice,
+                            TaskId = item.TaskId
+                        });
+                    }
+
+                    UpdateWaits(internalQueue);
+                    return;
+                }
 
                 //Initialization.
-                dbAccess.Jobs.AddRange(jobList);
                 dbAccess.SaveChanges();
                 internalQueue.Clear();
                 var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
@@ -84,7 +105,7 @@ namespace Queue_Bot
                     timePrice = 4,
                     TaskId = changedTask.TaskId
                 };
-                updateTask(newTask, changedTask);
+                updateTask(newTask, changedTask.TaskId);
             }
             //foreach (var tempCustomer in internalQueue)
             //{
@@ -94,17 +115,25 @@ namespace Queue_Bot
             //Console.ReadKey();
         }
 
-        private static void updateTask(Task newTask, Task oldTask)
+        public static IEnumerable<Job> getJobList()
         {
             using (var dbAccess = new JobContext())
             {
-                var original = dbAccess.Tasks.Find(oldTask.TaskId);
+                return dbAccess.Jobs.ToList();
+            }
+        }
+
+        public static void updateTask(Task newTask, Guid oldTaskId)
+        {
+            using (var dbAccess = new JobContext())
+            {
+                var original = dbAccess.Tasks.Find(oldTaskId);
 
                 if (original != null)
                 {
                     //var foo = internalQueue.First(item => item.TaskId == oldTask.TaskId);
                     //foo.timePrice = 4;
-                    internalQueue.ClearWhere(item => item.TaskId == oldTask.TaskId);
+                    internalQueue.ClearWhere(item => item.TaskId == oldTaskId);
                     internalQueue.Add(newTask);
                     UpdateWaits(internalQueue);
                     BEWT = FindBEWT(internalQueue);

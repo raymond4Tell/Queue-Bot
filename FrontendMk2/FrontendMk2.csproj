@@ -335,10 +335,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\app\add-task-component.ts" />
     <TypeScriptCompile Include="Scripts\app\app-component.ts" />
     <TypeScriptCompile Include="Scripts\app\app-module.ts" />
     <TypeScriptCompile Include="Scripts\app\app-routes.ts" />
     <TypeScriptCompile Include="Scripts\app\app.ts" />
+    <TypeScriptCompile Include="Scripts\app\auth-guard.ts" />
     <TypeScriptCompile Include="Scripts\app\login-component.ts" />
     <TypeScriptCompile Include="Scripts\app\main.ts" />
     <TypeScriptCompile Include="Scripts\app\model.ts" />

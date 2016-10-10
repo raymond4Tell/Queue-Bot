@@ -11,6 +11,7 @@ import { QueueService } from "./queue-service"
 <li *ngFor='let task of queueList' (click)='viewDetail(task)'>
 taskID: {{task.taskId}}<br/>
 Customer: {{task.customer.name}}<br/>
+TimePrice: {{task.timePrice}}<br/>
 jobId: {{task.job.jobId}}
 </li>
 </ul>`,

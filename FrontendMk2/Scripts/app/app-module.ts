@@ -13,6 +13,7 @@ import { LoginComponent } from "./login-component";
 import { possibleRoutes, appRouterProviders } from "./app-routes";
 import { AppComponent } from "./app-component";
 import { TaskDetailComponent } from "./task-detail-component";
+import { AddTaskComponent } from "./add-task-component";
 @NgModule({
     imports: [
         BrowserModule,
@@ -21,7 +22,7 @@ import { TaskDetailComponent } from "./task-detail-component";
         JsonpModule,
         RouterModule.forRoot(possibleRoutes)
     ],
-    declarations: [MyApp, LoginComponent, AppComponent, TaskDetailComponent],
+    declarations: [MyApp, LoginComponent, AppComponent, TaskDetailComponent, AddTaskComponent],
     providers: [QueueService, UserService],
     entryComponents: [AppComponent],
     bootstrap: [AppComponent]
