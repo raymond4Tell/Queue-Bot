@@ -19,7 +19,7 @@
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <IISExpressSSLPort>44369</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -335,11 +335,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\app\app-component.ts" />
+    <TypeScriptCompile Include="Scripts\app\app-module.ts" />
+    <TypeScriptCompile Include="Scripts\app\app-routes.ts" />
     <TypeScriptCompile Include="Scripts\app\app.ts" />
+    <TypeScriptCompile Include="Scripts\app\login-component.ts" />
+    <TypeScriptCompile Include="Scripts\app\main.ts" />
     <TypeScriptCompile Include="Scripts\app\model.ts" />
     <TypeScriptCompile Include="Scripts\app\queue-service.ts" />
     <TypeScriptCompile Include="Scripts\app\queue.ts" />
     <TypeScriptCompile Include="Scripts\app\rxjs-operators.ts" />
+    <TypeScriptCompile Include="Scripts\app\task-detail-component.ts" />
+    <TypeScriptCompile Include="Scripts\app\user-service.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
@@ -372,7 +379,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>11172</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:11172/</IISUrl>
+          <IISUrl>https://localhost:44369</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

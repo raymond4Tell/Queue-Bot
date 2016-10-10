@@ -21,6 +21,13 @@ export class QueueService {
             .catch(this.handleError);
     }
 
+    getTask(id: string): Promise<Task> {
+        return this.getHeroes()
+            .then(heroes => heroes.find(
+                hero => hero.taskId === id
+            ));
+    }
+
     private extractData(res: Response) {
         let body = res.json();
         return body || {};

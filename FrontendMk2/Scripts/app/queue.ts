@@ -1,31 +1,38 @@
 ﻿import { Component, OnInit } from '@angular/core';
-import { MyModel, Task, Job, Customer } from "./model";
-import "./rxjs.operator"
+import { Router } from '@angular/router';
+import { Task, Job, Customer } from "./model";
+import "./rxjs-operators";
 import { QueueService } from "./queue-service"
 
 
 @Component({
-    selector: `my-app`,
-    template: `<div>Hello from {{getCompiler()}} 
-<span *ngFor='let task of queueList'>{{task.authID}}</span>
-</div>`,
+    selector: 'queue-listing',
+    template: `<ul>
+<li *ngFor='let task of queueList' (click)='viewDetail(task)'>
+taskID: {{task.taskId}}<br/>
+Customer: {{task.customer.name}}<br/>
+jobId: {{task.job.jobId}}
+</li>
+</ul>`,
     providers: [QueueService]
 })
 export class MyApp implements OnInit {
-    constructor(private queueService: QueueService) { }
-    model = new MyModel();
+    constructor(
+        private router: Router,
+        private queueService: QueueService) { }
     queueList: Task[];
     errorMessage: string;
     mode = 'Observable';
 
     ngOnInit() { this.getQueue(); }
 
-    getCompiler(): string {
-        return this.model.compiler;
-    }
     getQueue() {
         this.queueService.getHeroes().then(
             heroes => this.queueList = heroes,
             error => this.errorMessage = <any>error);
+    }
+    viewDetail(task: Task): void {
+        let link = ['/detail', task.taskId];
+        this.router.navigate(link);
     }
 };

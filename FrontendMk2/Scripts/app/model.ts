@@ -1,11 +1,10 @@
-﻿export class MyModel {
-    compiler = "TypeScript";
-}
-
+﻿/**
+ * Primary model classes; derived from the classes in JobQueue.cs.
+ */
 export class Task {
-    AuthID: string;
-    TaskId: number;
-    WaitTime: TimeRanges;
+    authID: string;
+    taskId: string;
+    waitTime: TimeRanges;
     customer: Customer;
     deposit: number;
     job: Job;
@@ -15,11 +14,11 @@ export class Task {
     timePrice: number;
 }
 export class Customer {
-    AuthID: string;
-    Name: string;
+    authID: string;
+    name: string;
 }
 export class Job {
-    JobId: number;
-    Length: TimeRanges;
-    Name: String;
+    jobId: number;
+    length: TimeRanges;
+    name: String;
 }

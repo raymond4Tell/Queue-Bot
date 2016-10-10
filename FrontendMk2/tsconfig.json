@@ -13,11 +13,17 @@
     "outDir": "./Scripts/app"
   },
   "files": [
-    "./Scripts/app/queue-service.ts",
-    "./Scripts/app/queue.ts",
-    "./Scripts/app/model.ts",
     "./Scripts/app/main.ts",
-    "./Scripts/app/app.ts",
+    "./Scripts/app/app-component.ts",
+    "./Scripts/app/app-module.ts",
+    "./Scripts/app/app-routes.ts",
+    "./Scripts/app/queue.ts",
+    "./Scripts/app/queue-service.ts",
+    "./Scripts/app/task-detail-component.ts",
+    "./Scripts/app/user-service.ts",
+    "./Scripts/app/login-component.ts",
+    "./Scripts/app/rxjs-operators.ts",
+    "./Scripts/app/model.ts",
     "./typings/index.d.ts"
   ],
   "compileOnSave": true

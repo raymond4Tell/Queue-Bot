@@ -28,3 +28,6 @@ _ReSharper*/
 packages
 /Frontend
 /FrontendMk2/node_modules
+/FrontendMk2/Scripts/app/*.js
+/FrontendMk2/Scripts/app/*.map
+/FrontendMk2/App_Data
