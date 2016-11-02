@@ -28,8 +28,8 @@ export class MyApp implements OnInit {
     ngOnInit() { this.getQueue(); }
 
     getQueue() {
-        this.queueService.getHeroes().then(
-            heroes => this.queueList = heroes,
+        this.queueService.getTasks().then(
+            tasks => this.queueList = tasks,
             error => this.errorMessage = <any>error);
     }
     viewDetail(task: Task): void {

@@ -1,11 +1,12 @@
 ﻿import { Injectable } from '@angular/core';
 import { Http, Response, Headers } from "@angular/http";
 import './rxjs-operators';
-import { Task } from "./model"
+import { Task, Job } from "./model"
 
 @Injectable()
 export class QueueService {
-    private queueUrl = 'api/queue/';
+    private taskUrl = 'api/Queue/Tasks';
+    private jobUrl = 'api/Queue/Jobs';
 
     private headers = new Headers({
         'Content-Type': 'application/json',
@@ -14,15 +15,22 @@ export class QueueService {
 
     constructor(private http: Http) { }
 
-    getHeroes(): Promise<Task[]> {
-        return this.http.get(this.queueUrl)
+    getTasks(): Promise<Task[]> {
+        return this.http.get(this.taskUrl)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    }
+
+    getJobs(): Promise<Job[]> {
+        return this.http.get(this.jobUrl)
             .toPromise()
             .then(this.extractData)
             .catch(this.handleError);
     }
 
     getTask(id: string): Promise<Task> {
-        const url = `${this.queueUrl}/${id}`;
+        const url = `${this.taskUrl}/${id}`;
         return this.http.get(url)
             .toPromise()
             .then(this.extractData)
@@ -30,12 +38,19 @@ export class QueueService {
     }
 
     update(task: Task): Promise<Task> {
-        const url = `${this.queueUrl}/${task.taskId}`;
+        const url = `${this.taskUrl}/${task.taskId}`;
         return this.http
             .put(url, JSON.stringify(task), { headers: this.headers })
             .toPromise()
             .then(() => task)
             .catch(this.handleError);
+    }
+
+    create(task: Task): Promise<Task> {
+        return this.http.post(this.taskUrl, JSON.stringify(task), { headers: this.headers }).toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+
     }
 
     private extractData(res: Response) {

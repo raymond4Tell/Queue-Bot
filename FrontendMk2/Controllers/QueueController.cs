@@ -8,38 +8,44 @@ using System.Web.Http;
 
 namespace FrontendMk2.Controllers
 {
+    [RoutePrefix("api/Queue")]
     public class QueueController : ApiController
     {
-        // GET: api/Queue
-        public IEnumerable<Task> Get()
+        [HttpGet, Route("Tasks")]
+        public IEnumerable<Task> GetTasks()
         {
             var foo = JobQueue.QueueInstance.getTaskList();
             return foo.ToList();
         }
-
-        // GET: api/Queue/5
-        public Task Get(Guid id)
+        [HttpGet, Route("Jobs")]
+        public IEnumerable<Job> GetJobs()
+        {
+            var foo = JobQueue.QueueInstance.getJobList();
+            return foo.ToList();
+        }
+        [HttpGet, Route("Tasks/{id:guid}")]
+        public Task GetSingleTask(Guid id)
         {
             return JobQueue.QueueInstance.getTaskList().FirstOrDefault(item => item.TaskId == id);
         }
 
-        // POST: api/Queue
-        public void Post([FromBody]Task value)
+        [HttpPost, Route("Tasks")]
+        public IEnumerable<Task> CreateNewTask([FromBody]Task value)
         {
-            //QueueBotWrapper.Instance.AddCustomer(value.customer, value.job, value.timePrice);
-            var foo = JobQueue.QueueInstance.getJobList().First(item => item.JobId == 1);
-            JobQueue.QueueInstance.AddCustomer(new Customer { Name = "Gerald", AuthID = "u890asdf" }, foo, 4.1);
-
+            //TODO: Get customer data from authentication, that's what it's for.
+            var foo = JobQueue.QueueInstance.getJobList().First(item => item.JobId == value.jobId);
+            JobQueue.QueueInstance.AddCustomer(value.customer, foo, value.timePrice);
+            return JobQueue.QueueInstance.getTaskList();
         }
 
-        // PUT: api/Queue/5
-        public void Put(Guid id, [FromBody]Task value)
+        [HttpPut, Route("Tasks/{id:guid}")]
+        public void UpdateTask(Guid id, [FromBody]Task value)
         {
             JobQueue.QueueInstance.updateTask(value, id);
         }
 
-        // DELETE: api/Queue/5
-        public void Delete(int id)
+        [HttpDelete, Route("Tasks/{id:guid}")]
+        public void Delete(Guid id)
         {
         }
     }
