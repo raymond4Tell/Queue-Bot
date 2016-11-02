@@ -49,12 +49,59 @@ using System.Threading;
  */
 namespace Queue_Bot
 {
-    public static class JobQueue
+    public class JobQueue
     {
-        public static readonly IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
-        public static double MachineBalance = 0.0;
-        public static TimeSpan BEWT = TimeSpan.Zero;
-        public static Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+
+        private static volatile JobQueue instance;
+        private static object syncRoot = new Object();
+        public static Queue_Bot.JobQueue QueueInstance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    lock (syncRoot)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Queue_Bot.JobQueue();
+                            instance.Initialize();
+                        }
+                    }
+                }
+
+                return instance;
+            }
+        }
+
+        public IPriorityQueue<Task> internalQueue { get; private set; }
+        public double MachineBalance { get; private set; }
+        public TimeSpan BEWT
+        {
+            get
+            {
+                //Degenerate case; if the queue's empty, wait time is zero.
+                if (0 == internalQueue.Count)
+                    return TimeSpan.Zero;
+
+                /* MachineBalance = sum (customer.TimeValue * (Customer.WaitTime - BEWT))
+                 * Given that we know everything except BEWT in this equation, it's simple algebra to calculate BEWT.
+                 * BEWT = (sum(customer.TimeValue * customer.WaitTime) - MachineBalance) / sum(customer.TimeValue)
+                 */
+                double sumPi = 0.0, sumPiTi = 0.0;
+                foreach (Task foo in internalQueue)
+                {
+                    sumPi += foo.timePrice;
+                    sumPiTi += (foo.timePrice * foo.WaitTime.TotalHours);
+                }
+                double localBEWT = (sumPiTi + MachineBalance) / sumPi;
+
+                //Console.WriteLine("Break Even Wait Time is : {0} hours", localBEWT);
+
+                return TimeSpan.FromHours(localBEWT);
+            }
+        }
+        public Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
                 new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
             new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
             new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
@@ -63,6 +110,13 @@ namespace Queue_Bot
 
         public static void Main()
         {
+            Console.Write("MainMethod");
+        }
+
+        public void Initialize()
+        {
+            MachineBalance = 0;
+            internalQueue = new PriorityQueue<Task>();
             using (var dbAccess = new JobContext())
             {
                 if (dbAccess.Jobs.Any())
@@ -86,6 +140,7 @@ namespace Queue_Bot
                     UpdateWaits(internalQueue);
                     return;
                 }
+                dbAccess.Jobs.AddRange(jobList);
 
                 //Initialization.
                 dbAccess.SaveChanges();
@@ -107,15 +162,9 @@ namespace Queue_Bot
                 };
                 updateTask(newTask, changedTask.TaskId);
             }
-            //foreach (var tempCustomer in internalQueue)
-            //{
-            //    Console.WriteLine(tempCustomer.ToString());
-            //    Console.WriteLine("--------------------------");
-            //}
-            //Console.ReadKey();
         }
 
-        public static IEnumerable<Job> getJobList()
+        public IEnumerable<Job> getJobList()
         {
             using (var dbAccess = new JobContext())
             {
@@ -123,7 +172,18 @@ namespace Queue_Bot
             }
         }
 
-        public static void updateTask(Task newTask, Guid oldTaskId)
+        public IEnumerable<Task> getTaskList()
+        {
+            return internalQueue;
+        }
+        public IEnumerable<Customer> getCustomerList()
+        {
+            using (var dbAccess = new JobContext())
+            {
+                return dbAccess.Customers.ToList();
+            }
+        }
+        public void updateTask(Task newTask, Guid oldTaskId)
         {
             using (var dbAccess = new JobContext())
             {
@@ -136,7 +196,6 @@ namespace Queue_Bot
                     internalQueue.ClearWhere(item => item.TaskId == oldTaskId);
                     internalQueue.Add(newTask);
                     UpdateWaits(internalQueue);
-                    BEWT = FindBEWT(internalQueue);
 
                     dbAccess.Entry(original).CurrentValues.SetValues(newTask);
                     dbAccess.SaveChanges();
@@ -153,20 +212,20 @@ namespace Queue_Bot
         /// <param name="date">Date to trim</param>
         /// <param name="ticks">ticks per round unit.</param>
         /// <returns></returns>
-        public static DateTime Trim(this DateTime date, long ticks)
-        {
-            return new DateTime(date.Ticks - (date.Ticks % ticks));
-        }
+        //public static DateTime Trim(this DateTime date, long ticks)
+        //{
+        //    return new DateTime(date.Ticks - (date.Ticks % ticks));
+        //}
         /// <summary>
         /// Cousin of the above, used for trimming TimeSpans
         /// </summary>
         /// <param name="duration">TimeSpan to trim</param>
         /// <param name="ticks">Ticks per round unit.</param>
         /// <returns></returns>
-        public static TimeSpan Trim(this TimeSpan duration, long ticks)
-        {
-            return new TimeSpan(duration.Ticks - (duration.Ticks % ticks));
-        }
+        //public static TimeSpan Trim(this TimeSpan duration, long ticks)
+        //{
+        //    return new TimeSpan(duration.Ticks - (duration.Ticks % ticks));
+        //}
 
         /// <summary>
         /// Encapsulates jobQueue, so external programs don't have to interface with it directly, and can replace it as needed.
@@ -176,7 +235,7 @@ namespace Queue_Bot
         /// <param name="customer">Customer object to add to the queue</param>
         /// <param name="job">Job that customer wants done</param>
         /// <param name="timeValue">Customer's timevalue</param>
-        public static void AddCustomer(Customer customer, Job job, double timeValue)
+        public void AddCustomer(Customer customer, Job job, double timeValue)
         {
             using (var dbAccess = new JobContext())
             {
@@ -195,7 +254,6 @@ namespace Queue_Bot
                 };
                 internalQueue.Add(newTask);
                 UpdateWaits(internalQueue);
-                BEWT = FindBEWT(internalQueue);
                 dbAccess.Tasks.Add(newTask);
                 dbAccess.SaveChanges();
             }
@@ -205,12 +263,11 @@ namespace Queue_Bot
         /// Also consolidates boilerplate, so calling functions do not need to change as we add more nonsense.
         /// </summary>
         /// <returns>The next customer to be served</returns>
-        public static Task RemoveCustomer()
+        public Task RemoveCustomer()
         {
             var foo = internalQueue.PopFront();
             MachineBalance -= foo.Balance;
             UpdateWaits(internalQueue);
-            BEWT = FindBEWT(internalQueue);
             return foo;
         }
         /// <summary>
@@ -220,7 +277,7 @@ namespace Queue_Bot
         /// TODO If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
         /// TODO: Also need to set wait times according to when the next server is available. Doesn't help much to say customer 3 gets served 20m after customer 2, if customer 2 won't be served for 2 hours.
         /// </summary>
-        public static void UpdateWaits(IPriorityQueue<Task> PQueue)
+        public void UpdateWaits(IPriorityQueue<Task> PQueue)
         {
             TimeSpan cmltivWait = TimeSpan.Zero;
             foreach (Task customer in PQueue)
@@ -236,7 +293,7 @@ namespace Queue_Bot
         /// get paid for their patience. 
         /// </summary>
         /// <returns>TimeSpan representing the break-even time.</returns>
-        public static TimeSpan FindBEWT(IPriorityQueue<Task> PQueue)
+        public TimeSpan FindBEWT(IPriorityQueue<Task> PQueue)
         {
             //Degenerate case; if the queue's empty, wait time is zero.
             if (0 == PQueue.Count)
@@ -256,7 +313,7 @@ namespace Queue_Bot
 
             //Console.WriteLine("Break Even Wait Time is : {0} hours", localBEWT);
 
-            return TimeSpan.FromHours(localBEWT).Trim(TimeSpan.TicksPerSecond);
+            return TimeSpan.FromHours(localBEWT);
         }
     }
     public class Job
@@ -353,7 +410,8 @@ namespace Queue_Bot
         [ForeignKey("jobId")]
         public virtual Job job { get; set; }
         /// <summary>
-        /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings, or "I will pay $20 to get out of here an hour sooner".
+        /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings,
+        /// or "I will pay $20 to get out of here an hour sooner".
         /// </summary>
         /// <remarks>No, this isn't the right type, but for small amounts like this, it'll do and saves time casting everything.</remarks>
         public double timePrice { get; set; }
@@ -362,9 +420,11 @@ namespace Queue_Bot
         /// </summary>
         public DateTime timeEnqueued { get; set; }
         /// <summary>
-        /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue. Not stored in the DB, entirely handled in-program.
+        /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue.
+        /// Not stored in the DB,entirely handled in-program.
         /// </summary>
-        /// <remarks>Honestly I tried to map this to the DB, but a) It's all calculated here in any case, and b) it was giving me lip and causing concurrency errors.</remarks>
+        /// <remarks>Honestly I tried to map this to the DB, but a) It's all calculated here in any case, and
+        /// b) it was giving me lip and causing concurrency errors.</remarks>
         [NotMapped]
         public DateTime timeOfExpectedService { get; set; }
         /// <summary>
@@ -376,7 +436,7 @@ namespace Queue_Bot
         [NotMapped]
         public TimeSpan WaitTime
         {
-            get { return (timeOfExpectedService - timeEnqueued).Trim(TimeSpan.TicksPerSecond); }
+            get { return (timeOfExpectedService - timeEnqueued); }
             set { timeOfExpectedService = DateTime.Now + value; }
         }
         /// <summary>
@@ -391,7 +451,6 @@ namespace Queue_Bot
         /// Annoying as all hell, since we need to break encapsulation to access BEWT. 
         /// On the other hand, this must be public so we can display it on the GUI.
         /// </summary>
-        public double Balance { get { return timePrice * (WaitTime - JobQueue.BEWT).TotalHours - deposit; } }
-
+        public double Balance { get { return timePrice * (WaitTime - JobQueue.QueueInstance.BEWT).TotalHours - deposit; } }
     }
 }
