@@ -10,7 +10,7 @@ import { QueueService } from "./queue-service";
     selector: 'my-task-detail',
     template: `<div *ngIf="task">
     <h2>{{task.customer.name}} / {{task.job.name }}</h2>
-    <div>    <label>id: </label>{{task.authId}}</div>
+    <div>    <label>id: </label>{{task.authID}}</div>
     <div>
     <label>name: </label>
     <input [(ngModel)]='task.timePrice' placeholder= "name" />

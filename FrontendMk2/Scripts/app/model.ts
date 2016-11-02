@@ -2,7 +2,7 @@
  * Primary model classes; derived from the classes in JobQueue.cs.
  */
 export class Task {
-    authID: string;
+    authId: string;
     taskId: string;
     waitTime: TimeRanges;
     customer: Customer;
@@ -14,7 +14,7 @@ export class Task {
     timePrice: number;
 }
 export class Customer {
-    authID: string;
+    authId: string;
     name: string;
 }
 export class Job {
