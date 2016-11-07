@@ -4,7 +4,7 @@ import { FormsModule } from "@angular/forms";
 import { RouterModule } from '@angular/router';
 import { HttpModule, JsonpModule } from '@angular/http';
 
-import { MyApp } from './queue';
+import { Dashboard } from './queue';
 import { QueueService } from "./queue-service";
 import { UserService } from "./user-service";
 import { LoginComponent } from "./login-component";

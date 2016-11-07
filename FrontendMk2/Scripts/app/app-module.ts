@@ -7,7 +7,7 @@ import { HttpModule, JsonpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
 import { MomentModule } from 'angular2-moment';
 
-import { MyApp } from './queue';
+import { Dashboard } from './queue';
 import { QueueService } from "./queue-service";
 import { UserService } from "./user-service";
 import { LoginComponent } from "./login-component";
@@ -24,7 +24,7 @@ import { AddTaskComponent } from "./add-task-component";
         MomentModule,
         RouterModule.forRoot(possibleRoutes)
     ],
-    declarations: [MyApp, LoginComponent, AppComponent, TaskDetailComponent, AddTaskComponent],
+    declarations: [Dashboard, LoginComponent, AppComponent, TaskDetailComponent, AddTaskComponent],
     providers: [QueueService, UserService],
     entryComponents: [AppComponent],
     bootstrap: [AppComponent]
