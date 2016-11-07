@@ -1,6 +1,6 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Task, Job, Customer, QueueDTO } from "./model";
+import { Task, QueueDTO } from "./model";
 import "./rxjs-operators";
 import { QueueService } from "./queue-service"
 
@@ -15,13 +15,15 @@ import { QueueService } from "./queue-service"
 <li *ngFor='let task of queueList' (click)='viewDetail(task)'>
 taskID: {{task.taskId}}<br/>
 Customer: {{task.customer.name}}<br/>
-TimePrice: {{task.timePrice}}<br/>
+Job: {{task.job.name}}<br/>
+Went on Queue: {{task.timeEnqueued | amDateFormat:"LTS" }}<br/>
+Balance: {{task.balance| currency:"USD":true }}<br/>
 jobId: {{task.job.jobId}}
 </li>
 </ul>`,
     providers: [QueueService]
 })
-export class MyApp implements OnInit {
+export class Dashboard implements OnInit {
     constructor(private router: Router,
         private queueService: QueueService) { }
 
