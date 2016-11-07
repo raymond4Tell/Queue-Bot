@@ -11,31 +11,47 @@ namespace FrontendMk2.Controllers
     [RoutePrefix("api/Queue")]
     public class QueueController : ApiController
     {
+        public struct QueueDTO
+        {
+            public double MachineBalance;
+            public TimeSpan BEWT;
+            public IEnumerable<Task> internalQueue;
+        }
+        [HttpGet, Route("Queue")]
+        public QueueDTO GetQueueStatus()
+        {
+            var foo = new QueueDTO
+            {
+                MachineBalance = JobQueue.QueueInstance.MachineBalance,
+                BEWT = JobQueue.QueueInstance.BEWT,
+                internalQueue = JobQueue.QueueInstance.taskList
+            };
+            return foo;
+        }
         [HttpGet, Route("Tasks")]
         public IEnumerable<Task> GetTasks()
         {
-            var foo = JobQueue.QueueInstance.getTaskList();
+            var foo = JobQueue.QueueInstance.taskList;
             return foo.ToList();
         }
         [HttpGet, Route("Jobs")]
         public IEnumerable<Job> GetJobs()
         {
-            var foo = JobQueue.QueueInstance.getJobList();
+            var foo = JobQueue.QueueInstance.jobList;
             return foo.ToList();
         }
         [HttpGet, Route("Tasks/{id:guid}")]
         public Task GetSingleTask(Guid id)
         {
-            return JobQueue.QueueInstance.getTaskList().FirstOrDefault(item => item.TaskId == id);
+            return JobQueue.QueueInstance.taskList.FirstOrDefault(item => item.TaskId == id);
         }
 
         [HttpPost, Route("Tasks")]
-        public IEnumerable<Task> CreateNewTask([FromBody]Task value)
+        public Task CreateNewTask([FromBody]Task value)
         {
             //TODO: Get customer data from authentication, that's what it's for.
-            var foo = JobQueue.QueueInstance.getJobList().First(item => item.JobId == value.jobId);
-            JobQueue.QueueInstance.AddCustomer(value.customer, foo, value.timePrice);
-            return JobQueue.QueueInstance.getTaskList();
+            var foo = JobQueue.QueueInstance.jobList.First(item => item.JobId == value.jobId);
+            return JobQueue.QueueInstance.AddCustomer(value.customer, foo, value.timePrice);
         }
 
         [HttpPut, Route("Tasks/{id:guid}")]

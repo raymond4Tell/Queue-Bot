@@ -1,12 +1,13 @@
 ﻿import { Injectable } from '@angular/core';
 import { Http, Response, Headers } from "@angular/http";
 import './rxjs-operators';
-import { Task, Job } from "./model"
+import { Task, Job, QueueDTO, Customer } from "./model"
 
 @Injectable()
 export class QueueService {
     private taskUrl = 'api/Queue/Tasks';
     private jobUrl = 'api/Queue/Jobs';
+    private dashUrl = 'api/Queue/Queue';
 
     private headers = new Headers({
         'Content-Type': 'application/json',
@@ -37,6 +38,13 @@ export class QueueService {
             .catch(this.handleError);
     }
 
+    getQueueStatus(): Promise<QueueDTO> {
+        return this.http.get(this.dashUrl)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    }
+
     update(task: Task): Promise<Task> {
         const url = `${this.taskUrl}/${task.taskId}`;
         return this.http
@@ -46,8 +54,8 @@ export class QueueService {
             .catch(this.handleError);
     }
 
-    create(task: Task): Promise<Task> {
-        return this.http.post(this.taskUrl, JSON.stringify(task), { headers: this.headers }).toPromise()
+    create(task: Task): void {
+        this.http.post(this.taskUrl, JSON.stringify(task), { headers: this.headers }).toPromise()
             .then(this.extractData)
             .catch(this.handleError);
 

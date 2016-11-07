@@ -22,3 +22,9 @@ export class Job {
     length: TimeRanges;
     name: String;
 }
+
+export class QueueDTO {
+    machineBalance: number;
+    bewt: TimeRanges;
+    internalQueue: Task[];
+}
