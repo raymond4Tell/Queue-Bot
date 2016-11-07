@@ -6,54 +6,13 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading;
 
-/* SEE README.md; most of this is obsolete.
- * 
- * Workflow runs in two (async?) loops. Probably just functions
- * on a service; users can add/modify jobs, service automatically pops jobs.
- * Would be cool to make this as an event system that everybody subscribes to;
- * GUI sends event adding new customer, which JobQueue picks up on and updates itself, then
- * sends an event indicating to everybody else that JobQueue is new. OTOH, how much benefit
- * would that really give over current?
- * 
- * 1. Add jobs to PQueue. Jobs have jobName, Owner (with name and
- * time-value), jobDuration, time enqueued, and balance. Last two may belong
- * to owner instead of job. Adding job will also require updating
- * ordering, and therefore BEWT and each job's balance. 
- * 2. Remove jobs from PQueue, with payment and at proper time.
- * Am uncertain whether to handle this as operator requesting
- * next job, or service sending job to operator. Probably best
- * to send from service.
- * 
- * Alternate structure: Queue of persons that have job fields.
- * Also allows for limited list of possible jobs, useful for controlling user input.
- * 
- * Desired sorting order: Minimize value of total time spent in queue across all users.
- * IE, person Alpha worth $20/hr who spends 4 hours waiting to be served
- * and person Bravo worth $15 who waits 20 minutes have a combined wait-time-value of $85.
- * Best method is probably O(n!) combinatorial brute force, or something cunning in dynamic programming.
- * Simplest and current is just sorting on timeValue/jobDuration, so busy customers
- * and quick jobs get sorted first, regardless of actual time in queue.
- * 
- * Technical issue: Need PQueue that maintains internal sorted order, not just heap.
- * Best option is probably something based on SortedList. Later worry, though. Right now,
- * focus is on getting Angular frontend set up.
- * 
- * Break-Even Wait Time calculation: Balance = sum (timeValue * (timeWaiting - BEWT))
- * BEWT is the "average" wait time, so that
- * (payments from people who wait less than BEWT) + (payments to people who wait longer than BEWT) = Balance on computer.
- * Balance is initially 0, but will change as people leave the queue and pay/get paid for their wait.
- * May also change over time due to the cost of operating this service; bandwidth costs, electricity, ETC.
- * 
- * Consistency issue: What's a negative MachineBalance mean? Means machine owes money, yes? Doesn't much matter which
- * we go with, but for the love of God, keep it consistent.
- */
 namespace Queue_Bot
 {
     public class JobQueue
     {
-
-        private static volatile JobQueue instance;
-        private static object syncRoot = new Object();
+        /// <summary>
+        /// Singleton; used so 
+        /// </summary>
         public static Queue_Bot.JobQueue QueueInstance
         {
             get
@@ -73,9 +32,24 @@ namespace Queue_Bot
                 return instance;
             }
         }
+        private static volatile JobQueue instance;
+        private static object syncRoot = new Object();
 
-        public IPriorityQueue<Task> internalQueue { get; private set; }
+
+        private IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
+        /// <summary>
+        /// How much money is on the machine, used for bookkeeping purposes and working out how much the system owes
+        /// or is owed by the customers. By default only changes because of customers making and taking payments, but it'd
+        /// be easy enough to add some code saying "Balance drops $.07/hr to pay for the cost of operation".
+        /// </summary>
         public double MachineBalance { get; private set; }
+        /// <summary>
+        /// Calculates the Break-Even Waiting time, an "average" waiting time
+        /// for people in the queue. Used in calculating payments; people who wait
+        /// less than BEWT pay for their time savings, while people who wait longer
+        /// get paid for their patience. 
+        /// </summary>
+        /// <returns>TimeSpan representing the break-even time.</returns>
         public TimeSpan BEWT
         {
             get
@@ -101,12 +75,34 @@ namespace Queue_Bot
                 return TimeSpan.FromHours(localBEWT);
             }
         }
-        public Job[] jobList = { new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
-                new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-            new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-            new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-            new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-            };
+        public IEnumerable<Job> jobList
+        {
+            get
+            {
+                using (var dbAccess = new JobContext())
+                {
+                    return dbAccess.Jobs.ToList();
+                }
+            }
+        }
+
+        public IEnumerable<Task> taskList
+        {
+            get
+            {
+                return internalQueue.ToList();
+            }
+        }
+        public IEnumerable<Customer> customerList
+        {
+            get
+            {
+                using (var dbAccess = new JobContext())
+                {
+                    return dbAccess.Customers.ToList();
+                }
+            }
+        }
 
         public static void Main()
         {
@@ -116,7 +112,6 @@ namespace Queue_Bot
         public void Initialize()
         {
             MachineBalance = 0;
-            internalQueue = new PriorityQueue<Task>();
             using (var dbAccess = new JobContext())
             {
                 if (dbAccess.Jobs.Any())
@@ -140,6 +135,12 @@ namespace Queue_Bot
                     UpdateWaits(internalQueue);
                     return;
                 }
+                Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+                    new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+                    new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+                    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+                    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+                };
                 dbAccess.Jobs.AddRange(jobList);
 
                 //Initialization.
@@ -164,25 +165,6 @@ namespace Queue_Bot
             }
         }
 
-        public IEnumerable<Job> getJobList()
-        {
-            using (var dbAccess = new JobContext())
-            {
-                return dbAccess.Jobs.ToList();
-            }
-        }
-
-        public IEnumerable<Task> getTaskList()
-        {
-            return internalQueue;
-        }
-        public IEnumerable<Customer> getCustomerList()
-        {
-            using (var dbAccess = new JobContext())
-            {
-                return dbAccess.Customers.ToList();
-            }
-        }
         public void updateTask(Task newTask, Guid oldTaskId)
         {
             using (var dbAccess = new JobContext())
@@ -204,30 +186,6 @@ namespace Queue_Bot
         }
 
         /// <summary>
-        /// Extension method, used for rounding times for display.
-        /// While computers may appreciate millisecond-accuracy, I
-        /// prefer slightly rounder time.
-        /// </summary>
-        /// <example>DateTime nowTrimmedToSeconds = now.Trim(TimeSpan.TicksPerSecond);</example>
-        /// <param name="date">Date to trim</param>
-        /// <param name="ticks">ticks per round unit.</param>
-        /// <returns></returns>
-        //public static DateTime Trim(this DateTime date, long ticks)
-        //{
-        //    return new DateTime(date.Ticks - (date.Ticks % ticks));
-        //}
-        /// <summary>
-        /// Cousin of the above, used for trimming TimeSpans
-        /// </summary>
-        /// <param name="duration">TimeSpan to trim</param>
-        /// <param name="ticks">Ticks per round unit.</param>
-        /// <returns></returns>
-        //public static TimeSpan Trim(this TimeSpan duration, long ticks)
-        //{
-        //    return new TimeSpan(duration.Ticks - (duration.Ticks % ticks));
-        //}
-
-        /// <summary>
         /// Encapsulates jobQueue, so external programs don't have to interface with it directly, and can replace it as needed.
         /// Also consolidates the boilerplate involved in object addition, so we don't have to call it in every function.
         /// TODO: Probably ought to move half of this into the actual PQueue class, for the same reason above, particularly UpdateWaits.
@@ -235,7 +193,7 @@ namespace Queue_Bot
         /// <param name="customer">Customer object to add to the queue</param>
         /// <param name="job">Job that customer wants done</param>
         /// <param name="timeValue">Customer's timevalue</param>
-        public void AddCustomer(Customer customer, Job job, double timeValue)
+        public Task AddCustomer(Customer customer, Job job, double timeValue)
         {
             using (var dbAccess = new JobContext())
             {
@@ -256,6 +214,7 @@ namespace Queue_Bot
                 UpdateWaits(internalQueue);
                 dbAccess.Tasks.Add(newTask);
                 dbAccess.SaveChanges();
+                return newTask;
             }
         }
         /// <summary>
