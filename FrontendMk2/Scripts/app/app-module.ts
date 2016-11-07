@@ -5,6 +5,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { HttpModule, JsonpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
+import { MomentModule } from 'angular2-moment';
 
 import { MyApp } from './queue';
 import { QueueService } from "./queue-service";
@@ -20,6 +21,7 @@ import { AddTaskComponent } from "./add-task-component";
         FormsModule,
         HttpModule,
         JsonpModule,
+        MomentModule,
         RouterModule.forRoot(possibleRoutes)
     ],
     declarations: [MyApp, LoginComponent, AppComponent, TaskDetailComponent, AddTaskComponent],
