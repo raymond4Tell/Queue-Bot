@@ -298,10 +298,10 @@ namespace Queue_Bot
         public string Name { get; set; }
         /// <summary>
         /// This is supposed to be a list of jobs requested by each customer. Unfortunately it's giving me "circular reference" issues,
-        /// since each of these jobs also refers to the customer that requested them, and worse, it seems to reg. 
+        /// since each of these jobs also refers to the customer that requested them. 
         /// Fuck it. I'll just have the app attach jobs to customers client-side.
         /// </summary>
-        public ICollection<Task> requestedJobs { get; set; }
+        //public virtual ICollection<Task> requestedJobs { get; set; }
     }
 
     /// <summary>
