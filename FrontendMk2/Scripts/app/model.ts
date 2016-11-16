@@ -16,6 +16,7 @@ export class Task {
 export class Customer {
     authId: string;
     name: string;
+    requestedJobs: Task[];
 }
 export class Job {
     jobId: number;

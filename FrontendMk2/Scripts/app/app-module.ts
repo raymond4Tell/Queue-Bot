@@ -11,6 +11,7 @@ import { Dashboard } from './queue';
 import { QueueService } from "./queue-service";
 import { UserService } from "./user-service";
 import { LoginComponent } from "./login-component";
+import { CustomerListComponent } from "./customer-component";
 import { possibleRoutes, appRouterProviders } from "./app-routes";
 import { AppComponent } from "./app-component";
 import { TaskDetailComponent } from "./task-detail-component";
@@ -24,7 +25,7 @@ import { AddTaskComponent } from "./add-task-component";
         MomentModule,
         RouterModule.forRoot(possibleRoutes)
     ],
-    declarations: [Dashboard, LoginComponent, AppComponent, TaskDetailComponent, AddTaskComponent],
+    declarations: [Dashboard, LoginComponent, AppComponent, TaskDetailComponent, AddTaskComponent, CustomerListComponent],
     providers: [QueueService, UserService],
     entryComponents: [AppComponent],
     bootstrap: [AppComponent]

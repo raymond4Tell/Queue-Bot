@@ -11,7 +11,7 @@ namespace Queue_Bot
     public class JobQueue
     {
         /// <summary>
-        /// Singleton; used so 
+        /// Singleton; used to create a static instance for everybody consuming this class and also for the Task objects.
         /// </summary>
         public static Queue_Bot.JobQueue QueueInstance
         {
@@ -37,12 +37,14 @@ namespace Queue_Bot
 
 
         private IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
+
         /// <summary>
         /// How much money is on the machine, used for bookkeeping purposes and working out how much the system owes
         /// or is owed by the customers. By default only changes because of customers making and taking payments, but it'd
         /// be easy enough to add some code saying "Balance drops $.07/hr to pay for the cost of operation".
         /// </summary>
         public double MachineBalance { get; private set; }
+
         /// <summary>
         /// Calculates the Break-Even Waiting time, an "average" waiting time
         /// for people in the queue. Used in calculating payments; people who wait
@@ -108,18 +110,17 @@ namespace Queue_Bot
         {
             Console.Write("MainMethod");
         }
-
-        public void Initialize()
+        private void Initialize()
         {
             MachineBalance = 0;
             using (var dbAccess = new JobContext())
             {
                 if (dbAccess.Jobs.Any())
                 {//Just refresh the queue and return.
-                    internalQueue.Clear();
+                    QueueInstance.internalQueue.Clear();
                     foreach (var item in dbAccess.Tasks)
                     {
-                        internalQueue.Add(new Task
+                        QueueInstance.internalQueue.Add(new Task
                         {
                             deposit = item.deposit,
                             AuthID = item.AuthID,
@@ -132,7 +133,7 @@ namespace Queue_Bot
                         });
                     }
 
-                    UpdateWaits(internalQueue);
+                    UpdateWaits(QueueInstance.internalQueue);
                     return;
                 }
                 Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
@@ -145,10 +146,10 @@ namespace Queue_Bot
 
                 //Initialization.
                 dbAccess.SaveChanges();
-                internalQueue.Clear();
-                var bob = new Customer { Name = "Bob", AuthID = "asdkfljakdf" };
+                QueueInstance.internalQueue.Clear();
+                var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
                 AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
-                AddCustomer(new Customer { Name = "Gerald", AuthID = "u890asdf" }, dbAccess.Jobs.Find(1), 4.1);
+                AddCustomer(new Customer { Name = "Gerald", AuthId = "u890asdf" }, dbAccess.Jobs.Find(1), 4.1);
                 var changedTask = internalQueue.First(item => item.customer.Name == "Gerald");
                 var newTask = new Task
                 {
@@ -173,14 +174,14 @@ namespace Queue_Bot
 
                 if (original != null)
                 {
-                    //var foo = internalQueue.First(item => item.TaskId == oldTask.TaskId);
-                    //foo.timePrice = 4;
-                    internalQueue.ClearWhere(item => item.TaskId == oldTaskId);
-                    internalQueue.Add(newTask);
+                    var foo = internalQueue.First(item => item.TaskId == oldTaskId);
+                    foo.timePrice = newTask.timePrice;
+                    foo.job = newTask.job;
+                    foo.deposit = newTask.deposit;
                     UpdateWaits(internalQueue);
 
-                    dbAccess.Entry(original).CurrentValues.SetValues(newTask);
-                    dbAccess.SaveChanges();
+                    //dbAccess.Entry(original).CurrentValues.SetValues(newTask);
+                    //dbAccess.SaveChanges();
                 }
             }
         }
@@ -197,14 +198,14 @@ namespace Queue_Bot
         {
             using (var dbAccess = new JobContext())
             {
-                if (!dbAccess.Customers.Any(registeredCustomers => customer.AuthID == registeredCustomers.AuthID))
+                if (!dbAccess.Customers.Any(registeredCustomers => customer.AuthId == registeredCustomers.AuthId))
                 {
                     dbAccess.Customers.Add(customer);
                 }
                 var newTask = new Task()
                 {
                     TaskId = Guid.NewGuid(),
-                    customer = dbAccess.Customers.Find(customer.AuthID),
+                    customer = dbAccess.Customers.Find(customer.AuthId),
                     job = dbAccess.Jobs.Find(job.JobId),
                     timeEnqueued = DateTime.Now,
                     timePrice = timeValue,
@@ -236,7 +237,7 @@ namespace Queue_Bot
         /// TODO If we upgrade scheduling to handle multiple jobs in parallel, this MUST be fixed along with it.
         /// TODO: Also need to set wait times according to when the next server is available. Doesn't help much to say customer 3 gets served 20m after customer 2, if customer 2 won't be served for 2 hours.
         /// </summary>
-        public void UpdateWaits(IPriorityQueue<Task> PQueue)
+        private void UpdateWaits(IPriorityQueue<Task> PQueue)
         {
             TimeSpan cmltivWait = TimeSpan.Zero;
             foreach (Task customer in PQueue)
@@ -244,35 +245,6 @@ namespace Queue_Bot
                 customer.WaitTime = cmltivWait;
                 cmltivWait += customer.job.Length;
             }
-        }
-        /// <summary>
-        /// Calculates the Break-Even Waiting time, an "average" waiting time
-        /// for people in the queue. Used in calculating payments; people who wait
-        /// less than BEWT pay for their time savings, while people who wait longer
-        /// get paid for their patience. 
-        /// </summary>
-        /// <returns>TimeSpan representing the break-even time.</returns>
-        public TimeSpan FindBEWT(IPriorityQueue<Task> PQueue)
-        {
-            //Degenerate case; if the queue's empty, wait time is zero.
-            if (0 == PQueue.Count)
-                return TimeSpan.Zero;
-
-            /* MachineBalance = sum (customer.TimeValue * (Customer.WaitTime - BEWT))
-             * Given that we know everything except BEWT in this equation, it's simple algebra to calculate BEWT.
-             * BEWT = (sum(customer.TimeValue * customer.WaitTime) - MachineBalance) / sum(customer.TimeValue)
-             */
-            double sumPi = 0.0, sumPiTi = 0.0;
-            foreach (Task foo in PQueue)
-            {
-                sumPi += foo.timePrice;
-                sumPiTi += (foo.timePrice * foo.WaitTime.TotalHours);
-            }
-            double localBEWT = (sumPiTi + MachineBalance) / sumPi;
-
-            //Console.WriteLine("Break Even Wait Time is : {0} hours", localBEWT);
-
-            return TimeSpan.FromHours(localBEWT);
         }
     }
     public class Job
@@ -319,11 +291,17 @@ namespace Queue_Bot
         /// ID used for connection with whichever authentication system we use. 
         /// </summary>
         [Key]
-        public string AuthID { get; set; }
+        public string AuthId { get; set; }
         /// <summary>
         /// Name of customer. Will probably want to add other identifying/contact info in future development.
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// This is supposed to be a list of jobs requested by each customer. Unfortunately it's giving me "circular reference" issues,
+        /// since each of these jobs also refers to the customer that requested them, and worse, it seems to reg. 
+        /// Fuck it. I'll just have the app attach jobs to customers client-side.
+        /// </summary>
+        public ICollection<Task> requestedJobs { get; set; }
     }
 
     /// <summary>
@@ -384,7 +362,6 @@ namespace Queue_Bot
         /// </summary>
         /// <remarks>Honestly I tried to map this to the DB, but a) It's all calculated here in any case, and
         /// b) it was giving me lip and causing concurrency errors.</remarks>
-        [NotMapped]
         public DateTime timeOfExpectedService { get; set; }
         /// <summary>
         /// Time spent waiting for service. As much as I hate clever code, we're going to get a little cunning here.

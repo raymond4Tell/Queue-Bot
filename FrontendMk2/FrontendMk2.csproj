@@ -341,6 +341,7 @@
     <TypeScriptCompile Include="Scripts\app\app-routes.ts" />
     <TypeScriptCompile Include="Scripts\app\app.ts" />
     <TypeScriptCompile Include="Scripts\app\auth-guard.ts" />
+    <TypeScriptCompile Include="Scripts\app\customer-component.ts" />
     <TypeScriptCompile Include="Scripts\app\login-component.ts" />
     <TypeScriptCompile Include="Scripts\app\main.ts" />
     <TypeScriptCompile Include="Scripts\app\model.ts" />

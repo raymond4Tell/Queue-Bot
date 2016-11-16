@@ -7,6 +7,7 @@ import { Task, Job, QueueDTO, Customer } from "./model"
 export class QueueService {
     private taskUrl = 'api/Queue/Tasks';
     private jobUrl = 'api/Queue/Jobs';
+    private customerUrl = 'api/Queue/Customers';
     private dashUrl = 'api/Queue/Queue';
 
     private headers = new Headers({
@@ -29,7 +30,12 @@ export class QueueService {
             .then(this.extractData)
             .catch(this.handleError);
     }
-
+    getCustomers(): Promise<Customer[]> {
+        return this.http.get(this.customerUrl)
+            .toPromise()
+            .then(this.extractData)
+            .catch(this.handleError);
+    }
     getTask(id: string): Promise<Task> {
         const url = `${this.taskUrl}/${id}`;
         return this.http.get(url)

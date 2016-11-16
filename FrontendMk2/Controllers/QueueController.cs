@@ -32,13 +32,19 @@ namespace FrontendMk2.Controllers
         public IEnumerable<Task> GetTasks()
         {
             var foo = JobQueue.QueueInstance.taskList;
-            return foo.ToList();
+            return foo;
         }
         [HttpGet, Route("Jobs")]
         public IEnumerable<Job> GetJobs()
         {
             var foo = JobQueue.QueueInstance.jobList;
-            return foo.ToList();
+            return foo;
+        }
+        [HttpGet, Route("Customers")]
+        public IEnumerable<Customer> GetCustomers()
+        {
+            var foo = JobQueue.QueueInstance.customerList;
+            return foo;
         }
         [HttpGet, Route("Tasks/{id:guid}")]
         public Task GetSingleTask(Guid id)
