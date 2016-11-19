@@ -176,6 +176,7 @@ namespace Queue_Bot
                 {
                     var foo = internalQueue.First(item => item.TaskId == oldTaskId);
                     foo.timePrice = newTask.timePrice;
+                    foo.jobId = newTask.jobId;
                     foo.job = newTask.job;
                     foo.deposit = newTask.deposit;
                     UpdateWaits(internalQueue);
