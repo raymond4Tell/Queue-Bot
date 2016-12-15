@@ -16,6 +16,7 @@ import { QueueService } from "./queue-service"
 taskID: {{task.taskId}}<br/>
 Customer: {{task.customer.name}}<br/>
 Job: {{task.job.name}}<br/>
+TimePrice: {{task.timePrice}} <br/>
 Went on Queue: {{task.timeEnqueued | amDateFormat:"LTS" }}<br/>
 Balance: {{task.balance| currency:"USD":true }}<br/>
 jobId: {{task.job.jobId}}

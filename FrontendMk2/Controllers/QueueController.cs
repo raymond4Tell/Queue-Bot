@@ -52,6 +52,12 @@ namespace FrontendMk2.Controllers
             return JobQueue.QueueInstance.taskList.FirstOrDefault(item => item.TaskId == id);
         }
 
+        [HttpGet, Route("Tasks/Next")]
+        public Task GetNextTask()
+        {
+            return JobQueue.QueueInstance.RemoveCustomer();
+        }
+
         [HttpPost, Route("Tasks")]
         public Task CreateNewTask([FromBody]Task value)
         {

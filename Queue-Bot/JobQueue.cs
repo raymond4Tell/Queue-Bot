@@ -314,14 +314,15 @@ namespace Queue_Bot
         public int CompareTo(Task other)
         {
             if (Equals(other)) return 0;
+            if (other.TaskId.Equals(TaskId)) return 0;
             var comp1 = job.Length.TotalHours / (double)timePrice;
             var comp2 = other.job.Length.TotalHours / (double)other.timePrice;
-            return (comp1 < comp2) ? -1 : 1;
-
-        }
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
+            if (comp1 < comp2)
+                return -1;
+            else if (comp2 < comp1)
+                return 1;
+            else
+                return (timeEnqueued.CompareTo(other.timeEnqueued));
         }
 
         /// <summary>
