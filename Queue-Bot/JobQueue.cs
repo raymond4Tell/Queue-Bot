@@ -36,7 +36,7 @@ namespace Queue_Bot
         private static object syncRoot = new Object();
 
 
-        private IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
+        private readonly IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
 
         /// <summary>
         /// How much money is on the machine, used for bookkeeping purposes and working out how much the system owes
@@ -118,7 +118,7 @@ namespace Queue_Bot
                 if (dbAccess.Jobs.Any())
                 {//Just refresh the queue and return.
                     QueueInstance.internalQueue.Clear();
-                    foreach (var item in dbAccess.Tasks)
+                    foreach (var item in dbAccess.Tasks.Where(task => task.taskStatus.Equals("Waiting")))
                     {
                         QueueInstance.internalQueue.Add(new Task
                         {
@@ -181,8 +181,8 @@ namespace Queue_Bot
                     foo.deposit = newTask.deposit;
                     UpdateWaits(internalQueue);
 
-                    //dbAccess.Entry(original).CurrentValues.SetValues(newTask);
-                    //dbAccess.SaveChanges();
+                    dbAccess.Entry(original).CurrentValues.SetValues(newTask);
+                    dbAccess.SaveChanges();
                 }
             }
         }
@@ -203,20 +203,20 @@ namespace Queue_Bot
                 {
                     dbAccess.Customers.Add(customer);
                 }
-                var newTask = new Task()
+                var foo = dbAccess.Tasks.Add(new Task()
                 {
                     TaskId = Guid.NewGuid(),
                     customer = dbAccess.Customers.Find(customer.AuthId),
                     job = dbAccess.Jobs.Find(job.JobId),
                     timeEnqueued = DateTime.Now,
+                    taskStatus = "Waiting",
                     timePrice = timeValue,
                     timeOfExpectedService = DateTime.Now.AddHours(1)
-                };
-                internalQueue.Add(newTask);
+                });
+                internalQueue.Add(foo);
                 UpdateWaits(internalQueue);
-                dbAccess.Tasks.Add(newTask);
                 dbAccess.SaveChanges();
-                return newTask;
+                return foo;
             }
         }
         /// <summary>
@@ -226,10 +226,18 @@ namespace Queue_Bot
         /// <returns>The next customer to be served</returns>
         public Task RemoveCustomer()
         {
-            var foo = internalQueue.PopFront();
-            MachineBalance -= foo.Balance;
-            UpdateWaits(internalQueue);
-            return foo;
+            using (var dbAccess = new JobContext())
+            {
+                var foo = internalQueue.PopFront();
+                foo.taskStatus = "Complete";
+                MachineBalance -= foo.Balance;
+                UpdateWaits(internalQueue);
+                var bar = dbAccess.Tasks.First(item => item.TaskId == foo.TaskId);
+                bar.taskStatus = "Complete";
+                dbAccess.SaveChanges();
+
+                return foo;
+            }
         }
         /// <summary>
         /// Updates the wait times for each item in the list.
@@ -348,6 +356,11 @@ namespace Queue_Bot
         public int jobId { get; set; }
         [ForeignKey("jobId")]
         public virtual Job job { get; set; }
+        /// <summary>
+        /// Status of the task; "Waiting for service", "Completed", "Cancelled", ETC. 
+        /// TODO: Turn this into a proper enum, probably referencing another database. That'll probably wait until I convert this to use SProcs instead of ORM, though.
+        /// </summary>
+        public String taskStatus { get; set; }
         /// <summary>
         /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings,
         /// or "I will pay $20 to get out of here an hour sooner".
