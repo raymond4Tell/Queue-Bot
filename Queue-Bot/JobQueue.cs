@@ -35,7 +35,12 @@ namespace Queue_Bot
         private static volatile JobQueue instance;
         private static object syncRoot = new Object();
 
-
+        /// <summary>
+        /// The heart of this project. Not sure if I really need the PQueue wrapper, or
+        /// if I can just get away with using a SortedSet directly, since the behavior
+        /// shouldn't matter to anything using this library, and I'm going to change away
+        /// from even an IPQueue before I change how the scheduling works. Fuck it, I'll do it right for now.
+        /// </summary>
         private readonly IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
 
         /// <summary>
@@ -43,6 +48,9 @@ namespace Queue_Bot
         /// or is owed by the customers. By default only changes because of customers making and taking payments, but it'd
         /// be easy enough to add some code saying "Balance drops $.07/hr to pay for the cost of operation".
         /// </summary>
+        /// <remarks>
+        /// TODO: Find some way to persist this and/or record changes in balance. I want to be able to shut everything down and rebuild the entire state from 0.
+        /// </remarks>
         public double MachineBalance { get; private set; }
 
         /// <summary>
@@ -127,6 +135,7 @@ namespace Queue_Bot
                             customer = item.customer,
                             job = item.job,
                             jobId = item.jobId,
+                            taskStatus = item.taskStatus,
                             timeEnqueued = item.timeEnqueued,
                             timePrice = item.timePrice,
                             TaskId = item.TaskId
