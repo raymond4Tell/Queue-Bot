@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Entity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -43,7 +44,7 @@ namespace Queue_Bot
         {
             using (var dbAccess = new JobContext())
             {
-                return            dbAccess.Tasks.First(item => item.TaskId == taskId);
+                return dbAccess.Tasks.First(item => item.TaskId == taskId);
 
             }
         }
@@ -58,7 +59,10 @@ namespace Queue_Bot
 
         public IEnumerable<Task> getTasksForQueue()
         {
-            throw new NotImplementedException();
+            using (var dbAccess = new JobContext())
+            {
+                return dbAccess.Tasks.Where(task => task.taskStatus.Equals("Waiting")).Include(t => t.customer).Include(t=>t.job).ToList();
+            }
         }
 
         public Task updateTask(Task changedTask)

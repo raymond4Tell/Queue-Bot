@@ -24,7 +24,7 @@ namespace Queue_Bot
                         if (instance == null)
                         {
                             instance = new Queue_Bot.JobQueue();
-                            instance.Initialize();
+                            instance.Initialize(new QueueRepo());
                         }
                     }
                 }
@@ -42,6 +42,8 @@ namespace Queue_Bot
         /// from even an IPQueue before I change how the scheduling works. Fuck it, I'll do it right for now.
         /// </summary>
         private readonly IPriorityQueue<Task> internalQueue = new PriorityQueue<Task>();
+
+        private IQueueRepository _queueRepo;
 
         /// <summary>
         /// How much money is on the machine, used for bookkeeping purposes and working out how much the system owes
@@ -89,10 +91,7 @@ namespace Queue_Bot
         {
             get
             {
-                using (var dbAccess = new JobContext())
-                {
-                    return dbAccess.Jobs.ToList();
-                }
+                return _queueRepo.getJobs();
             }
         }
 
@@ -107,10 +106,7 @@ namespace Queue_Bot
         {
             get
             {
-                using (var dbAccess = new JobContext())
-                {
-                    return dbAccess.Customers.ToList();
-                }
+                return _queueRepo.getCustomers();
             }
         }
 
@@ -118,83 +114,47 @@ namespace Queue_Bot
         {
             Console.Write("MainMethod");
         }
-        private void Initialize()
+        private void Initialize(IQueueRepository queueRepo)
         {
+            _queueRepo = queueRepo;
             MachineBalance = 0;
-            using (var dbAccess = new JobContext())
+            foreach (var item in _queueRepo.getTasksForQueue())
             {
-                if (dbAccess.Jobs.Any())
-                {//Just refresh the queue and return.
-                    QueueInstance.internalQueue.Clear();
-                    foreach (var item in dbAccess.Tasks.Where(task => task.taskStatus.Equals("Waiting")))
-                    {
-                        QueueInstance.internalQueue.Add(new Task
-                        {
-                            deposit = item.deposit,
-                            AuthID = item.AuthID,
-                            customer = item.customer,
-                            job = item.job,
-                            jobId = item.jobId,
-                            taskStatus = item.taskStatus,
-                            timeEnqueued = item.timeEnqueued,
-                            timePrice = item.timePrice,
-                            TaskId = item.TaskId
-                        });
-                    }
-
-                    UpdateWaits(QueueInstance.internalQueue);
-                    return;
-                }
-                Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
-                    new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-                    new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-                    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-                    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-                };
-                dbAccess.Jobs.AddRange(jobList);
-
-                //Initialization.
-                dbAccess.SaveChanges();
-                QueueInstance.internalQueue.Clear();
-                var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
-                AddCustomer(bob, dbAccess.Jobs.Find(2), 1.2);
-                AddCustomer(new Customer { Name = "Gerald", AuthId = "u890asdf" }, dbAccess.Jobs.Find(1), 4.1);
-                var changedTask = internalQueue.First(item => item.customer.Name == "Gerald");
-                var newTask = new Task
+                QueueInstance.internalQueue.Add(new Task
                 {
-                    deposit = changedTask.deposit,
-                    AuthID = changedTask.AuthID,
-                    customer = changedTask.customer,
-                    job = changedTask.job,
-                    jobId = changedTask.jobId,
-                    timeEnqueued = changedTask.timeEnqueued,
-                    timePrice = 4,
-                    TaskId = changedTask.TaskId
-                };
-                updateTask(newTask, changedTask.TaskId);
+                    deposit = item.deposit,
+                    AuthID = item.AuthID,
+                    customer = item.customer,
+                    job = item.job,
+                    jobId = item.jobId,
+                    taskStatus = item.taskStatus,
+                    timeEnqueued = item.timeEnqueued,
+                    timePrice = item.timePrice,
+                    TaskId = item.TaskId
+                });
             }
+
+            UpdateWaits(QueueInstance.internalQueue);
         }
+
 
         public void updateTask(Task newTask, Guid oldTaskId)
         {
-            using (var dbAccess = new JobContext())
+
+            var original = _queueRepo.getTaskById(oldTaskId);
+            if (original != null)
             {
-                var original = dbAccess.Tasks.Find(oldTaskId);
+                var foo = internalQueue.First(item => item.TaskId == oldTaskId);
+                foo.timePrice = newTask.timePrice;
+                foo.jobId = newTask.jobId;
+                foo.job = newTask.job;
+                foo.deposit = newTask.deposit;
+                UpdateWaits(internalQueue);
 
-                if (original != null)
-                {
-                    var foo = internalQueue.First(item => item.TaskId == oldTaskId);
-                    foo.timePrice = newTask.timePrice;
-                    foo.jobId = newTask.jobId;
-                    foo.job = newTask.job;
-                    foo.deposit = newTask.deposit;
-                    UpdateWaits(internalQueue);
-
-                    dbAccess.Entry(original).CurrentValues.SetValues(newTask);
-                    dbAccess.SaveChanges();
-                }
+                _queueRepo.updateTask(newTask);
             }
         }
+
 
         /// <summary>
         /// Encapsulates jobQueue, so external programs don't have to interface with it directly, and can replace it as needed.
@@ -206,27 +166,20 @@ namespace Queue_Bot
         /// <param name="timeValue">Customer's timevalue</param>
         public Task AddCustomer(Customer customer, Job job, double timeValue)
         {
-            using (var dbAccess = new JobContext())
+            var foo = _queueRepo.addTask(new Task()
             {
-                if (!dbAccess.Customers.Any(registeredCustomers => customer.AuthId == registeredCustomers.AuthId))
-                {
-                    dbAccess.Customers.Add(customer);
-                }
-                var foo = dbAccess.Tasks.Add(new Task()
-                {
-                    TaskId = Guid.NewGuid(),
-                    customer = dbAccess.Customers.Find(customer.AuthId),
-                    job = dbAccess.Jobs.Find(job.JobId),
-                    timeEnqueued = DateTime.Now,
-                    taskStatus = "Waiting",
-                    timePrice = timeValue,
-                    timeOfExpectedService = DateTime.Now.AddHours(1)
-                });
-                internalQueue.Add(foo);
-                UpdateWaits(internalQueue);
-                dbAccess.SaveChanges();
-                return foo;
-            }
+                TaskId = Guid.NewGuid(),
+                customer = customer,
+                job = job,
+                timeEnqueued = DateTime.Now,
+                taskStatus = "Waiting",
+                timePrice = timeValue,
+                timeOfExpectedService = DateTime.Now.AddHours(1)
+            });
+            internalQueue.Add(foo);
+            UpdateWaits(internalQueue);
+            return foo;
+
         }
         /// <summary>
         /// Encapsulates jobQueue, so calling functions will not lose functionality if we need to replace it.
@@ -235,18 +188,12 @@ namespace Queue_Bot
         /// <returns>The next customer to be served</returns>
         public Task RemoveCustomer()
         {
-            using (var dbAccess = new JobContext())
-            {
-                var foo = internalQueue.PopFront();
-                foo.taskStatus = "Complete";
-                MachineBalance -= foo.Balance;
-                UpdateWaits(internalQueue);
-                var bar = dbAccess.Tasks.First(item => item.TaskId == foo.TaskId);
-                bar.taskStatus = "Complete";
-                dbAccess.SaveChanges();
-
-                return foo;
-            }
+            var foo = internalQueue.PopFront();
+            foo.taskStatus = "Complete";
+            MachineBalance -= foo.Balance;
+            UpdateWaits(internalQueue);
+            _queueRepo.updateTask(foo);
+            return foo;
         }
         /// <summary>
         /// Updates the wait times for each item in the list.
@@ -293,11 +240,57 @@ namespace Queue_Bot
             Name = name;
         }
     }
+
+    public class QueueDBInitializer<T> : DropCreateDatabaseAlways<JobContext>
+    {
+        protected override void Seed(JobContext context)
+        {
+            Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+                    new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+                    new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+                    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+                    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+                };
+            foreach (Job std in jobList)
+                context.Jobs.Add(std);
+
+            var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
+            context.Tasks.Add(new Task
+            {
+                deposit = 0,
+                AuthID = bob.AuthId,
+                customer = bob,
+                job = jobList[2],
+                jobId = jobList[2].JobId,
+                taskStatus = "Waiting",
+                timeEnqueued = DateTime.Now,
+                timeOfExpectedService = DateTime.Now.AddHours(1),
+                timePrice = 1.2,
+                TaskId = Guid.NewGuid()
+            });
+            context.Tasks.Add(new Task
+            {
+                deposit = 0,
+                AuthID = "u890asdf",
+                customer = new Customer { Name = "Gerald", AuthId = "u890asdf" },
+                job = jobList[1],
+                jobId = jobList[1].JobId,
+                taskStatus = "Waiting",
+                timeEnqueued = DateTime.Now,
+                timeOfExpectedService = DateTime.Now.AddHours(1),
+                timePrice = 4.1,
+                TaskId = Guid.NewGuid()
+            });
+
+            base.Seed(context);
+        }
+    }
     public class JobContext : DbContext
     {
         public JobContext() : base("Queue_Bot.Properties.Settings.JobStoreConnectionString")
         {
-            Database.SetInitializer(new DropCreateDatabaseIfModelChanges<JobContext>());
+            Database.SetInitializer<JobContext>(new QueueDBInitializer<JobContext>());
+            Database.Initialize(true);
         }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Customer> Customers { get; set; }
