@@ -60,14 +60,26 @@ namespace Queue_Bot.Tests
         [Fact()]
         public void updateTaskTest()
         {
+            Fixture fixtureGen = new Fixture();
+            Customer bob = fixtureGen.Create<Customer>();
+            Job requestedJob = testingQueue.jobList.First();
+            var bar = testingQueue.AddCustomer(bob, requestedJob, 5);
             var foo = testingQueue.queueStatus.internalQueue.First();
-            Assert.True(false, "This test needs an implementation");
+            Assert.Equal(bar.customer, foo.customer);
+            Assert.Equal(bar.job, foo.job);
         }
 
         [Fact()]
         public void RemoveCustomerTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            Fixture fixtureGen = new Fixture();
+            Customer bob = fixtureGen.Create<Customer>();
+            Job requestedJob = testingQueue.jobList.First();
+            var foo = testingQueue.AddCustomer(bob, requestedJob, 50);
+            Assert.Equal(foo.taskStatus, "Waiting");
+            var bar = testingQueue.RemoveCustomer();
+            Assert.Equal(foo, bar);
+            Assert.Equal(bar.taskStatus, "Complete");
         }
     }
 }
