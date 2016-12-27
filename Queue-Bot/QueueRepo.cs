@@ -9,14 +9,19 @@ namespace Queue_Bot
 {
     public class QueueRepo : IQueueRepository
     {
+        public Customer addCustomer(Customer newCustomer)
+        {
+            using (var dbAccess = new JobContext())
+            {
+                return dbAccess.Customers.Add(newCustomer);
+            }
+        }
+
         public Task addTask(Task newTask)
         {
             using (var dbAccess = new JobContext())
             {
-                if (!dbAccess.Customers.Any(registeredCustomers => newTask.customer.AuthId == registeredCustomers.AuthId))
-                {
-                    dbAccess.Customers.Add(newTask.customer);
-                }
+               
                 var foo = dbAccess.Tasks.Add(newTask);
                 return foo;
             }

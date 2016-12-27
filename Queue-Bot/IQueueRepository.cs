@@ -9,6 +9,7 @@ namespace Queue_Bot
     public interface IQueueRepository
     {
         Task addTask(Task newTask);
+        Customer addCustomer(Customer newCustomer);
         IEnumerable<Job> getJobs();
         IEnumerable<Task> getTasksAll();
         IEnumerable<Task> getTasksForQueue();

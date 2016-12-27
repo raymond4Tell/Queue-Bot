@@ -27,13 +27,19 @@ namespace Queue_Bot.Tests
                    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
                    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
                 };
-            Customer[] customerList = {
+            List<Customer> customerList = new List<Customer> {
                 new Customer { Name = "Bob", AuthId = "asdkfljakdf" },
                 new Customer { Name = "Gerald", AuthId = "adsfasdf" }
             };
+            List<Task> taskList = new List<Task>();
             mockedRepo.Setup(request => request.getJobs()).Returns(jobList);
             mockedRepo.Setup(request => request.getCustomers()).Returns(customerList);
-            mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) => newTask);
+            mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) => newTask)
+                .Callback<Task>(newTask => taskList.Add(newTask));
+            mockedRepo.Setup(request => request.addCustomer(It.IsAny<Customer>())).Returns((Customer newCustomer) => newCustomer)
+                .Callback<Customer>(newCustomer => customerList.Add(newCustomer));
+
+            mockedRepo.Setup(request => request.getTasksAll()).Returns(taskList);
             testingQueue = new JobQueue(mockedRepo.Object);
         }
         [Fact()]
@@ -44,7 +50,24 @@ namespace Queue_Bot.Tests
             Job requestedJob = testingQueue.jobList.First();
             var newTask = testingQueue.AddCustomer(bob, requestedJob, 1.2);
             Assert.Equal(newTask.job, requestedJob);
+            Assert.Equal(newTask.customer, bob);
+            Assert.Equal(newTask.timePrice, 1.2);
+            Assert.Contains(testingQueue.customerList, item => item == bob);
+            Assert.Contains(testingQueue.queueStatus.internalQueue, item => item == newTask);
         }
 
+
+        [Fact()]
+        public void updateTaskTest()
+        {
+            var foo = testingQueue.queueStatus.internalQueue.First();
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void RemoveCustomerTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
     }
 }

@@ -154,6 +154,10 @@ namespace Queue_Bot
         /// <param name="timeValue">Customer's timevalue</param>
         public Task AddCustomer(Customer customer, Job job, double timeValue)
         {
+            if (!customerList.Any(registeredCustomers => customer.AuthId == registeredCustomers.AuthId))
+            {
+                _queueRepo.addCustomer(customer);
+            }
             var foo = _queueRepo.addTask(new Task()
             {
                 TaskId = Guid.NewGuid(),
