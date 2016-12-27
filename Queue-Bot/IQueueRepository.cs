@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Queue_Bot
 {
-    interface IQueueRepository
+    public interface IQueueRepository
     {
         Task addTask(Task newTask);
         IEnumerable<Job> getJobs();

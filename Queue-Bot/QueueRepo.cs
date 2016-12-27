@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Queue_Bot
 {
-    class QueueRepo : IQueueRepository
+    public class QueueRepo : IQueueRepository
     {
         public Task addTask(Task newTask)
         {
@@ -61,7 +61,7 @@ namespace Queue_Bot
         {
             using (var dbAccess = new JobContext())
             {
-                return dbAccess.Tasks.Where(task => task.taskStatus.Equals("Waiting")).Include(t => t.customer).Include(t=>t.job).ToList();
+                return dbAccess.Tasks.Where(task => task.taskStatus.Equals("Waiting")).Include(t => t.customer).Include(t => t.job).ToList();
             }
         }
 

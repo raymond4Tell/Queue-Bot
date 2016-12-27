@@ -8,33 +8,9 @@ using System.Threading;
 
 namespace Queue_Bot
 {
+
     public class JobQueue
     {
-        /// <summary>
-        /// Singleton; used to create a static instance for everybody consuming this class and also for the Task objects.
-        /// </summary>
-        public static Queue_Bot.JobQueue QueueInstance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    lock (syncRoot)
-                    {
-                        if (instance == null)
-                        {
-                            instance = new Queue_Bot.JobQueue();
-                            instance.Initialize(new QueueRepo());
-                        }
-                    }
-                }
-
-                return instance;
-            }
-        }
-        private static volatile JobQueue instance;
-        private static object syncRoot = new Object();
-
         /// <summary>
         /// The heart of this project. Not sure if I really need the PQueue wrapper, or
         /// if I can just get away with using a SortedSet directly, since the behavior
@@ -99,7 +75,7 @@ namespace Queue_Bot
         {
             get
             {
-                return internalQueue.ToList();
+                return _queueRepo.getTasksAll().ToList();
             }
         }
         public IEnumerable<Customer> customerList
@@ -109,18 +85,30 @@ namespace Queue_Bot
                 return _queueRepo.getCustomers();
             }
         }
+        public QueueDTO queueStatus
+        {
+            get
+            {
+                return new QueueDTO
+                {
+                    MachineBalance = MachineBalance,
+                    BEWT = BEWT,
+                    internalQueue = internalQueue
+                };
+            }
+        }
 
         public static void Main()
         {
             Console.Write("MainMethod");
         }
-        private void Initialize(IQueueRepository queueRepo)
+        public JobQueue(IQueueRepository queueRepo)
         {
             _queueRepo = queueRepo;
             MachineBalance = 0;
             foreach (var item in _queueRepo.getTasksForQueue())
             {
-                QueueInstance.internalQueue.Add(new Task
+                internalQueue.Add(new Task
                 {
                     deposit = item.deposit,
                     AuthID = item.AuthID,
@@ -134,7 +122,7 @@ namespace Queue_Bot
                 });
             }
 
-            UpdateWaits(QueueInstance.internalQueue);
+            UpdateWaits(internalQueue);
         }
 
 
@@ -212,8 +200,19 @@ namespace Queue_Bot
             }
         }
     }
+    /// <summary>
+    /// Just a stupid DTO used to pass the queue's status out to any consumers, because that's easier than exposing all three properties.
+    /// </summary>
+    public struct QueueDTO
+    {
+        public double MachineBalance;
+        public TimeSpan BEWT;
+        public IEnumerable<Task> internalQueue;
+    }
+
     public class Job
     {
+
         protected bool Equals(Job other)
         {
             return Length == other.Length && string.Equals(Name, other.Name);
@@ -375,10 +374,9 @@ namespace Queue_Bot
         public DateTime timeEnqueued { get; set; }
         /// <summary>
         /// When the customer can expect to be served, provisionally, barring significant rearrangement of the queue.
-        /// Not stored in the DB,entirely handled in-program.
+        /// Was having issues with the DB, because DateTime defaults to 0, which broke the database. Initialized it
+        /// to a more sensible time in <seealso cref="JobQueue.AddCustomer(Customer, Job, double)"/>, and now it's working quite well.
         /// </summary>
-        /// <remarks>Honestly I tried to map this to the DB, but a) It's all calculated here in any case, and
-        /// b) it was giving me lip and causing concurrency errors.</remarks>
         public DateTime timeOfExpectedService { get; set; }
         /// <summary>
         /// Time spent waiting for service. As much as I hate clever code, we're going to get a little cunning here.
@@ -400,10 +398,9 @@ namespace Queue_Bot
         /// </summary>
         public double deposit { get; set; }
 
-        /// <summary>
-        /// Annoying as all hell, since we need to break encapsulation to access BEWT. 
-        /// On the other hand, this must be public so we can display it on the GUI.
+        /// <summary>Fuck it, we're going to make this a proper dumb DTO, with a dumb property instead of an encapsulatio-breaking auto-calculated thing.
+        /// get { return timePrice * (WaitTime - JobQueue.QueueInstance.BEWT).TotalHours - deposit; }
         /// </summary>
-        public double Balance { get { return timePrice * (WaitTime - JobQueue.QueueInstance.BEWT).TotalHours - deposit; } }
+        public double Balance { get; set; }
     }
 }
