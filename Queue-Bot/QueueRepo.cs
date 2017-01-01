@@ -23,6 +23,7 @@ namespace Queue_Bot
             {
                
                 var foo = dbAccess.Tasks.Add(newTask);
+                dbAccess.SaveChanges();
                 return foo;
             }
         }
@@ -58,7 +59,7 @@ namespace Queue_Bot
         {
             using (var dbAccess = new JobContext())
             {
-                return dbAccess.Tasks.ToList();
+                return dbAccess.Tasks.Include(t => t.customer).Include(t => t.job).ToList();
             }
         }
 
@@ -74,6 +75,7 @@ namespace Queue_Bot
         {
             using (var dbAccess = new JobContext())
             {
+                dbAccess.Tasks.Attach(changedTask);
                 dbAccess.Entry(changedTask).CurrentValues.SetValues(changedTask);
                 return dbAccess.Entry(changedTask).Entity;
             }

@@ -71,7 +71,7 @@ namespace Queue_Bot
             }
         }
 
-        public IEnumerable<Task> taskList
+        public IEnumerable<Task> taskListFull
         {
             get
             {
@@ -122,9 +122,21 @@ namespace Queue_Bot
                 });
             }
 
-            UpdateWaits(internalQueue);
+            UpdateBalances(internalQueue);
         }
+        /// <summary>
+        /// Since we've moved Task.Balance to a dumb property instead of an auto-calculated one, we need to update it manually here.
+        /// </summary>
+        /// <param name="PQueue"></param>
+        private void UpdateBalances(IPriorityQueue<Task> PQueue)
+        {
+            UpdateWaits(internalQueue);
+            foreach (Task customer in PQueue)
+            {
+                customer.Balance = customer.timePrice * (customer.WaitTime - BEWT).TotalHours - customer.deposit;
+            }
 
+        }
 
         public void updateTask(Task newTask, Guid oldTaskId)
         {
@@ -137,7 +149,7 @@ namespace Queue_Bot
                 foo.jobId = newTask.jobId;
                 foo.job = newTask.job;
                 foo.deposit = newTask.deposit;
-                UpdateWaits(internalQueue);
+                UpdateBalances(internalQueue);
 
                 _queueRepo.updateTask(newTask);
             }
@@ -161,15 +173,17 @@ namespace Queue_Bot
             var foo = _queueRepo.addTask(new Task()
             {
                 TaskId = Guid.NewGuid(),
+                AuthID = customer.AuthId,
                 customer = customer,
                 job = job,
+                jobId = job.JobId,
                 timeEnqueued = DateTime.Now,
                 taskStatus = "Waiting",
                 timePrice = timeValue,
                 timeOfExpectedService = DateTime.Now.AddHours(1)
             });
             internalQueue.Add(foo);
-            UpdateWaits(internalQueue);
+            UpdateBalances(internalQueue);
             return foo;
 
         }
@@ -183,7 +197,7 @@ namespace Queue_Bot
             var foo = internalQueue.PopFront();
             foo.taskStatus = "Complete";
             MachineBalance -= foo.Balance;
-            UpdateWaits(internalQueue);
+            UpdateBalances(internalQueue);
             _queueRepo.updateTask(foo);
             return foo;
         }
@@ -293,7 +307,7 @@ namespace Queue_Bot
         public JobContext() : base("Queue_Bot.Properties.Settings.JobStoreConnectionString")
         {
             Database.SetInitializer<JobContext>(new QueueDBInitializer<JobContext>());
-            Database.Initialize(true);
+            Database.Initialize(false);
         }
         public DbSet<Job> Jobs { get; set; }
         public DbSet<Customer> Customers { get; set; }
@@ -367,13 +381,21 @@ namespace Queue_Bot
         /// </summary>
         public String taskStatus { get; set; }
         /// <summary>
+        /// Notes from the customer, possibly including custom requests, additional information, the results of pre-checks, whatever.
+        /// </summary>
+        public string customerNotes { get; set; }
+        /// <summary>
+        /// Notes from the admin, possibly about the customer, how unpleasant/dreamy/talkative they are, whatever.
+        /// </summary>
+        public string adminNotes { get; set; }
+        /// <summary>
         /// Value the customer places on their time, expressed as an hourly rate. Based either on income and lost earnings,
         /// or "I will pay $20 to get out of here an hour sooner".
         /// </summary>
         /// <remarks>No, this isn't the right type, but for small amounts like this, it'll do and saves time casting everything.</remarks>
         public double timePrice { get; set; }
         /// <summary>
-        /// When the customer selected their desired job and joined the queue.
+        /// When the customer selected their desired job and was added to the queue.
         /// </summary>
         public DateTime timeEnqueued { get; set; }
         /// <summary>
@@ -401,10 +423,11 @@ namespace Queue_Bot
         /// has some skin in the game.
         /// </summary>
         public double deposit { get; set; }
-
-        /// <summary>Fuck it, we're going to make this a proper dumb DTO, with a dumb property instead of an encapsulatio-breaking auto-calculated thing.
-        /// get { return timePrice * (WaitTime - JobQueue.QueueInstance.BEWT).TotalHours - deposit; }
-        /// </summary>
+        ///<summary>How much this customer owes to/is owed by the system.
+        ///An estimate, not binding until they get checked out and pay up, at which point it is, or should be, locked in for records.</summary>
+        /// <remarks>This had been a cute little auto-calculated property, but that required accessing JobQueue's BEWT field, which caused issues.
+        /// So now we're manually setting it in JobQueue's <seealso cref="JobQueue.UpdateBalances(IPriorityQueue{Task})"/> method.
+        /// </remarks>
         public double Balance { get; set; }
     }
 }

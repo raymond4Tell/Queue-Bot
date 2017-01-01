@@ -67,6 +67,12 @@ namespace Queue_Bot.Tests
             var foo = testingQueue.queueStatus.internalQueue.First();
             Assert.Equal(bar.customer, foo.customer);
             Assert.Equal(bar.job, foo.job);
+            var deposit = fixtureGen.Create<int>();
+            foo.deposit = deposit;
+            testingQueue.updateTask(foo, foo.TaskId);
+            var baz = testingQueue.queueStatus.internalQueue.First();
+            Assert.Equal(baz.deposit, deposit);
+            Assert.Equal(baz.TaskId, foo.TaskId);
         }
 
         [Fact()]
@@ -76,10 +82,13 @@ namespace Queue_Bot.Tests
             Customer bob = fixtureGen.Create<Customer>();
             Job requestedJob = testingQueue.jobList.First();
             var foo = testingQueue.AddCustomer(bob, requestedJob, 50);
+            var baz = testingQueue.AddCustomer(fixtureGen.Create<Customer>(), requestedJob, 1);
             Assert.Equal(foo.taskStatus, "Waiting");
             var bar = testingQueue.RemoveCustomer();
             Assert.Equal(foo, bar);
             Assert.Equal(bar.taskStatus, "Complete");
+            Assert.True(bar.Balance < 0);
+            Assert.Equal(bar.Balance, -1 * testingQueue.MachineBalance);
         }
     }
 }

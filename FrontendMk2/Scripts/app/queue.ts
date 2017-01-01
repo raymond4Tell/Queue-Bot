@@ -11,8 +11,8 @@ import { QueueService } from "./queue-service"
 <div class="col-md-3" >BEWT: {{dashStatus.bewt |amDuration:"hours"}}</div>
 <div class="col-md-3" >Current Balance: {{dashStatus.machineBalance | currency:"USD":true }}</div>
 </div>
-<ul>
-<li *ngFor='let task of queueList' (click)='viewDetail(task)'>
+<ul *ngIf="dashStatus">
+<li *ngFor='let task of dashStatus.internalQueue' (click)='viewDetail(task)'>
 taskID: {{task.taskId}}<br/>
 Customer: {{task.customer.name}}<br/>
 Job: {{task.job.name}}<br/>
@@ -27,17 +27,11 @@ jobId: {{task.job.jobId}}
 export class Dashboard implements OnInit {
     constructor(private router: Router,
         private queueService: QueueService) { }
-
-    queueList: Task[];
     dashStatus: QueueDTO;
     errorMessage: string;
     mode = 'Observable';
 
     ngOnInit() {
-        this.queueService.getTasks().then(
-            tasks => this.queueList = tasks,
-            error => this.errorMessage = <any>error);
-
         this.queueService.getQueueStatus().then(
             result => this.dashStatus = result,
             error => this.errorMessage = <any>error);
