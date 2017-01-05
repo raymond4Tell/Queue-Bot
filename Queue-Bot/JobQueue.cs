@@ -257,62 +257,42 @@ namespace Queue_Bot
             Name = name;
         }
     }
+    
+            //Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+            //        new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+            //        new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+            //        new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+            //        new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+            //    };
+    
+            //var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
+            //context.Tasks.Add(new Task
+            //{
+            //    deposit = 0,
+            //    AuthID = bob.AuthId,
+            //    customer = bob,
+            //    job = jobList[2],
+            //    jobId = jobList[2].JobId,
+            //    taskStatus = "Waiting",
+            //    timeEnqueued = DateTime.Now,
+            //    timeOfExpectedService = DateTime.Now.AddHours(1),
+            //    timePrice = 1.2,
+            //    TaskId = Guid.NewGuid()
+            //});
+            //context.Tasks.Add(new Task
+            //{
+            //    deposit = 0,
+            //    AuthID = "u890asdf",
+            //    customer = new Customer { Name = "Gerald", AuthId = "u890asdf" },
+            //    job = jobList[1],
+            //    jobId = jobList[1].JobId,
+            //    taskStatus = "Waiting",
+            //    timeEnqueued = DateTime.Now,
+            //    timeOfExpectedService = DateTime.Now.AddHours(1),
+            //    timePrice = 4.1,
+            //    TaskId = Guid.NewGuid()
+            //});
 
-    public class QueueDBInitializer<T> : DropCreateDatabaseAlways<JobContext>
-    {
-        protected override void Seed(JobContext context)
-        {
-            Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
-                    new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-                    new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-                    new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-                    new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-                };
-            foreach (Job std in jobList)
-                context.Jobs.Add(std);
-
-            var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
-            context.Tasks.Add(new Task
-            {
-                deposit = 0,
-                AuthID = bob.AuthId,
-                customer = bob,
-                job = jobList[2],
-                jobId = jobList[2].JobId,
-                taskStatus = "Waiting",
-                timeEnqueued = DateTime.Now,
-                timeOfExpectedService = DateTime.Now.AddHours(1),
-                timePrice = 1.2,
-                TaskId = Guid.NewGuid()
-            });
-            context.Tasks.Add(new Task
-            {
-                deposit = 0,
-                AuthID = "u890asdf",
-                customer = new Customer { Name = "Gerald", AuthId = "u890asdf" },
-                job = jobList[1],
-                jobId = jobList[1].JobId,
-                taskStatus = "Waiting",
-                timeEnqueued = DateTime.Now,
-                timeOfExpectedService = DateTime.Now.AddHours(1),
-                timePrice = 4.1,
-                TaskId = Guid.NewGuid()
-            });
-
-            base.Seed(context);
-        }
-    }
-    public class JobContext : DbContext
-    {
-        public JobContext() : base("Queue_Bot.Properties.Settings.JobStoreConnectionString")
-        {
-            Database.SetInitializer<JobContext>(new QueueDBInitializer<JobContext>());
-            Database.Initialize(false);
-        }
-        public DbSet<Job> Jobs { get; set; }
-        public DbSet<Customer> Customers { get; set; }
-        public DbSet<Task> Tasks { get; set; }
-    }
     public class Customer
     {
         /// <summary>
@@ -329,7 +309,7 @@ namespace Queue_Bot
         /// since each of these jobs also refers to the customer that requested them. 
         /// Fuck it. I'll just have the app attach jobs to customers client-side.
         /// </summary>
-        //public virtual ICollection<Task> requestedJobs { get; set; }
+        public virtual ICollection<Task> requestedJobs { get; set; }
     }
 
     /// <summary>
