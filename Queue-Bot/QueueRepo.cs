@@ -64,9 +64,9 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return db.Query<Task>("Select * From Tasks" +
-                    "inner join Customers on Customers.AuthId = Tasks.AuthID" +
-                    "inner join Jobs on Jobs.JobId = Tasks.jobId").ToList();
+                return db.Query<Task, Customer, Job, Task>("Select * From Tasks" +
+                    " inner join Customers on Customers.AuthId = Tasks.AuthID" +
+                    " inner join Jobs on Jobs.JobId = Tasks.jobId", (task, user, job) => { task.customer = user; task.job = job; return task; }, splitOn: "authId,jobId").ToList();
             }
         }
 
@@ -74,7 +74,10 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return db.Query<Task>("Select * From Tasks where taskStatus = 'Waiting'").ToList();
+                return db.Query<Task, Customer, Job, Task>("Select * From Tasks"
+                    + " inner join Jobs on Jobs.JobId = Tasks.jobId"
+                    + " inner join Customers on Customers.AuthId = Tasks.AuthID"
+                    + " where taskStatus = 'Waiting' ", (task, user, job) => { task.job = job; task.customer = user; return task; }, splitOn: "jobId,authId").ToList();
             }
         }
 
