@@ -1,0 +1,1 @@
+﻿insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance) values(NEWID()

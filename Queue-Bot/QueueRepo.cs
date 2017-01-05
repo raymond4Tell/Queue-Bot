@@ -4,80 +4,88 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data;
+using Dapper;
+using System.Data.SqlClient;
+using System.Configuration;
+using Dapper.Contrib.Extensions;
 
 namespace Queue_Bot
 {
     public class QueueRepo : IQueueRepository
     {
+        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Queue_Bot.Properties.Settings.JobStoreConnectionString;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
         public Customer addCustomer(Customer newCustomer)
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return dbAccess.Customers.Add(newCustomer);
+                db.Insert(newCustomer);
+                return db.Query<Customer>("Select * From Customers where AuthId = @AuthId", newCustomer.AuthId).FirstOrDefault();
             }
         }
 
         public Task addTask(Task newTask)
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-               
-                var foo = dbAccess.Tasks.Add(newTask);
-                dbAccess.SaveChanges();
-                return foo;
+                db.Execute("insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance) values" +
+                    "(newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, @timeenqueued, timeOfExpectedService, deposit, Balance)", newTask);
+                return db.Query<Task>("Select * From task where AuthId = @AuthId", newTask.timeEnqueued).FirstOrDefault();
+
             }
         }
 
         public IEnumerable<Customer> getCustomers()
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return dbAccess.Customers.ToList();
+                return db.Query<Customer>("Select * From Customers").ToList();
             }
         }
 
 
         public IEnumerable<Job> getJobs()
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return dbAccess.Jobs.ToList();
+                return db.Query<Job>("Select * From Jobs").ToList();
             }
-
         }
 
         public Task getTaskById(Guid taskId)
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return dbAccess.Tasks.First(item => item.TaskId == taskId);
-
+                return db.Query<Task>("Select * From Tasks where taskId = @taskId", taskId).FirstOrDefault();
             }
         }
 
         public IEnumerable<Task> getTasksAll()
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return dbAccess.Tasks.Include(t => t.customer).Include(t => t.job).ToList();
+                return db.Query<Task>("Select * From Tasks" +
+                    "inner join Customers on Customers.AuthId = Tasks.AuthID" +
+                    "inner join Jobs on Jobs.JobId = Tasks.jobId").ToList();
             }
         }
 
         public IEnumerable<Task> getTasksForQueue()
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return dbAccess.Tasks.Where(task => task.taskStatus.Equals("Waiting")).Include(t => t.customer).Include(t => t.job).ToList();
+                return db.Query<Task>("Select * From Tasks where taskStatus = 'Waiting'").ToList();
             }
         }
 
         public Task updateTask(Task changedTask)
         {
-            using (var dbAccess = new JobContext())
+            using (IDbConnection db = new SqlConnection(connectionString))
             {
-                dbAccess.Tasks.Attach(changedTask);
-                dbAccess.Entry(changedTask).CurrentValues.SetValues(changedTask);
-                return dbAccess.Entry(changedTask).Entity;
+                string sqlQuery = "UPDATE Task SET FirstName = @FirstName, LastName = @LastName WHERE taskId = @taskId";
+                int rowsAffected = db.Execute(sqlQuery, changedTask);
+
+                return db.Query<Task>("Select * From Tasks where taskId = @taskId", changedTask.TaskId).FirstOrDefault();
             }
         }
     }

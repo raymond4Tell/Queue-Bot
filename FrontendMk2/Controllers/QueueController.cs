@@ -12,6 +12,7 @@ namespace FrontendMk2.Controllers
     public class QueueController : ApiController
     {
         private JobQueue queueService = new JobQueue(new QueueRepo());
+
         [HttpGet, Route("Queue")]
         public QueueDTO GetQueueStatus()
         {
@@ -65,6 +66,7 @@ namespace FrontendMk2.Controllers
         [HttpDelete, Route("Tasks/{id:guid}")]
         public void Delete(Guid id)
         {
+            //We never actually delete any tasks, we just soft-delete them, which means updating them with a status of Cancelled or similar.
         }
     }
 }
