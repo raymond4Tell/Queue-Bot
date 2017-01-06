@@ -309,7 +309,7 @@ namespace Queue_Bot
         /// since each of these jobs also refers to the customer that requested them. 
         /// Fuck it. I'll just have the app attach jobs to customers client-side.
         /// </summary>
-        public virtual ICollection<Task> requestedJobs { get; set; }
+        public List<Task> requestedJobs { get; set; }
     }
 
     /// <summary>

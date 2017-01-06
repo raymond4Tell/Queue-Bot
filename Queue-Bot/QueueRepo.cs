@@ -29,7 +29,7 @@ namespace Queue_Bot
             using (IDbConnection db = new SqlConnection(connectionString))
             {
                 db.Execute("insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance) values" +
-                    "(newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, @timeenqueued, timeOfExpectedService, deposit, Balance)", newTask);
+                    "(newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, @timeenqueued, @timeOfExpectedService, @deposit, @Balance)", newTask);
                 return db.Query<Task>("Select * From task where AuthId = @AuthId", newTask.timeEnqueued).FirstOrDefault();
 
             }
@@ -39,7 +39,15 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return db.Query<Customer>("Select * From Customers").ToList();
+                var foo = db.Query<Customer>("Select * From Customers").ToList();
+                foreach (var item in foo)
+                {
+                    var bar = db.Query<Task, Job, Task>("Select * From Tasks"
+                        + " inner join Jobs on Jobs.JobId = Tasks.jobId"
+                        + " where AuthId = @AuthId",  (task, job) => { task.job = job; return task; }, item, splitOn: "jobId").ToList();
+                    item.requestedJobs = bar;
+                }
+                return foo;
             }
         }
 

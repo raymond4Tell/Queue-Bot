@@ -1,8 +1,8 @@
-﻿import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Customer, Task, Job } from "./model";
+﻿import { Component, OnInit } from "@angular/core";
+import { Router } from "@angular/router";
+import { Customer} from "./model";
 import "./rxjs-operators";
-import { QueueService } from "./queue-service"
+import { QueueService } from "./queue-service";
 
 
 @Component({
@@ -24,23 +24,12 @@ export class CustomerListComponent implements OnInit {
         private queueService: QueueService) { }
 
     customerList: Customer[];
-    taskList: Task[]
     errorMessage: string;
     mode = 'Observable';
 
     ngOnInit() {
         this.queueService.getCustomers().then(
-            tasks => {
-                this.customerList = tasks;
-                this.queueService.getTasks().then(
-                    tasks => {
-                        this.customerList.forEach(
-                            (value) => {
-                                value.requestedJobs = tasks.filter((element) => element.customer.authId == value.authId)
-                            });
-                    },
-                    error => this.errorMessage = <any>error);
-            },
+            tasks => this.customerList = tasks,
             error => this.errorMessage = <any>error);
     }
 
