@@ -8,19 +8,18 @@ using System.Data;
 using Dapper;
 using System.Data.SqlClient;
 using System.Configuration;
-using Dapper.Contrib.Extensions;
-
 namespace Queue_Bot
 {
     public class QueueRepo : IQueueRepository
     {
         private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Queue_Bot.Properties.Settings.JobStoreConnectionString;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+
         public Customer addCustomer(Customer newCustomer)
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                db.Insert(newCustomer);
-                return db.Query<Customer>("Select * From Customers where AuthId = @AuthId", newCustomer.AuthId).FirstOrDefault();
+                db.Execute("insert into Customers(Name, AuthId) values (@Name, @AuthId)", newCustomer);
+                return db.Query<Customer>("Select * From Customers where AuthId = @AuthId", newCustomer).FirstOrDefault();
             }
         }
 
@@ -28,11 +27,11 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                db.Execute("insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance) values" +
-                    "(newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, @timeenqueued, @timeOfExpectedService, @deposit, @Balance)", newTask);
-                return db.Query<Task>("Select * From task where AuthId = @AuthId", newTask.timeEnqueued).FirstOrDefault();
-
-            }
+                var foo = db.ExecuteScalar<Guid>("insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance)" +
+                                    " output inserted.taskId" +
+                                     " values (newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, getdate(), dateadd(hour, 1, getdate()), @deposit, @Balance)", newTask);
+                return db.Query<Task>("Select * From tasks where taskID = @taskId", new { taskId= foo }).FirstOrDefault();
+                            }
         }
 
         public IEnumerable<Customer> getCustomers()
@@ -44,7 +43,7 @@ namespace Queue_Bot
                 {
                     var bar = db.Query<Task, Job, Task>("Select * From Tasks"
                         + " inner join Jobs on Jobs.JobId = Tasks.jobId"
-                        + " where AuthId = @AuthId",  (task, job) => { task.job = job; return task; }, item, splitOn: "jobId").ToList();
+                        + " where AuthId = @AuthId", (task, job) => { task.job = job; return task; }, item, splitOn: "jobId").ToList();
                     item.requestedJobs = bar;
                 }
                 return foo;

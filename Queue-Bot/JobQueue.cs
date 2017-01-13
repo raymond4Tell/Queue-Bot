@@ -172,15 +172,10 @@ namespace Queue_Bot
             }
             var foo = _queueRepo.addTask(new Task()
             {
-                TaskId = Guid.NewGuid(),
                 AuthID = customer.AuthId,
-                customer = customer,
-                job = job,
                 jobId = job.JobId,
-                timeEnqueued = DateTime.Now,
                 taskStatus = "Waiting",
                 timePrice = timeValue,
-                timeOfExpectedService = DateTime.Now.AddHours(1)
             });
             internalQueue.Add(foo);
             UpdateBalances(internalQueue);
@@ -257,41 +252,41 @@ namespace Queue_Bot
             Name = name;
         }
     }
-    
-            //Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
-            //        new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
-            //        new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
-            //        new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
-            //        new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
-            //    };
-    
-            //var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
-            //context.Tasks.Add(new Task
-            //{
-            //    deposit = 0,
-            //    AuthID = bob.AuthId,
-            //    customer = bob,
-            //    job = jobList[2],
-            //    jobId = jobList[2].JobId,
-            //    taskStatus = "Waiting",
-            //    timeEnqueued = DateTime.Now,
-            //    timeOfExpectedService = DateTime.Now.AddHours(1),
-            //    timePrice = 1.2,
-            //    TaskId = Guid.NewGuid()
-            //});
-            //context.Tasks.Add(new Task
-            //{
-            //    deposit = 0,
-            //    AuthID = "u890asdf",
-            //    customer = new Customer { Name = "Gerald", AuthId = "u890asdf" },
-            //    job = jobList[1],
-            //    jobId = jobList[1].JobId,
-            //    taskStatus = "Waiting",
-            //    timeEnqueued = DateTime.Now,
-            //    timeOfExpectedService = DateTime.Now.AddHours(1),
-            //    timePrice = 4.1,
-            //    TaskId = Guid.NewGuid()
-            //});
+
+    //Job[] jobList = {new Job(new TimeSpan(2, 0, 0) , "Rotate tires"),
+    //        new Job(TimeSpan.FromHours(.5), "Hoover the roof") ,
+    //        new Job(new TimeSpan(1, 40, 0),  "Square the circle"),
+    //        new Job(new TimeSpan(2, 30,0),  "Empty liquor cabinet"),
+    //        new Job(new TimeSpan(3, 0,0), "Destroy watermelons")
+    //    };
+
+    //var bob = new Customer { Name = "Bob", AuthId = "asdkfljakdf" };
+    //context.Tasks.Add(new Task
+    //{
+    //    deposit = 0,
+    //    AuthID = bob.AuthId,
+    //    customer = bob,
+    //    job = jobList[2],
+    //    jobId = jobList[2].JobId,
+    //    taskStatus = "Waiting",
+    //    timeEnqueued = DateTime.Now,
+    //    timeOfExpectedService = DateTime.Now.AddHours(1),
+    //    timePrice = 1.2,
+    //    TaskId = Guid.NewGuid()
+    //});
+    //context.Tasks.Add(new Task
+    //{
+    //    deposit = 0,
+    //    AuthID = "u890asdf",
+    //    customer = new Customer { Name = "Gerald", AuthId = "u890asdf" },
+    //    job = jobList[1],
+    //    jobId = jobList[1].JobId,
+    //    taskStatus = "Waiting",
+    //    timeEnqueued = DateTime.Now,
+    //    timeOfExpectedService = DateTime.Now.AddHours(1),
+    //    timePrice = 4.1,
+    //    TaskId = Guid.NewGuid()
+    //});
 
     public class Customer
     {
