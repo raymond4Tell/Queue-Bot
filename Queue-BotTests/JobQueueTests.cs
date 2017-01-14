@@ -34,7 +34,7 @@ namespace Queue_Bot.Tests
             List<Task> taskList = new List<Task>();
             mockedRepo.Setup(request => request.getJobs()).Returns(jobList);
             mockedRepo.Setup(request => request.getCustomers()).Returns(customerList);
-            mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) => newTask)
+            mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) => { newTask.taskStatus = "Waiting"; return newTask; })
                 .Callback<Task>(newTask => taskList.Add(newTask));
             mockedRepo.Setup(request => request.addCustomer(It.IsAny<Customer>())).Returns((Customer newCustomer) => newCustomer)
                 .Callback<Customer>(newCustomer => customerList.Add(newCustomer));
@@ -46,9 +46,9 @@ namespace Queue_Bot.Tests
         public void AddCustomerTest()
         {
             Fixture fixtureGen = new Fixture();
-            Customer bob = fixtureGen.Create<Customer>();
+            Customer bob = fixtureGen.Build<Customer>().Without(x => x.requestedJobs).Create();
             Job requestedJob = testingQueue.jobList.First();
-            var newTask = testingQueue.AddCustomer(bob, requestedJob, 1.2);
+            var newTask = testingQueue.AddCustomer(new Task { customer = bob, job = requestedJob, timePrice = 1.2 });
             Assert.Equal(newTask.job, requestedJob);
             Assert.Equal(newTask.customer, bob);
             Assert.Equal(newTask.timePrice, 1.2);
@@ -61,9 +61,9 @@ namespace Queue_Bot.Tests
         public void updateTaskTest()
         {
             Fixture fixtureGen = new Fixture();
-            Customer bob = fixtureGen.Create<Customer>();
+            Customer bob = fixtureGen.Build<Customer>().Without(x => x.requestedJobs).Create();
             Job requestedJob = testingQueue.jobList.First();
-            var bar = testingQueue.AddCustomer(bob, requestedJob, 5);
+            var bar = testingQueue.AddCustomer(new Task { customer = bob, job = requestedJob, timePrice = 1.2 });
             var foo = testingQueue.queueStatus.internalQueue.First();
             Assert.Equal(bar.customer, foo.customer);
             Assert.Equal(bar.job, foo.job);
@@ -79,10 +79,11 @@ namespace Queue_Bot.Tests
         public void RemoveCustomerTest()
         {
             Fixture fixtureGen = new Fixture();
-            Customer bob = fixtureGen.Create<Customer>();
+            Customer bob = fixtureGen.Build<Customer>().Without(x => x.requestedJobs).Create();
+            Customer baz = fixtureGen.Build<Customer>().Without(x => x.requestedJobs).Create();
             Job requestedJob = testingQueue.jobList.First();
-            var foo = testingQueue.AddCustomer(bob, requestedJob, 50);
-            var baz = testingQueue.AddCustomer(fixtureGen.Create<Customer>(), requestedJob, 1);
+            var foo = testingQueue.AddCustomer(new Task { customer = bob, job = requestedJob, timePrice = 50 });
+            var qux = testingQueue.AddCustomer(new Task { customer = baz, job = requestedJob, timePrice = 1 });
             Assert.Equal(foo.taskStatus, "Waiting");
             var bar = testingQueue.RemoveCustomer();
             Assert.Equal(foo, bar);

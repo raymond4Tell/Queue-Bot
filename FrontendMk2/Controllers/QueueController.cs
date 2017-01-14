@@ -54,7 +54,7 @@ namespace FrontendMk2.Controllers
         {
             //TODO: Get customer data from authentication, that's what it's for.
             var foo = queueService.jobList.First(item => item.JobId == value.jobId);
-            return queueService.AddCustomer(value.customer, foo, value.timePrice);
+            return queueService.AddCustomer(value);
         }
 
         [HttpPut, Route("Tasks/{id:guid}")]

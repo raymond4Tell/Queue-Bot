@@ -1,17 +1,21 @@
 ﻿/**
- * Primary model classes; derived from the classes in JobQueue.cs.
- */
+  * Primary model classes; derived from the classes in JobQueue.cs.
+  */
 export class Task {
     authId: string;
     taskId: string;
     waitTime: TimeRanges;
     customer: Customer;
     deposit: number;
+    timePrice: number;
+    Balance: number;
     job: Job;
     jobId: number;
     timeEnqueued: Date;
     timeOfExpectedService: Date;
-    timePrice: number;
+    taskStatus: String;
+    customerNotes: string;
+    adminNotes: string;
 }
 export class Customer {
     authId: string;

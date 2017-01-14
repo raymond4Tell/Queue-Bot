@@ -160,23 +160,16 @@ namespace Queue_Bot
         /// Encapsulates jobQueue, so external programs don't have to interface with it directly, and can replace it as needed.
         /// Also consolidates the boilerplate involved in object addition, so we don't have to call it in every function.
         /// TODO: Probably ought to move half of this into the actual PQueue class, for the same reason above, particularly UpdateWaits.
+        /// TODO: Add better input-checking. Using parameterized SQL should stop most things, but I'm certain there's something else I'm missing.
         /// </summary>
-        /// <param name="customer">Customer object to add to the queue</param>
-        /// <param name="job">Job that customer wants done</param>
-        /// <param name="timeValue">Customer's timevalue</param>
-        public Task AddCustomer(Customer customer, Job job, double timeValue)
+        /// <param name="newTask">The new task to add. </param>
+        public Task AddCustomer(Task newTask)
         {
-            if (!customerList.Any(registeredCustomers => customer.AuthId == registeredCustomers.AuthId))
+            if (!customerList.Any(registeredCustomers => newTask.customer.AuthId == registeredCustomers.AuthId))
             {
-                _queueRepo.addCustomer(customer);
+                _queueRepo.addCustomer(newTask.customer);
             }
-            var foo = _queueRepo.addTask(new Task()
-            {
-                AuthID = customer.AuthId,
-                jobId = job.JobId,
-                taskStatus = "Waiting",
-                timePrice = timeValue,
-            });
+            var foo = _queueRepo.addTask(newTask);
             internalQueue.Add(foo);
             UpdateBalances(internalQueue);
             return foo;
