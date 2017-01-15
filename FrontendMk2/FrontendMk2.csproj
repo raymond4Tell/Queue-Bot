@@ -349,6 +349,7 @@
     <TypeScriptCompile Include="Scripts\app\queue.ts" />
     <TypeScriptCompile Include="Scripts\app\rxjs-operators.ts" />
     <TypeScriptCompile Include="Scripts\app\task-detail-component.ts" />
+    <TypeScriptCompile Include="Scripts\app\task-list-component.ts" />
     <TypeScriptCompile Include="Scripts\app\user-service.ts" />
   </ItemGroup>
   <ItemGroup>

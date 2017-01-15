@@ -27,6 +27,9 @@ jobId: {{job.length}}
     <label>Customer name: 
 <input type="number" [(ngModel)]="task.timePrice" />
 </label>
+<label>Customer notes: 
+<input type="text" [(ngModel)]="task.customerNotes" />
+</label>
 <button (click)="goBack()"> Back </button>
   <button (click)="save()">Save</button>
     </div>`,

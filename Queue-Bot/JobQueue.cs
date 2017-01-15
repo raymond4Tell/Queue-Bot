@@ -170,6 +170,7 @@ namespace Queue_Bot
         {
             var foo = internalQueue.PopFront();
             foo.taskStatus = "Complete";
+            _queueRepo.updateTask(foo);
             MachineBalance -= foo.Balance;
             UpdateBalances(internalQueue);
             _queueRepo.updateTask(foo);
