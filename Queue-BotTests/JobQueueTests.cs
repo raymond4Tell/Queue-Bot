@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Ploeh.AutoFixture;
 using Ploeh.AutoFixture.AutoMoq;
 using Ploeh.AutoFixture.Xunit2;
-
+using System.Threading;
 
 namespace Queue_Bot.Tests
 {
@@ -34,7 +34,11 @@ namespace Queue_Bot.Tests
             List<Task> taskList = new List<Task>();
             mockedRepo.Setup(request => request.getJobs()).Returns(jobList);
             mockedRepo.Setup(request => request.getCustomers()).Returns(customerList);
-            mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) => { newTask.taskStatus = "Waiting"; return newTask; })
+            mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) =>
+            {
+                newTask.taskStatus = "Waiting"; newTask.TaskId = Guid.NewGuid();
+                newTask.timeEnqueued = DateTime.Now; newTask.timeOfExpectedService = DateTime.Now.AddHours(1); return newTask;
+            })
                 .Callback<Task>(newTask => taskList.Add(newTask));
             mockedRepo.Setup(request => request.addCustomer(It.IsAny<Customer>())).Returns((Customer newCustomer) => newCustomer)
                 .Callback<Customer>(newCustomer => customerList.Add(newCustomer));
@@ -83,6 +87,8 @@ namespace Queue_Bot.Tests
             Customer baz = fixtureGen.Build<Customer>().Without(x => x.requestedJobs).Create();
             Job requestedJob = testingQueue.jobList.First();
             var foo = testingQueue.AddCustomer(new Task { customer = bob, job = requestedJob, timePrice = 50 });
+            Thread.Sleep(30 * 1000);
+            requestedJob = testingQueue.jobList.ElementAt(new Random().Next(testingQueue.jobList.Count()));
             var qux = testingQueue.AddCustomer(new Task { customer = baz, job = requestedJob, timePrice = 1 });
             Assert.Equal(foo.taskStatus, "Waiting");
             var bar = testingQueue.RemoveCustomer();

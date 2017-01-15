@@ -106,22 +106,7 @@ namespace Queue_Bot
         {
             _queueRepo = queueRepo;
             MachineBalance = 0;
-            foreach (var item in _queueRepo.getTasksForQueue())
-            {
-                internalQueue.Add(new Task
-                {
-                    deposit = item.deposit,
-                    AuthID = item.AuthID,
-                    customer = item.customer,
-                    job = item.job,
-                    jobId = item.jobId,
-                    taskStatus = item.taskStatus,
-                    timeEnqueued = item.timeEnqueued,
-                    timePrice = item.timePrice,
-                    TaskId = item.TaskId
-                });
-            }
-
+            internalQueue.AddRange(_queueRepo.getTasksForQueue());
             UpdateBalances(internalQueue);
         }
         /// <summary>
@@ -131,9 +116,10 @@ namespace Queue_Bot
         private void UpdateBalances(IPriorityQueue<Task> PQueue)
         {
             UpdateWaits(internalQueue);
-            foreach (Task customer in PQueue)
+            foreach (Task task in PQueue)
             {
-                customer.Balance = customer.timePrice * (customer.WaitTime - BEWT).TotalHours - customer.deposit;
+                task.Balance = (task.timePrice * (task.WaitTime - BEWT).TotalHours) - task.deposit;
+                _queueRepo.updateTask(task);
             }
 
         }

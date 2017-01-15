@@ -30,8 +30,8 @@ namespace Queue_Bot
                 var foo = db.ExecuteScalar<Guid>("insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance)" +
                                     " output inserted.taskId" +
                                      " values (newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, getdate(), dateadd(hour, 1, getdate()), @deposit, @Balance)", newTask);
-                return db.Query<Task>("Select * From tasks where taskID = @taskId", new { taskId= foo }).FirstOrDefault();
-                            }
+                return getTaskById(foo);
+            }
         }
 
         public IEnumerable<Customer> getCustomers()
@@ -63,7 +63,10 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return db.Query<Task>("Select * From Tasks where taskId = @taskId", taskId).FirstOrDefault();
+                return db.Query<Task, Customer, Job, Task>("Select * From Tasks"
+                       + " inner join Jobs on Jobs.JobId = Tasks.jobId"
+                    + " inner join Customers on Customers.AuthId = Tasks.AuthID"
+                    + " where taskId = @taskId", (task, user, job) => { task.customer = user; task.job = job; return task; }, splitOn: "authId,jobId", param: new { taskId = taskId }).FirstOrDefault();
             }
         }
 
@@ -92,10 +95,11 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                string sqlQuery = "UPDATE Task SET FirstName = @FirstName, LastName = @LastName WHERE taskId = @taskId";
+                //(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice, timeenqueued, timeOfExpectedService, deposit, Balance)
+                string sqlQuery = "UPDATE Tasks SET jobid = @jobid, taskStatus = @taskStatus, customernotes = @customernotes, adminnotes = @adminnotes, Balance = @balance, timeOfExpectedService = @timeOfExpectedService, timeprice = @timeprice WHERE taskId = @taskId";
                 int rowsAffected = db.Execute(sqlQuery, changedTask);
 
-                return db.Query<Task>("Select * From Tasks where taskId = @taskId", changedTask.TaskId).FirstOrDefault();
+                return getTaskById(changedTask.TaskId);
             }
         }
     }
