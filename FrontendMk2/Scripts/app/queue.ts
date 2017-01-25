@@ -11,8 +11,8 @@ import { QueueService } from "./queue-service"
 <div class="col-md-3" >BEWT: {{dashStatus.bewt |amDuration:"hours"}}</div>
 <div class="col-md-3" >Current Balance: {{dashStatus.machineBalance | currency:"USD":true }}</div>
 </div>
-<ul *ngIf="dashStatus">
-<li *ngFor='let task of dashStatus.internalQueue' (click)='viewDetail(task)'>
+<ul *ngIf="dashStatus" class='list-group'>
+<li class='list-group-item' *ngFor='let task of dashStatus.internalQueue' (click)='viewDetail(task)'>
 taskID: {{task.taskId}}<br/>
 Customer: {{task.customer.name}}<br/>
 Job: {{task.job.name}}<br/>

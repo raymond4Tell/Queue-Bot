@@ -14,11 +14,13 @@ import { QueueService } from "./queue-service";
 <form>
        <label>id: {{task.authID}}</label>
 <div class='form-group row'>
-<div class='col-md-2' *ngFor='let job of jobList' >
+<div class='col-md-2'>
 <label >
-Name: {{job.name}}<br/>
-jobId: {{job.length}}
-<input type="radio" [value]="job.jobId" [(ngModel)]="task.jobId" name='jobId' />
+<select  [(ngModel)]="selectedJob" name="job">
+<option *ngFor='let job of jobList' [ngValue]="job">
+{{job.name}}
+</option></select>
+{{selectedJob.jobId}}
 </label></div>
 </div>
 <div class='form-group'>
@@ -31,6 +33,8 @@ jobId: {{job.length}}
 export class TaskDetailComponent implements OnInit {
     task: Task;
     jobList: Job[];
+    //Only needed because the select list above can't work on task.job directly. :(
+    selectedJob: Job;
     errorMessage: string;
 
     constructor(
@@ -44,17 +48,19 @@ export class TaskDetailComponent implements OnInit {
             let id: string = params['id'];
             this.queueService.getTask(id)
                 .then(
-                task => this.task = task
+                task => { this.task = task; },
+                error => this.errorMessage = <any>error
                 );
         });
 
         this.queueService.getJobs().then(
-            jobs => this.jobList = jobs,
+            jobs => { this.jobList = jobs; this.selectedJob = jobs[2]; },
             error => this.errorMessage = <any>error);
     }
 
     save(): void {
-        this.task.job = this.jobList.find(value => value.jobId == this.task.jobId);
+        this.task.job = this.selectedJob;
+        this.task.jobId = this.selectedJob.jobId;
         this.queueService.update(this.task)
             .then(() => this.goBack());
     }
