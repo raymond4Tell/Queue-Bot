@@ -140,4 +140,10 @@
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
   </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="SeedData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="QueueDB.publish.xml" />
+  </ItemGroup>
 </Project>
