@@ -36,7 +36,7 @@ namespace Queue_Bot.Tests
             mockedRepo.Setup(request => request.getCustomers()).Returns(customerList);
             mockedRepo.Setup(request => request.addTask(It.IsAny<Task>())).Returns((Task newTask) =>
             {
-                newTask.taskStatus = "Waiting"; newTask.TaskId = Guid.NewGuid();
+                newTask.taskStatus = 0; newTask.TaskId = Guid.NewGuid();
                 newTask.timeEnqueued = DateTime.Now; newTask.timeOfExpectedService = DateTime.Now.AddHours(1); return newTask;
             })
                 .Callback<Task>(newTask => taskList.Add(newTask));
@@ -90,10 +90,10 @@ namespace Queue_Bot.Tests
             Thread.Sleep(30 * 1000);
             requestedJob = testingQueue.jobList.ElementAt(new Random().Next(testingQueue.jobList.Count()));
             var qux = testingQueue.AddCustomer(new Task { customer = baz, job = requestedJob, timePrice = 1 });
-            Assert.Equal(foo.taskStatus, "Waiting");
+            Assert.Equal(foo.taskStatus, 0);
             var bar = testingQueue.RemoveCustomer();
             Assert.Equal(foo, bar);
-            Assert.Equal(bar.taskStatus, "Complete");
+            Assert.Equal(bar.taskStatus, 1);
             Assert.True(bar.Balance < 0);
             Assert.Equal(bar.Balance, -1 * testingQueue.MachineBalance);
         }

@@ -169,7 +169,7 @@ namespace Queue_Bot
         public Task RemoveCustomer()
         {
             var foo = internalQueue.PopFront();
-            foo.taskStatus = "Complete";
+            foo.taskStatus = 1;
             _queueRepo.updateTask(foo);
             MachineBalance -= foo.Balance;
             UpdateBalances(internalQueue);
@@ -224,6 +224,7 @@ namespace Queue_Bot
         public TimeSpan Length { get; set; }
         //TODO: Do we really still need a hash when we've got a proper key?
         public int Hash { get { return GetHashCode(); } }
+        public string Description { get; set; }
         public int JobId { get; set; }
         public Job() : this(TimeSpan.FromMinutes(30), "Get Plastered") { }
         public Job(TimeSpan duration, String name)
@@ -334,7 +335,7 @@ namespace Queue_Bot
         /// Status of the task; "Waiting for service", "Completed", "Cancelled", ETC. 
         /// TODO: Turn this into a proper enum, probably referencing another database. That'll probably wait until I convert this to use SProcs instead of ORM, though.
         /// </summary>
-        public String taskStatus { get; set; }
+        public int taskStatus { get; set; }
         /// <summary>
         /// Notes from the customer, possibly including custom requests, additional information, the results of pre-checks, whatever.
         /// </summary>

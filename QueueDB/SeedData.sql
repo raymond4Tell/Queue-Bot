@@ -86,6 +86,31 @@ VALUES (authid, Name)
 WHEN NOT MATCHED BY SOURCE THEN 
 DELETE;
 
+
+-- Reference Data for TaskStatus 
+SET IDENTITY_INSERT taskstatus on
+    GO 
+MERGE INTO taskstatus AS Target 
+USING (VALUES 
+	(0, 'Waiting' ),
+	(1, 'Completed' ),
+	(2, 'Cancelled' ),
+	(3, 'Requester Dead' )
+) AS Source ([StatusId], [Status])
+ON Target.statusid = Source.statusid 
+-- update matched rows 
+WHEN MATCHED THEN 
+UPDATE SET Status = Source.Status
+-- insert new rows 
+WHEN NOT MATCHED BY TARGET THEN 
+INSERT ([StatusId], [Status])
+VALUES ([StatusId], [Status])
+WHEN NOT MATCHED BY SOURCE THEN 
+DELETE;
+SET IDENTITY_INSERT taskstatus OFF 
+    GO 
+
+
 -- Reference Data for Tasks
 --	[TaskId]                UNIQUEIDENTIFIER NOT NULL,
 --  [AuthID]                NVARCHAR (128)   NULL,
@@ -101,8 +126,8 @@ DELETE;
     
 MERGE INTO Tasks AS Target 
 USING (VALUES 
-	(newid(), 'asdkfljakdf', 2,'Waiting', '', '', 4.8,getdate(), dateadd(hour, 1, getdate()), 0 , 0 ),
-	(newid(), 'u890asdf', 4,'Waiting', '', '', 2.1,getdate(), dateadd(hour, 1, getdate()), 0 , 0   )
+	(newid(), 'asdkfljakdf', 2, 0, '', '', 4.8,getdate(), dateadd(hour, 1, getdate()), 0 , 0 ),
+	(newid(), 'u890asdf', 4, 0, '', '', 2.1,getdate(), dateadd(hour, 1, getdate()), 0 , 0   )
 ) AS Source (taskid, authid, jobid, taskStatus, customerNotes, adminnotes, timeprice, timeenqueued, timeofexpectedservice,
 deposit, balance )
 ON Target.taskid = Source.taskid 

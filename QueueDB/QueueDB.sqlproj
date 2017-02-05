@@ -139,6 +139,7 @@
       <AnsiNulls>On</AnsiNulls>
       <QuotedIdentifier>On</QuotedIdentifier>
     </Build>
+    <Build Include="dbo\Tables\TaskStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="SeedData.sql" />

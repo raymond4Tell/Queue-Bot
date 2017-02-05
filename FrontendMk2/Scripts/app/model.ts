@@ -13,7 +13,7 @@ export class Task {
     jobId: number;
     timeEnqueued: Date;
     timeOfExpectedService: Date;
-    taskStatus: String;
+    taskStatus: number;
     customerNotes: string;
     adminNotes: string;
 }
@@ -26,6 +26,7 @@ export class Job {
     jobId: number;
     length: TimeRanges;
     name: String;
+    description: String;
 }
 
 export class QueueDTO {

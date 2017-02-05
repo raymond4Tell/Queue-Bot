@@ -14,13 +14,13 @@ import { QueueService } from "./queue-service";
 <form>
        <label>id: {{task.authID}}</label>
 <div class='form-group row'>
-<div class='col-md-2'>
+<div class='col-md-3'>
 <label >
 <select  [(ngModel)]="selectedJob" name="job">
 <option *ngFor='let job of jobList' [ngValue]="job">
 {{job.name}}
 </option></select>
-{{selectedJob.jobId}}
+{{selectedJob.description}}
 </label></div>
 </div>
 <div class='form-group'>
@@ -41,7 +41,9 @@ export class TaskDetailComponent implements OnInit {
         private queueService: QueueService,
         private route: ActivatedRoute,
         private location: Location
-    ) { }
+    ) {
+        this.selectedJob = new Job();
+    }
 
     ngOnInit(): void {
         this.route.params.forEach((params: Params) => {

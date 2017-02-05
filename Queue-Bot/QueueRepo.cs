@@ -12,7 +12,7 @@ namespace Queue_Bot
 {
     public class QueueRepo : IQueueRepository
     {
-        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=Queue_Bot.Properties.Settings.JobStoreConnectionString;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Database=QueueDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
         public Customer addCustomer(Customer newCustomer)
         {
@@ -29,7 +29,7 @@ namespace Queue_Bot
             {
                 var foo = db.ExecuteScalar<Guid>("insert into Tasks(taskID, authId, jobid, taskStatus, customernotes, adminnotes, timeprice,timeenqueued, timeOfExpectedService, deposit, Balance)" +
                                     " output inserted.taskId" +
-                                     " values (newid(), @authid, @jobid, @taskstatus, @customernotes, @adminnotes, @timeprice, getdate(), dateadd(hour, 1, getdate()), @deposit, @Balance)", newTask);
+                                     " values (newid(), @authid, @jobid, 0, @customernotes, @adminnotes, @timeprice, getdate(), dateadd(hour, 1, getdate()), @deposit, @Balance)", newTask);
                 return getTaskById(foo);
             }
         }
@@ -84,10 +84,13 @@ namespace Queue_Bot
         {
             using (IDbConnection db = new SqlConnection(connectionString))
             {
-                return db.Query<Task, Customer, Job, Task>("Select * From Tasks"
+                return db.Query<Task, Job, Customer, Task>("Select * From Tasks"
                     + " inner join Jobs on Jobs.JobId = Tasks.jobId"
                     + " inner join Customers on Customers.AuthId = Tasks.AuthID"
-                    + " where taskStatus = 'Waiting' ", (task, user, job) => { task.job = job; task.customer = user; return task; }, splitOn: "jobId,authId").ToList();
+                    + " where taskStatus = 0 ", (task, job, user) =>
+                    {
+                        task.job = job; task.customer = user; return task;
+                    }, splitOn: "jobId,authId").ToList();
             }
         }
 
