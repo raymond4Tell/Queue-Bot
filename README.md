@@ -73,3 +73,4 @@ _*Three Model Classes*_
 * BEWT - Break-Even Wait Time. Calculated so the sum of each customer's payments is equal to the current balance on the machine. The actual derivation is tedious, but comes to BEWT = sum(Task.Customer.TimeValue * Task.WaitTime)/sum(Task.Customer.TimeValue)
 * Probably a few other fields for internal use; timeNextServerAvailable might be useful for sorting out the queues, f'rinstance.
 
+[![forthebadge](http://forthebadge.com/images/badges/approved-by-george-costanza.svg)](http://forthebadge.com)
