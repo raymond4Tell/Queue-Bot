@@ -146,5 +146,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="QueueDB.publish.xml" />
+    <None Include="Local.publish.xml" />
   </ItemGroup>
 </Project>

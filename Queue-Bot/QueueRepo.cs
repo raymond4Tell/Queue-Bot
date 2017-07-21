@@ -12,7 +12,7 @@ namespace Queue_Bot
 {
     public class QueueRepo : IQueueRepository
     {
-        private string connectionString = ConfigurationManager.ConnectionStrings["Queue_Bot.Properties.Settings.JobStoreConnectionString"].ConnectionString;
+        private string connectionString = ConfigurationManager.ConnectionStrings["JobQueueDB"].ConnectionString;
 
         public Customer addCustomer(Customer newCustomer)
         {
