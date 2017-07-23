@@ -56,7 +56,7 @@ export class AddTaskComponent {
 
     save(): void {
         this.task.authId = this.task.customer.authId;
-        this.task.taskStatus = "Waiting";
+        this.task.taskStatus = 0;
         this.queueService.create(this.task);
         //this.goBack();
     }

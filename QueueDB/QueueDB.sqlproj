@@ -8,7 +8,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{2fd9947e-cc78-462e-97b9-5c5ac109fa8d}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -146,5 +146,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="QueueDB.publish.xml" />
+    <None Include="Local.publish.xml" />
   </ItemGroup>
 </Project>

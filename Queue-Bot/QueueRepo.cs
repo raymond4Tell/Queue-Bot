@@ -12,7 +12,7 @@ namespace Queue_Bot
 {
     public class QueueRepo : IQueueRepository
     {
-        private string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Database=QueueDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+        private string connectionString = ConfigurationManager.ConnectionStrings["JobQueueDB"].ConnectionString;
 
         public Customer addCustomer(Customer newCustomer)
         {
