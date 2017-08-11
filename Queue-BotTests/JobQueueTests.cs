@@ -1,15 +1,9 @@
 ﻿using Xunit;
 using Moq;
-
-using Queue_Bot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Ploeh.AutoFixture;
-using Ploeh.AutoFixture.AutoMoq;
-using Ploeh.AutoFixture.Xunit2;
 using System.Threading;
 
 namespace Queue_Bot.Tests

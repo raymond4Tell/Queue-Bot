@@ -64,8 +64,8 @@ namespace Queue_Bot
             using (IDbConnection db = new SqlConnection(connectionString))
             {
                 return db.Query<Task, Customer, Job, Task>("Select * From Tasks"
-                       + " inner join Jobs on Jobs.JobId = Tasks.jobId"
                     + " inner join Customers on Customers.AuthId = Tasks.AuthID"
+                    + " inner join Jobs on Jobs.JobId = Tasks.jobId"
                     + " where taskId = @taskId", (task, user, job) => { task.customer = user; task.job = job; return task; }, splitOn: "authId,jobId", param: new { taskId = taskId }).FirstOrDefault();
             }
         }

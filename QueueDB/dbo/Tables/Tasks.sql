@@ -2,7 +2,7 @@
     [TaskId]                UNIQUEIDENTIFIER NOT NULL,
     [AuthID]                NVARCHAR (128)   NULL,
     [jobId]                 INT              NOT NULL,
-    [taskStatus]            int				 not NULL,
+    [TaskStatus]            int				 not NULL,
     [customerNotes]         NVARCHAR (MAX)   NULL,
     [adminNotes]            NVARCHAR (MAX)   NULL,
     [timePrice]             FLOAT (53)       NOT NULL,
