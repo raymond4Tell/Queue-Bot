@@ -58,5 +58,5 @@ Good solutions for these will probably require connecting with an actual busines
 *_Program State_*
 * JobQueue - Actual queue and ordering for tasks. Currently PQueue/SortedList, but might need to change.
 * Balance - How much money the machine has on hand; initialized to 0, but changes as customers make and take payments. Will probably also change due to other concerns, like 7c/hr to cover the cost of running the machine.
-* BEWT - Break-Even Wait Time. Calculated so the sum of each customer's payments is equal to the current balance on the machine. The actual derivation is tedious, but comes to BEWT = sum(Task.Customer.TimeValue * Task.WaitTime)/sum(Task.Customer.TimeValue)
+* BEWT - Break-Even Wait Time. Calculated so the sum of each customer's payments is equal to the current balance on the machine. The actual derivation is tedious, but comes to BEWT = BEWT = (sum(customer.TimeValue * customer.WaitTime) - Balance) / sum(customer.TimeValue)
 * Probably a few other fields for internal use; timeNextServerAvailable might be useful for sorting out the queues, for instance.
