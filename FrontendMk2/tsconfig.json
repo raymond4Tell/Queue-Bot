@@ -1,31 +1,18 @@
 {
-  "compilerOptions": {
-    "target": "es5",
-    "module": "system",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "removeComments": false,
-    "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "noEmitOnError": true,
-    "outDir": "./Scripts/app"
-  },
-  "files": [
-    "./Scripts/app/main.ts",
-    "./Scripts/app/app-component.ts",
-    "./Scripts/app/app-module.ts",
-    "./Scripts/app/app-routes.ts",
-    "./Scripts/app/queue.ts",
-    "./Scripts/app/queue-service.ts",
-    "./Scripts/app/task-detail-component.ts",
-    "./Scripts/app/user-service.ts",
-    "./Scripts/app/login-component.ts",
-    "./Scripts/app/auth-guard.ts",
-    "./Scripts/app/rxjs-operators.ts",
-    "./Scripts/app/model.ts",
-    "./typings/index.d.ts"
-  ],
-  "compileOnSave": true
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"jsx": "react",
+		"noImplicitAny": false,
+		"noEmitOnError": true,
+		"removeComments": false,
+		"sourceMap": true,
+		"target": "es5",
+		"module": "commonjs"
+	},
+	"compileOnSave": true,
+	"include": [ "scripts/**/*" ],
+	"exclude": [
+		"node_modules",
+		"wwwroot"
+	]
 }

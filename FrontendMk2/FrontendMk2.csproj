@@ -241,10 +241,19 @@
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
-    <Content Include="Scripts\angular2-polyfills.js" />
-    <Content Include="Scripts\angular2.js" />
-    <Content Include="Scripts\bootstrap.js" />
-    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\app\components\Header.js" />
+    <Content Include="Scripts\app\components\QuestionField.js" />
+    <Content Include="Scripts\app\components\QuestionsBox.js" />
+    <Content Include="Scripts\app\reducers\UpdateQuestions.js" />
+    <Content Include="Scripts\app\types\ActionBuilder.js" />
+    <Content Include="Scripts\app\types\ActionItem.js" />
+    <Content Include="Scripts\app\types\ActionsIndex.js" />
+    <Content Include="Scripts\app\types\ExternalLink.js" />
+    <Content Include="Scripts\app\types\Question.js" />
+    <Content Include="Scripts\app\types\Scenario.js" />
+    <Content Include="Scripts\app\types\Section.js" />
+    <Content Include="Scripts\app\types\SectionItem.js" />
+    <Content Include="Scripts\app\types\SiteConfig.js" />
     <Content Include="Areas\HelpPage\Views\Web.config" />
     <Content Include="Areas\HelpPage\Views\Shared\_Layout.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\ResourceModel.cshtml" />
@@ -265,15 +274,26 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="package.json" />
+    <Content Include="webpack.config.js" />
     <None Include="Properties\PublishProfiles\FrontendMk220161004075954.pubxml" />
-    <None Include="Scripts\jquery-1.10.2.intellisense.js" />
-    <Content Include="Scripts\jquery-1.10.2.js" />
-    <Content Include="Scripts\jquery-1.10.2.min.js" />
-    <Content Include="Scripts\modernizr-2.6.2.js" />
-    <Content Include="Scripts\respond.js" />
-    <Content Include="Scripts\respond.min.js" />
-    <Content Include="Scripts\sammy-0.7.4.js" />
-    <Content Include="Scripts\sammy-0.7.4.min.js" />
+    <Content Include="Scripts\app\components\Header.js.map" />
+    <Content Include="Scripts\app\components\QuestionField.js.map" />
+    <Content Include="Scripts\app\components\QuestionsBox.js.map" />
+    <Content Include="Scripts\app\reducers\UpdateQuestions.js.map" />
+    <Content Include="Scripts\app\types\ActionBuilder.js.map" />
+    <Content Include="Scripts\app\types\ActionItem.js.map" />
+    <Content Include="Scripts\app\types\ActionsIndex.js.map" />
+    <Content Include="Scripts\app\types\ExternalLink.js.map" />
+    <Content Include="Scripts\app\types\Question.js.map" />
+    <Content Include="Scripts\app\types\Scenario.js.map" />
+    <Content Include="Scripts\app\types\Section.js.map" />
+    <Content Include="Scripts\app\types\SectionItem.js.map" />
+    <Content Include="Scripts\app\types\SiteConfig.js.map" />
+    <None Include="Scripts\jquery-3.1.1.intellisense.js" />
+    <Content Include="Scripts\jquery-3.1.1.js" />
+    <Content Include="Scripts\jquery-3.1.1.min.js" />
+    <Content Include="Scripts\jquery-3.1.1.slim.js" />
+    <Content Include="Scripts\jquery-3.1.1.slim.min.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -313,10 +333,12 @@
       <DependentUpon>Web.config</DependentUpon>
     </Content>
     <Content Include="tsconfig.json" />
-    <Content Include="Scripts\system.config.js" />
+    <Content Include="Scripts\jquery-3.1.1.min.map" />
+    <Content Include="Scripts\jquery-3.1.1.slim.min.map" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Scripts\app\containers\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -326,7 +348,6 @@
       <SubType>Designer</SubType>
     </Content>
     <None Include="Project_Readme.html" />
-    <Content Include="Scripts\jquery-1.10.2.min.map" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Queue-Bot\Queue-Bot.csproj">
@@ -335,22 +356,20 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Scripts\app\add-task-component.ts" />
-    <TypeScriptCompile Include="Scripts\app\app-component.ts" />
-    <TypeScriptCompile Include="Scripts\app\app-module.ts" />
-    <TypeScriptCompile Include="Scripts\app\app-routes.ts" />
-    <TypeScriptCompile Include="Scripts\app\app.ts" />
-    <TypeScriptCompile Include="Scripts\app\auth-guard.ts" />
-    <TypeScriptCompile Include="Scripts\app\customer-component.ts" />
-    <TypeScriptCompile Include="Scripts\app\login-component.ts" />
-    <TypeScriptCompile Include="Scripts\app\main.ts" />
-    <TypeScriptCompile Include="Scripts\app\model.ts" />
-    <TypeScriptCompile Include="Scripts\app\queue-service.ts" />
-    <TypeScriptCompile Include="Scripts\app\queue.ts" />
-    <TypeScriptCompile Include="Scripts\app\rxjs-operators.ts" />
-    <TypeScriptCompile Include="Scripts\app\task-detail-component.ts" />
-    <TypeScriptCompile Include="Scripts\app\task-list-component.ts" />
-    <TypeScriptCompile Include="Scripts\app\user-service.ts" />
+    <TypeScriptCompile Include="Scripts\app\components\Header.tsx" />
+    <TypeScriptCompile Include="Scripts\app\components\QuestionField.tsx" />
+    <TypeScriptCompile Include="Scripts\app\components\QuestionsBox.tsx" />
+    <TypeScriptCompile Include="Scripts\app\Index.tsx" />
+    <TypeScriptCompile Include="Scripts\app\reducers\UpdateQuestions.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\ActionBuilder.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\ActionItem.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\ActionsIndex.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\ExternalLink.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\Question.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\Scenario.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\Section.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\SectionItem.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\SiteConfig.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
