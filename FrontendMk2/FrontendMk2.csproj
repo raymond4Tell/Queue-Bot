@@ -261,6 +261,7 @@
     <Content Include="Areas\HelpPage\Views\Help\DisplayTemplates\ApiGroup.cshtml" />
     <Content Include="Areas\HelpPage\Views\Help\Api.cshtml" />
     <Content Include="package.json" />
+    <Content Include="Scripts\bundle.js" />
     <Content Include="webpack.config.js" />
     <None Include="Properties\PublishProfiles\FrontendMk220161004075954.pubxml" />
     <None Include="Scripts\jquery-3.1.1.intellisense.js" />
