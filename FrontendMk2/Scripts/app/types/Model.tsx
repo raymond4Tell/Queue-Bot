@@ -29,6 +29,6 @@ export class Job {
 
 export class QueueDTO {
 	machineBalance: number;
-	bewt: Moment.;
+	bewt: Moment.Duration;
 	internalQueue: Task[];
 }

@@ -2,13 +2,13 @@
 import * as ReactDOM from "react-dom";
 import { connect, Dispatch, Provider } from "react-redux";
 import Link from "redux-first-router-link";
-import { NOT_FOUND, connectRoutes } from "redux-first-router"
-import { combineReducers, createStore, applyMiddleware, compose } from "redux"
-import createHistory from 'history/createBrowserHistory'
+import { NOT_FOUND, connectRoutes } from "redux-first-router";
+import { combineReducers, createStore, applyMiddleware, compose } from "redux";
+import createHistory from 'history/createBrowserHistory';
 import { Header } from "./components/Header";
-import { Dashboard } from "./components/Dashboard"
-import { Job, Task, QueueDTO, Customer } from "./types/Model"
-import { Timespan } from "timespan";
+import { Dashboard } from "./components/Dashboard";
+import { Job, Task, QueueDTO, Customer } from "./types/Model";
+import * as moment from "moment";
 
 "using strict";
 
@@ -50,7 +50,7 @@ const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer });
 const middlewares = applyMiddleware(middleware);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
-const BEWT: Timespan = new Date().setHours(new Date().getHours() + 1) - Date.now();
+const BEWT: moment.Duration = moment.duration(2, "hours");
 const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 25.6, internalQueue: [] }
 
 const App = ({ pageType, onClick }) => {
@@ -61,7 +61,7 @@ const App = ({ pageType, onClick }) => {
 			that doesn't play well with the current "shape" for pageType.
 			This also does need to be a single expression, if/else if/else blocks are not allowed. */
 			pageType == "QUESTIONS!"
-				? <Dashboard bewt={testQueue.bewt} />
+				? <Dashboard bewt={testQueue.bewt} machineBalance={testQueue.machineBalance} internalQueue={testQueue.internalQueue} />
 				: !isNaN(pageType) && null != pageType ? <h1>SCENARIO: {pageType}</h1>
 					: <h1>HOME PAGe</h1>
 		}
