@@ -315,6 +315,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Scripts\app\containers\" />
+    <Folder Include="Scripts\app\reducers\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="fonts\glyphicons-halflings-regular.woff" />
@@ -332,20 +333,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\app\components\Dashboard.tsx" />
     <TypeScriptCompile Include="Scripts\app\components\Header.tsx" />
-    <TypeScriptCompile Include="Scripts\app\components\QuestionField.tsx" />
-    <TypeScriptCompile Include="Scripts\app\components\QuestionsBox.tsx" />
     <TypeScriptCompile Include="Scripts\app\Index.tsx" />
-    <TypeScriptCompile Include="Scripts\app\reducers\UpdateQuestions.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\ActionBuilder.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\ActionItem.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\ActionsIndex.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\ExternalLink.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\Question.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\Scenario.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\Section.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\SectionItem.ts" />
-    <TypeScriptCompile Include="Scripts\app\types\SiteConfig.ts" />
+    <TypeScriptCompile Include="Scripts\app\types\Model.tsx" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />

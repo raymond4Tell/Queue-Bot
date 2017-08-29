@@ -6,32 +6,16 @@ import { NOT_FOUND, connectRoutes } from "redux-first-router"
 import { combineReducers, createStore, applyMiddleware, compose } from "redux"
 import createHistory from 'history/createBrowserHistory'
 import { Header } from "./components/Header";
-import { QuestionsBox } from "./components/QuestionsBox";
-import { QuestionField } from "./components/QuestionField";
-import { Scenario } from "./types/Scenario";
-import { Question } from "./types/Question";
+import { Dashboard } from "./components/Dashboard"
+import { Job, Task, QueueDTO, Customer } from "./types/Model"
+import { Timespan } from "timespan";
 
 "using strict";
 
 export interface StoreState {
-	jobList: Array<string>,
-	scenarioList: Scenario[],
-	questionList: Question[]
+	currentQueue: QueueDTO,
+	jobList: Job[]
 };
-
-const testQuestion = {
-	Text: "What is your favourite colour?",
-	Required: true,
-	QuestionId: "source",
-	Options: ["red", "blue", "green"]
-};
-const listOfQuestions = [testQuestion, {
-	Text: "Why is a raven like a writing desk?",
-	Required: false,
-	QuestionId: "carroll",
-	Options: ["Because Poe wrote on both", "Because they are nevar put with the wrong end front", "Hiding behind the couch"]
-}]
-
 
 export const pageTypeReducer = (state = null, action = { type: "", payload: { id: "" } }) => {
 	switch (action.type) {
@@ -57,7 +41,7 @@ enum routesEnum {
 }
 const routesMap = {
 	HOME: '/home',      // action <-> url path
-	SCENARIO: '/scenario/:id',  // :id is a dynamic segment
+	SCENARIO: '/task/:id',  // :id is a dynamic segment
 	QUESTIONS: "/questions"
 };
 
@@ -66,7 +50,8 @@ const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer });
 const middlewares = applyMiddleware(middleware);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
-
+const BEWT: Timespan = new Date().setHours(new Date().getHours() + 1) - Date.now();
+const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 25.6, internalQueue: [] }
 
 const App = ({ pageType, onClick }) => {
 	return <div>
@@ -76,9 +61,9 @@ const App = ({ pageType, onClick }) => {
 			that doesn't play well with the current "shape" for pageType.
 			This also does need to be a single expression, if/else if/else blocks are not allowed. */
 			pageType == "QUESTIONS!"
-			? <QuestionField questionList={listOfQuestions} />
-			: !isNaN(pageType) && null != pageType ? <h1>SCENARIO: {pageType}</h1>
-				: <h1>HOME PAGe</h1>
+				? <Dashboard bewt={testQueue.bewt} />
+				: !isNaN(pageType) && null != pageType ? <h1>SCENARIO: {pageType}</h1>
+					: <h1>HOME PAGe</h1>
 		}
 	</div>
 };

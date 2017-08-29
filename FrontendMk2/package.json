@@ -17,13 +17,10 @@
 		"ts-loader": "^2.3.1"
 	},
 	"dependencies": {
-		"@types/jest": "^19.2.2",
-		"@types/react": "^15.0.22",
-		"@types/react-dom": "^15.5.0",
-		"@types/react-redux": "^4.4.47",
-		"@types/react-router-dom": "^4.0.7",
 		"history": "^4.6.3",
 		"react": "^15.5.4",
+		"react-moment": "^0.6.4",
+		"moment": "^2.18.1",
 		"react-dom": "^15.5.4",
 		"react-redux": "^5.0.5",
 		"react-router-dom": "^4.1.2",
