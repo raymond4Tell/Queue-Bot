@@ -50,8 +50,14 @@ const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer });
 const middlewares = applyMiddleware(middleware);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
-const BEWT: moment.Duration = moment.duration(2, "hours");
-const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 25.6, internalQueue: [] }
+const BEWT: moment.Duration = moment.duration({ hours: 2, minutes: 20, seconds: 40 });
+const internalQueue: Task[] = [{
+	timeEnqueued: moment.now(), customer: { name: "Alfred", authId: "klkjlk", requestedJobs: [] }, authId: "sadfasdf",
+	job: { jobId: 1, length: moment.duration({ hours: 1 }), description: "asdfadfkl", name: "sdasdfkjlkk" }, taskId: "asdfasdfasdf",
+	taskStatus: 1, waitTime: moment.duration({ hours: 3 }), deposit: 3, timePrice: 1.5, timeOfExpectedService: moment.now(), Balance: -4.1,
+	jobId: 1, customerNotes: "", adminNotes: ""
+}]
+const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 25.6, internalQueue: internalQueue }
 
 const App = ({ pageType, onClick }) => {
 	return <div>

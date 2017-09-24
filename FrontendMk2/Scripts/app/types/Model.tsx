@@ -2,15 +2,15 @@
 export class Task {
 	authId: string;
 	taskId: string;
-	waitTime: TimeRanges;
+	waitTime: Moment.Duration;
 	customer: Customer;
 	deposit: number;
 	timePrice: number;
 	Balance: number;
 	job: Job;
 	jobId: number;
-	timeEnqueued: Date;
-	timeOfExpectedService: Date;
+	timeEnqueued: number;
+	timeOfExpectedService: number;
 	taskStatus: number;
 	customerNotes: string;
 	adminNotes: string;
@@ -22,7 +22,7 @@ export class Customer {
 }
 export class Job {
 	jobId: number;
-	length: number;
+	length: Moment.Duration;
 	name: String;
 	description: String;
 }
