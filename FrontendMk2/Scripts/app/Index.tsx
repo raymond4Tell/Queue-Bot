@@ -66,8 +66,8 @@ const App = ({ pageType, onClick }) => {
 			/* This ought to be a hash table or something, keyed off of pageType, but
 			that doesn't play well with the current "shape" for pageType.
 			This also does need to be a single expression, if/else if/else blocks are not allowed. */
-			pageType == "QUESTIONS!"
-				? <Dashboard bewt={testQueue.bewt} machineBalance={testQueue.machineBalance} internalQueue={testQueue.internalQueue} />
+            pageType == "QUESTIONS!"
+                ? <Dashboard {...testQueue } />
 				: !isNaN(pageType) && null != pageType ? <h1>SCENARIO: {pageType}</h1>
 					: <h1>HOME PAGe</h1>
 		}
