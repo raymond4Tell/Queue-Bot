@@ -296,3 +296,4 @@ __pycache__/
 
 /FrontendMk2/Scripts/app/**/*.js
 /FrontendMk2/Scripts/**/*.map
+/FrontendMk2/Scripts/bundle.js
