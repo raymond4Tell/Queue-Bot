@@ -1,5 +1,4 @@
 ﻿import * as React from "react";
-import { StoreState } from "./../Index";
 import Link from "redux-first-router-link";
 
 export const Header = () => {
