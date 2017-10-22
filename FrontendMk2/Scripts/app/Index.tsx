@@ -33,7 +33,7 @@ const internalQueue: Task[] = [{
     taskStatus: 1, waitTime: moment.duration({ hours: 3 }), deposit: 3, timePrice: 1.5, timeOfExpectedService: moment.now(), Balance: -4.1,
     jobId: 1, customerNotes: "", adminNotes: ""
 }]
-const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 25.6, internalQueue: [] }
+const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 0, internalQueue: [] }
 export const taskReducer = (state = internalQueue, action) =>
 {
     switch (action.type) {
@@ -43,7 +43,23 @@ export const taskReducer = (state = internalQueue, action) =>
             return state;
     }
 }
+export const BEWTReducer = (state = BEWT, action) => {
+    switch (action.type) {
+        case "NEW_BEWT":
+            return action.BEWT;
+        default:
+            return state;
+    }
+}
 
+export const balanceReducer = (state = 25.6, action) => {
+    switch (action.type) {
+        case "NEW_BALANCE":
+            return action.balance;
+        default:
+            return state;
+    }
+}
 const history = createHistory();
 
 // THE WORK:
@@ -60,12 +76,13 @@ const routesMap = {
 
 const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 // and you already know how the story ends:
-const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer, tasks: taskReducer });
+const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer, tasks: taskReducer, bewt: BEWTReducer, machineBalance: balanceReducer });
 const middlewares = applyMiddleware(middleware);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
 
 const App = ({ pageType, onClick }) => {
-	return <div>
+    return <div>
+        <a onClick={onClick}>Butts</a>
 		<Header />
 		{
 			/* This ought to be a hash table or something, keyed off of pageType, but
@@ -80,7 +97,7 @@ const App = ({ pageType, onClick }) => {
 };
 const mapStateToProps = ({ pageType }) => ({ pageType });
 const mapDispatchToProps = (dispatch) => ({
-	onClick: () => dispatch({ type: 'USER', payload: { id: 5 } })
+	onClick: () => dispatch({ type: 'SCENARIO', payload: { id: 5 } })
 });
 
 const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
