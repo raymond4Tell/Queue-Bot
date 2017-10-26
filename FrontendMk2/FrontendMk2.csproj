@@ -334,6 +334,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\app\components\Dashboard.tsx" />
+    <TypeScriptCompile Include="Scripts\app\components\NewTask.tsx" />
     <TypeScriptCompile Include="Scripts\app\components\Header.tsx" />
     <TypeScriptCompile Include="Scripts\app\Index.tsx" />
     <TypeScriptCompile Include="Scripts\app\types\Model.tsx" />

@@ -6,6 +6,7 @@ import { NOT_FOUND, connectRoutes } from "redux-first-router";
 import { combineReducers, createStore, applyMiddleware, compose } from "redux";
 import createHistory from 'history/createBrowserHistory';
 import { Header } from "./components/Header";
+import { ConnectedNewTask } from "./components/NewTask";
 import { ConnectedDashboard } from "./components/Dashboard";
 import { Job, Task, QueueDTO, Customer } from "./types/Model";
 import * as moment from "moment";
@@ -90,7 +91,7 @@ const App = ({ pageType, onClick }) => {
 			This also does need to be a single expression, if/else if/else blocks are not allowed. */
             pageType == "QUESTIONS!"
                 ? <ConnectedDashboard {...testQueue } />
-				: !isNaN(pageType) && null != pageType ? <h1>SCENARIO: {pageType}</h1>
+                : !isNaN(pageType) && null != pageType ? <ConnectedNewTask />
 					: <h1>HOME PAGe</h1>
 		}
 	</div>
