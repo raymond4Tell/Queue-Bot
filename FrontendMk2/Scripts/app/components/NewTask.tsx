@@ -5,8 +5,8 @@ import { connect, Dispatch, Provider } from "react-redux";
 import * as moment from "moment";
 import Moment from "react-moment";
 // TODO: Find better way to display the BEWT with some measure of precision.
-const NewTask = (onClick, createTask) => {
-    var addNewTask = () => { onClick.createTask(); };
+const NewTask = ({ createTask }) => {
+    var addNewTask = () => { createTask(); };
     return <div>
         <h2>New Task</h2>
         <button> Back </button >
@@ -16,10 +16,7 @@ const NewTask = (onClick, createTask) => {
 
 const mapStateToProps = (state) => ({});
 const mapDispatchToProps = (dispatch) => ({
-    onClick: () => dispatch({
-        type: 'SCENARIO',
-        payload: { id: 5 }
-    }),
+   
     createTask: () => dispatch({
         type: "ADD_TASK",
         newTask: {
