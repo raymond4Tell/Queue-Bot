@@ -17,8 +17,8 @@ export const pageTypeReducer = (state = null, action = { type: "", payload: { id
 	switch (action.type) {
 		case routesEnum.HOME:
 		case NOT_FOUND:
-			return null
-		case routesEnum.SCENARIO:
+            return null
+        case routesEnum.TASK:
 			return action.payload.id;
 		case routesEnum.QUESTIONS:
 			return "QUESTIONS!"
@@ -66,12 +66,12 @@ const history = createHistory();
 // THE WORK:
 enum routesEnum {
 	HOME = "HOME",
-	SCENARIO = "SCENARIO",
+	TASK = "TASK",
 	QUESTIONS = "QUESTIONS"
 }
 const routesMap = {
 	HOME: '/home',      // action <-> url path
-	SCENARIO: '/task/:id',  // :id is a dynamic segment
+	TASK: '/task/:id',  // :id is a dynamic segment
 	QUESTIONS: "/questions"
 };
 
@@ -98,7 +98,7 @@ const App = ({ pageType, onClick }) => {
 };
 const mapStateToProps = ({ pageType }) => ({ pageType });
 const mapDispatchToProps = (dispatch) => ({
-	onClick: () => dispatch({ type: 'SCENARIO', payload: { id: 5 } })
+    onClick: () => dispatch({ type: routesEnum.TASK, payload: { id: 5 } })
 });
 
 const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
