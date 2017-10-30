@@ -6,17 +6,18 @@ import * as moment from "moment";
 import Moment from "react-moment";
 // TODO: Find better way to display the BEWT with some measure of precision.
 const NewTask = ({ createTask }) => {
-    var addNewTask = () => { createTask(); };
+    let input;
     return <div>
         <h2>New Task</h2>
+        <input ref={node => { input = node; }} />
         <button> Back </button >
-        <button onClick={() => createTask("butts")}> Save</button >
+        <button onClick={() => createTask(input.value)}> Save</button >
     </div>;
 }
 
 const mapStateToProps = (state) => ({});
 const mapDispatchToProps = (dispatch) => ({
-   
+
     createTask: (authID) => dispatch({
         type: "ADD_TASK",
         newTask: {
