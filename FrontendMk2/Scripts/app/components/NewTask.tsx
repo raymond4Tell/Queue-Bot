@@ -10,18 +10,18 @@ const NewTask = ({ createTask }) => {
     return <div>
         <h2>New Task</h2>
         <button> Back </button >
-        <button onClick={addNewTask}> Save</button >
+        <button onClick={() => createTask("butts")}> Save</button >
     </div>;
 }
 
 const mapStateToProps = (state) => ({});
 const mapDispatchToProps = (dispatch) => ({
    
-    createTask: () => dispatch({
+    createTask: (authID) => dispatch({
         type: "ADD_TASK",
         newTask: {
-            timeEnqueued: moment.now(), customer: { name: "Bert", authId: "klkjlk", requestedJobs: [] }, authId: "sadfasdf",
-            job: { jobId: 1, length: moment.duration({ hours: 1 }), description: "asdfadfkl", name: "sdasdfkjlkk" }, taskId: "jkljlkl",
+            timeEnqueued: moment.now(), customer: { name: "Bert", authId: "klkjlk", requestedJobs: [] }, authId: "adkkql",
+            job: { jobId: 1, length: moment.duration({ hours: 1 }), description: "asdfadfkl", name: "sdasdfkjlkk" }, taskId: authID,
             taskStatus: 1, waitTime: moment.duration({ hours: 3 }), deposit: 3, timePrice: 1.5, timeOfExpectedService: moment.now(), Balance: -4.1,
             jobId: 1, customerNotes: "", adminNotes: ""
         }
