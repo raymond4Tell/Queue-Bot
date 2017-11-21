@@ -1,34 +1,35 @@
 {
-	"name": "queue-bot",
-	"version": "1.0.0",
-	"description": "A machine for ensuring semi-prompt service",
-	"repository": "https://github.com/darthbob88/Queue-Bot",
-	"license": "none",
-	"devDependencies": {
-		"gulp": "^3.9.1",
-		"gulp-clean-css": "^3.0.3",
-		"gulp-concat": "^2.6.1",
-		"gulp-less": "^3.3.0",
-		"gulp-plumber": "^1.1.0",
-		"gulp-sourcemaps": "^2.4.1",
-		"gulp-uglify": "^2.0.1",
-		"path": "^0.12.7",
-		"source-map-loader": "^0.2.1",
-		"ts-loader": "^2.3.1"
-	},
-	"dependencies": {
-		"history": "^4.6.3",
-		"react": "^15.5.4",
-		"react-moment": "^0.6.4",
-		"moment": "^2.18.1",
-		"redux": "^3.7.2",
-		"react-dom": "^15.5.4",
-		"react-redux": "^5.0.5",
-		"react-router-dom": "^4.1.2",
-		"react-universal-component": "^2.0.11",
-		"redux-first-router": "^1.8.9",
-		"redux-first-router-link": "^1.1.1",
-		"typescript": "^2.4.2",
-		"webpack": "^3.3.0"
-	}
+  "name": "queue-bot",
+  "version": "1.0.0",
+  "description": "A machine for ensuring semi-prompt service",
+  "repository": "https://github.com/darthbob88/Queue-Bot",
+  "license": "none",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.0.3",
+    "gulp-concat": "^2.6.1",
+    "gulp-less": "^3.3.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-sourcemaps": "^2.4.1",
+    "gulp-uglify": "^2.0.1",
+    "path": "^0.12.7",
+    "source-map-loader": "^0.2.1",
+    "ts-loader": "^2.3.1"
+  },
+  "dependencies": {
+    "@types/react": "^16.0.20",
+    "history": "^4.6.3",
+    "moment": "^2.18.1",
+    "react": "^15.5.4",
+    "react-dom": "^15.5.4",
+    "react-moment": "^0.6.4",
+    "react-redux": "^5.0.5",
+    "react-router-dom": "^4.1.2",
+    "react-universal-component": "^2.0.11",
+    "redux": "^3.7.2",
+    "redux-first-router": "^1.8.9",
+    "redux-first-router-link": "^1.1.1",
+    "typescript": "^2.4.2",
+    "webpack": "^3.3.0"
+  }
 }

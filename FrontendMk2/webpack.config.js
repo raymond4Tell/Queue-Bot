@@ -1,6 +1,6 @@
 ﻿/// <binding ProjectOpened='Watch - Development' />
 module.exports = {
-	entry: "./Scripts/app/index.tsx",
+	entry: "./Scripts/app/Index.tsx",
 	output: {
 		filename: "./Scripts/bundle.js",
 	},
