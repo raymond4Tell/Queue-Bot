@@ -10,6 +10,8 @@ import { ConnectedNewTask } from "./components/NewTask";
 import { ConnectedDashboard } from "./components/Dashboard";
 import { Job, Task, QueueDTO, Customer } from "./types/Model";
 import * as moment from "moment";
+import thunk from 'redux-thunk';
+import { loadJobs } from "./actions/jobActions";
 
 "using strict";
 
@@ -36,7 +38,9 @@ const internalQueue: Task[] = [
         jobId: 1, customerNotes: "", adminNotes: ""
     }
 ]
-const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 0, internalQueue: [] }
+const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 0, internalQueue: [] };
+
+// TODO: Pull these reducers out into their own files in the folder I created for them.
 export const taskReducer = (state = internalQueue, action) => {
     switch (action.type) {
         case "ADD_TASK":
@@ -49,6 +53,15 @@ export const BEWTReducer = (state = BEWT, action) => {
     switch (action.type) {
         case "NEW_BEWT":
             return action.BEWT;
+        default:
+            return state;
+    }
+}
+
+export const jobsReducer = (state = [], action) => {
+    switch (action.type) {
+        case "LOAD_JOBS_SUCCESS":
+            return action.jobs;
         default:
             return state;
     }
@@ -78,8 +91,8 @@ const routesMap = {
 
 const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 // and you already know how the story ends:
-const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer, tasks: taskReducer, bewt: BEWTReducer, machineBalance: balanceReducer });
-const middlewares = applyMiddleware(middleware);
+const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer, tasks: taskReducer, bewt: BEWTReducer, machineBalance: balanceReducer, jobs: jobsReducer });
+const middlewares = applyMiddleware(middleware, thunk);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
 
 const App = ({ pageType, onClick }) => {
@@ -104,6 +117,7 @@ const mapDispatchToProps = (dispatch) => ({
 
 const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
 
+store.dispatch(loadJobs());
 ReactDOM.render(
     <Provider store={store}>
         <AppContainer />

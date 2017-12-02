@@ -24,6 +24,7 @@
     "react-dom": "^15.5.4",
     "react-moment": "^0.6.4",
     "react-redux": "^5.0.5",
+    "redux-thunk": "^2.2.0",
     "react-router-dom": "^4.1.2",
     "react-universal-component": "^2.0.11",
     "redux": "^3.7.2",

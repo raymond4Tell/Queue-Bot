@@ -25,10 +25,11 @@ export const SingleTask = (task: QBot.Task) =>
         TimePrice: {task.timePrice} <br />
         Went on Queue: {task.timeEnqueued}<br />
         Balance: {task.Balance}<br />
-        jobId: {task.job.jobId}
+        jobId: {task.jobId}
     </li>
 
 const mapStateToProps = (state) => ({
+    // TODO: Find some way to map this from the full list of tasks.
     internalQueue: state.tasks,
     bewt: state.bewt,
     machineBalance: state.machineBalance

@@ -6,7 +6,8 @@ import * as moment from "moment";
 import Moment from "react-moment";
 
 export interface NewTaskFormProps {
-    createTask: any
+    createTask: any,
+    jobList: QBot.Job[]
 }
 
 type NewTaskState = {
@@ -15,6 +16,7 @@ type NewTaskState = {
 
 class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
     state: NewTaskState = {
+        // Really ought to do this with `newTask : new QBot.Task()`, but CBA to add a proper constructor to that type.
         newTask: {
             timeEnqueued: moment.now(),
             customer: {
@@ -47,19 +49,28 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
         const value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
         this.setState({ newTask: { ...this.state.newTask, [name]: value } });
-        //this.props.createTask(this.state.newTask);
     };
 
     sendTask = () => {
-        this.setState({ newTask: { ...this.state.newTask } });
         this.props.createTask(this.state.newTask);
     }
 
     render() {
         const { handleIncrement } = this;
-        const { createTask } = this.props;
+        const { createTask, jobList } = this.props;
         return <div>
             <h2>New Task</h2>
+            <fieldset>
+                {jobList.map(job =>
+                    <label key={job.jobId} >
+                        Name: {job.name}<br />
+                        duration: {job.length}
+                        <input type="radio" value={job.jobId} name="jobId" onChange={this.handleIncrement}
+                            checked={this.state.newTask.jobId == job.jobId} />
+                    </label>
+                )
+                }
+            </fieldset>
             <label >Task ID
                 <input type="text" name="taskId" onChange={this.handleIncrement} value={this.state.newTask.taskId} />
             </label>
@@ -72,7 +83,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
     }
 }
 
-const mapStateToProps = (state) => ({});
+const mapStateToProps = (state) => ({ jobList: state.jobs });
 const mapDispatchToProps = (dispatch) => ({
 
     createTask: (newTask) => dispatch({
@@ -80,4 +91,4 @@ const mapDispatchToProps = (dispatch) => ({
         newTask: newTask
     })
 });
-export const ConnectedNewTask = connect(null, mapDispatchToProps)(NewTaskForm);
+export const ConnectedNewTask = connect(mapStateToProps, mapDispatchToProps)(NewTaskForm);

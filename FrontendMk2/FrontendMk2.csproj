@@ -314,7 +314,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Scripts\app\containers\" />
     <Folder Include="Scripts\app\reducers\" />
   </ItemGroup>
   <ItemGroup>
@@ -333,9 +332,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="Scripts\app\actions\jobActions.ts" />
     <TypeScriptCompile Include="Scripts\app\components\Dashboard.tsx" />
     <TypeScriptCompile Include="Scripts\app\components\NewTask.tsx" />
     <TypeScriptCompile Include="Scripts\app\components\Header.tsx" />
+    <TypeScriptCompile Include="Scripts\app\JobQueueAPI.ts" />
     <TypeScriptCompile Include="Scripts\app\Index.tsx" />
     <TypeScriptCompile Include="Scripts\app\types\Model.tsx" />
   </ItemGroup>
