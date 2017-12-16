@@ -4,6 +4,7 @@ import Link from "redux-first-router-link";
 import { connect, Dispatch, Provider } from "react-redux";
 import * as moment from "moment";
 import Moment from "react-moment";
+import { submitTask } from "../actions/jobActions";
 
 export interface NewTaskFormProps {
     createTask: any,
@@ -24,7 +25,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
                 authId: "klkjlk",
                 requestedJobs: []
             },
-            authId: "",
+            authId: "klkjlk",
             jobId: 1,
             job: {
                 jobId: 1,
@@ -51,6 +52,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
         this.setState({ newTask: { ...this.state.newTask, [name]: value } });
     };
 
+    // TODO: Add better validation, here and server-side.
     sendTask = () => {
         this.props.createTask(this.state.newTask);
     }
@@ -72,7 +74,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
                 }
             </fieldset>
             <label >Task ID
-                <input type="text" name="taskId" onChange={this.handleIncrement} value={this.state.newTask.taskId} />
+                <input type="text" name="authId" onChange={this.handleIncrement} value={this.state.newTask.authId} />
             </label>
             <label>Time Price
                 <input type="number" name="timePrice" onChange={this.handleIncrement} value={this.state.newTask.timePrice} />
@@ -85,10 +87,6 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
 
 const mapStateToProps = (state) => ({ jobList: state.jobs });
 const mapDispatchToProps = (dispatch) => ({
-
-    createTask: (newTask) => dispatch({
-        type: "ADD_TASK",
-        newTask: newTask
-    })
+    createTask: (newTask) => dispatch(submitTask(newTask))
 });
 export const ConnectedNewTask = connect(mapStateToProps, mapDispatchToProps)(NewTaskForm);
