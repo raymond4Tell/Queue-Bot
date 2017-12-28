@@ -11,7 +11,8 @@ import { ConnectedDashboard } from "./components/Dashboard";
 import { Job, Task, QueueDTO, Customer } from "./types/Model";
 import * as moment from "moment";
 import thunk from 'redux-thunk';
-import { loadJobs } from "./actions/jobActions";
+import { loadJobs } from "./state/jobActions";
+import { taskOperations } from "./state/tasks";
 
 "using strict";
 
@@ -30,26 +31,10 @@ export const pageTypeReducer = (state = null, action = { type: "", payload: { id
 };
 
 const BEWT: moment.Duration = moment.duration({ hours: 2, minutes: 20, seconds: 40 });
-const internalQueue: Task[] = [
-    {
-        timeEnqueued: moment.now(), customer: { name: "Alfred", authId: "klkjlk", requestedJobs: [] }, authId: "sadfasdf",
-        job: { jobId: 1, length: moment.duration({ hours: 1 }), description: "asdfadfkl", name: "sdasdfkjlkk" }, taskId: "asdfasdfasdf",
-        taskStatus: 1, waitTime: moment.duration({ hours: 3 }), deposit: 3, timePrice: 1.5, timeOfExpectedService: moment.now(), Balance: -4.1,
-        jobId: 1, customerNotes: "", adminNotes: ""
-    }
-]
-const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 0, internalQueue: [] };
+
 
 // TODO: Pull these reducers out into their own files in the folder I created for them.
-export const taskReducer = (state = internalQueue, action) => {
-    switch (action.type) {
-        case "ADD_TASK":
-            return [...state, action.newTask];
-        default:
-            return state;
-    }
-}
-export const BEWTReducer = (state = BEWT, action) => {
+const bewt = (state = BEWT, action) => {
     switch (action.type) {
         case "NEW_BEWT":
             return action.BEWT;
@@ -58,16 +43,7 @@ export const BEWTReducer = (state = BEWT, action) => {
     }
 }
 
-export const jobsReducer = (state = [], action) => {
-    switch (action.type) {
-        case "LOAD_JOBS_SUCCESS":
-            return action.jobs;
-        default:
-            return state;
-    }
-}
-
-export const balanceReducer = (state = 25.6, action) => {
+function machineBalance(state = 25.6, action) {
     switch (action.type) {
         case "NEW_BALANCE":
             return action.balance;
@@ -81,6 +57,7 @@ const history = createHistory();
 enum routesEnum {
     HOME = "HOME",
     TASK = "TASK",
+    TASKLIST = "TASKLIST",
     QUESTIONS = "QUESTIONS"
 }
 const routesMap = {
@@ -91,10 +68,16 @@ const routesMap = {
 
 const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 // and you already know how the story ends:
-const rootReducer = combineReducers({ location: reducer, pageType: pageTypeReducer, tasks: taskReducer, bewt: BEWTReducer, machineBalance: balanceReducer, jobs: jobsReducer });
+import tasks from "./state/tasks";
+import jobs from "./state/jobActions";
+const rootReducer = combineReducers({
+    location: reducer, pageType: pageTypeReducer, tasks, bewt,
+    machineBalance, jobs
+});
 const middlewares = applyMiddleware(middleware, thunk);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
 
+const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 0, internalQueue: [] };
 const App = ({ pageType, onClick }) => {
     return <div>
         <a onClick={onClick}>Butts</a>
@@ -118,6 +101,7 @@ const mapDispatchToProps = (dispatch) => ({
 const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
 
 store.dispatch(loadJobs());
+store.dispatch(taskOperations.loadCurrentTasks());
 ReactDOM.render(
     <Provider store={store}>
         <AppContainer />

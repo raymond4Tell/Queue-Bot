@@ -1,5 +1,12 @@
 ﻿import jobQueueAPI from '../JobQueueAPI';
-
+export default function jobsReducer(state = [], action) {
+    switch (action.type) {
+        case "LOAD_JOBS_SUCCESS":
+            return action.jobs;
+        default:
+            return state;
+    }
+}
 export function loadJobs() {
     return function (dispatch) {
         return jobQueueAPI.getAllJobs().then(jobList => {
@@ -8,20 +15,6 @@ export function loadJobs() {
             throw (error);
         });
     };
-}
-
-export function submitTask(task) {
-    return function (dispatch) {
-        return jobQueueAPI.createTask(task).then(newTask => {
-            dispatch(createTaskSuccess(newTask));
-        }).catch(error => {
-            throw (error);
-        });
-    };
-}
-
-export function createTaskSuccess(newTask) {
-    return { type: "ADD_TASK", newTask: newTask };
 }
 
 // TODO: Add nice enum for action types.

@@ -4,7 +4,7 @@ import Link from "redux-first-router-link";
 import { connect, Dispatch, Provider } from "react-redux";
 import * as moment from "moment";
 import Moment from "react-moment";
-import { submitTask } from "../actions/jobActions";
+import { taskOperations } from "../state/tasks/";
 
 export interface NewTaskFormProps {
     createTask: any,
@@ -87,6 +87,6 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
 
 const mapStateToProps = (state) => ({ jobList: state.jobs });
 const mapDispatchToProps = (dispatch) => ({
-    createTask: (newTask) => dispatch(submitTask(newTask))
+    createTask: (newTask) => dispatch(taskOperations.submitTask(newTask))
 });
 export const ConnectedNewTask = connect(mapStateToProps, mapDispatchToProps)(NewTaskForm);
