@@ -1,5 +1,6 @@
 ﻿import * as React from "react";
 import * as QBot from "../types/Model";
+import { taskSelectors } from "../state/tasks";
 import Link from "redux-first-router-link";
 import { connect } from 'react-redux';
 import Moment from "react-moment";
@@ -30,7 +31,7 @@ export const SingleTask = (task: QBot.Task) =>
 
 const mapStateToProps = (state) => ({
     // TODO: Find some way to map this from the full list of tasks.
-    internalQueue: state.tasks,
+    internalQueue: taskSelectors.getActiveSortedTasks(state),
     bewt: state.bewt,
     machineBalance: state.machineBalance
 });

@@ -87,7 +87,7 @@ const App = ({ pageType, onClick }) => {
 			that doesn't play well with the current "shape" for pageType.
 			This also does need to be a single expression, if/else if/else blocks are not allowed. */
             pageType == "QUESTIONS!"
-                ? <ConnectedDashboard {...testQueue } />
+                ? <ConnectedDashboard />
                 : !isNaN(pageType) && null != pageType ? <ConnectedNewTask />
                     : <h1>HOME PAGe</h1>
         }

@@ -22,4 +22,14 @@ function submitTask(task) {
     };
 }
 
+function updateTask(task) {
+    return function (dispatch) {
+        return jobQueueAPI.update(task).then(newTask => {
+            dispatch(actions.updateTaskSuccess(newTask));
+        }).catch(error => {
+            throw (error);
+        });
+    };
+}
+
 export {submitTask, loadCurrentTasks }
