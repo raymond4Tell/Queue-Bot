@@ -25,7 +25,7 @@ export const SingleTask = (task: QBot.Task) =>
         Job: {task.job.name}<br />
         TimePrice: {task.timePrice} <br />
         Went on Queue: {task.timeEnqueued}<br />
-        Balance: {task.Balance}<br />
+        Balance: {task.balance}<br />
         jobId: {task.jobId}
     </li>
 

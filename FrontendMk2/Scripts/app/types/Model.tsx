@@ -6,7 +6,7 @@ export class Task {
 	customer: Customer;
 	deposit: number;
 	timePrice: number;
-	Balance: number;
+	balance: number;
 	job: Job;
 	jobId: number;
 	timeEnqueued: number;

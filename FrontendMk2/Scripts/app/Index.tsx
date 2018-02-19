@@ -20,11 +20,12 @@ export const pageTypeReducer = (state = null, action = { type: "", payload: { id
     switch (action.type) {
         case routesEnum.HOME:
         case NOT_FOUND:
-            return null
+        case routesEnum.TASKLIST:
+            return routesEnum.HOME
         case routesEnum.TASK:
-            return action.payload.id;
-        case routesEnum.QUESTIONS:
-            return "QUESTIONS!"
+            return routesEnum.TASK
+        case routesEnum.NEWTASK:
+            return routesEnum.NEWTASK;
         default:
             return state
     }
@@ -54,16 +55,16 @@ function machineBalance(state = 25.6, action) {
 const history = createHistory();
 
 // THE WORK:
-enum routesEnum {
+export enum routesEnum {
     HOME = "HOME",
     TASK = "TASK",
     TASKLIST = "TASKLIST",
-    QUESTIONS = "QUESTIONS"
+    NEWTASK = "NEWTASK"
 }
 const routesMap = {
     HOME: '/home',      // action <-> url path
     TASK: '/task/:id',  // :id is a dynamic segment
-    QUESTIONS: "/questions"
+    NEWTASK: "/newtask"
 };
 
 const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
@@ -77,25 +78,25 @@ const rootReducer = combineReducers({
 const middlewares = applyMiddleware(middleware, thunk);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
 
-const testQueue: QueueDTO = { bewt: BEWT, machineBalance: 0, internalQueue: [] };
+const rootComponents = {
+    [routesEnum.HOME]: <ConnectedDashboard />,
+    [routesEnum.TASKLIST]: <ConnectedDashboard />,
+    [routesEnum.NEWTASK]: <ConnectedNewTask />
+}
+
 const App = ({ pageType, onClick }) => {
     return <div>
-        <a onClick={onClick}>Butts</a>
+        <a onClick={onClick}>Task List</a>
         <Header />
+        <span>{pageType}</span>
         {
-			/* This ought to be a hash table or something, keyed off of pageType, but
-			that doesn't play well with the current "shape" for pageType.
-			This also does need to be a single expression, if/else if/else blocks are not allowed. */
-            pageType == "QUESTIONS!"
-                ? <ConnectedDashboard />
-                : !isNaN(pageType) && null != pageType ? <ConnectedNewTask />
-                    : <h1>HOME PAGe</h1>
+            rootComponents[pageType]
         }
     </div>
 };
 const mapStateToProps = ({ pageType }) => ({ pageType });
 const mapDispatchToProps = (dispatch) => ({
-    onClick: () => dispatch({ type: routesEnum.TASK, payload: { id: 5 } })
+    onClick: () => dispatch({ type: routesEnum.TASKLIST })
 });
 
 const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);

@@ -39,7 +39,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
             deposit: 0,
             timePrice: 0,
             timeOfExpectedService: moment.now(),
-            Balance: 0,
+            balance: 0,
             customerNotes: "",
             adminNotes: ""
         }
