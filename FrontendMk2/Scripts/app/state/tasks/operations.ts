@@ -16,6 +16,7 @@ function submitTask(task) {
     return function (dispatch) {
         return jobQueueAPI.createTask(task).then(newTask => {
             dispatch(actions.createTaskSuccess(newTask));
+            dispatch({type:"HOME"})
         }).catch(error => {
             throw (error);
         });
