@@ -71,6 +71,7 @@ const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 // and you already know how the story ends:
 import tasks from "./state/tasks";
 import jobs from "./state/jobActions";
+import { ConnectedTaskDetail } from "./components/TaskDetail";
 const rootReducer = combineReducers({
     location: reducer, pageType: pageTypeReducer, tasks, bewt,
     machineBalance, jobs
@@ -80,6 +81,7 @@ const store = createStore(rootReducer, compose(enhancer, middlewares));
 
 const rootComponents = {
     [routesEnum.HOME]: <ConnectedDashboard />,
+    [routesEnum.TASK]:<ConnectedTaskDetail/>,
     [routesEnum.TASKLIST]: <ConnectedDashboard />,
     [routesEnum.NEWTASK]: <ConnectedNewTask />
 }
