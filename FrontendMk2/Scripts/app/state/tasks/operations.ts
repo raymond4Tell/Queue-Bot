@@ -11,7 +11,15 @@ function loadCurrentTasks() {
     };
 }
 
-
+function loadSingleTask(task) {
+    return function (dispatch) {
+        return jobQueueAPI.getTask(task).then(jobList => {
+            dispatch(actions.loadSingleTaskSuccess(jobList));
+        }).catch(error => {
+            throw (error);
+        });
+    };
+}
 function submitTask(task) {
     return function (dispatch) {
         return jobQueueAPI.createTask(task).then(newTask => {

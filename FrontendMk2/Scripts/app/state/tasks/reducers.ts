@@ -17,7 +17,9 @@ export default function taskReducer(state = [], action) {
         case types.LOAD_TASKS_SUCCESS:
             return [ ...state, ...action.newQueue ];
         case types.UPDATE_TASK:
-            return [ ...state, ...action.newQueue ];
+            return [...state, ...action.newQueue];
+        case types.LOAD_SINGLE_TASK_SUCCESS:
+            return [...state, ...action.newQueue];
         default:
             return state;
     }

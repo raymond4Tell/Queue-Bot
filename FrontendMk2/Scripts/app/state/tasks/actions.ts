@@ -19,5 +19,7 @@ function updateTaskSuccess(newTask) {
 function loadTasksSuccess(jobList) {
     return { type: types.LOAD_TASKS_SUCCESS, newQueue: jobList };
 }
-
-export { createTaskSuccess, loadTasksSuccess, updateTaskSuccess }
+function loadSingleTaskSuccess(jobList) {
+    return { type: types.LOAD_SINGLE_TASK_SUCCESS, newQueue: [].push(jobList )};
+}
+export { createTaskSuccess, loadTasksSuccess, updateTaskSuccess, loadSingleTaskSuccess }
