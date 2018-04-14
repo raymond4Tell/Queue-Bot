@@ -32,8 +32,6 @@ export const pageTypeReducer = (state = null, action = { type: "", payload: { id
 };
 
 const BEWT: moment.Duration = moment.duration({ hours: 2, minutes: 20, seconds: 40 });
-
-
 // TODO: Pull these reducers out into their own files in the folder I created for them.
 const bewt = (state = BEWT, action) => {
     switch (action.type) {
@@ -52,6 +50,15 @@ function machineBalance(state = 25.6, action) {
             return state;
     }
 }
+
+function currentTask(state = "", action  ) {
+    switch (action.type) {
+        case "TASK":
+            return action.payload.taskID;
+        default:
+            return state;
+    }
+}
 const history = createHistory();
 
 // THE WORK:
@@ -63,7 +70,21 @@ export enum routesEnum {
 }
 const routesMap = {
     HOME: '/home',      // action <-> url path
-    TASK: '/task/:id',  // :id is a dynamic segment
+    TASK: {
+        path: '/task/:taskID',
+        thunk: (dispatch, getState) => {
+            console.log("RUNNING THUNK")
+            const { location: { payload: { taskID } }, tasks } = getState();
+
+            if (tasks.find(function (element) { return element.taskID = currentTask; }))
+                return;
+            const task = JobQueueApi.getTask(taskID);
+            task.then(function (data) {
+                console.log("UPDATING TASKS")
+                dispatch({ type: "app/task/LOAD_SINGLE_TASK_SUCCESS", newQueue: [data] });
+            })
+        }
+    },
     NEWTASK: "/newtask"
 };
 
@@ -72,16 +93,17 @@ const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 import tasks from "./state/tasks";
 import jobs from "./state/jobActions";
 import { ConnectedTaskDetail } from "./components/TaskDetail";
+import JobQueueApi from "./JobQueueAPI";
 const rootReducer = combineReducers({
     location: reducer, pageType: pageTypeReducer, tasks, bewt,
-    machineBalance, jobs
+    machineBalance, jobs, currentTask
 });
 const middlewares = applyMiddleware(middleware, thunk);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
 
 const rootComponents = {
     [routesEnum.HOME]: <ConnectedDashboard />,
-    [routesEnum.TASK]:<ConnectedTaskDetail/>,
+    [routesEnum.TASK]: <ConnectedTaskDetail />,
     [routesEnum.TASKLIST]: <ConnectedDashboard />,
     [routesEnum.NEWTASK]: <ConnectedNewTask />
 }
