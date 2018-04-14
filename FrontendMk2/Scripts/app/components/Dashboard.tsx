@@ -19,13 +19,14 @@ export const Dashboard = (currentQueue: QBot.QueueDTO) => {
 }
 export const SingleTask = (task: QBot.Task) =>
     <Link to={`/task/${task.taskId}`} >
-    <li className='list-group-item' key={task.taskId} >
-        Customer: {task.customer.name}<br />
-        Job: {task.job.name}<br />
-        Went on Queue: {task.timeEnqueued}<br />
-        Balance: {task.balance}<br />
-        jobId: {task.jobId}
-    </li></Link>
+        <li className='list-group-item' key={task.taskId} >
+            Customer: {task.customer.name}<br />
+            Job: {task.job.name}<br />
+            Went on Queue: {task.timeEnqueued}<br />
+            Expected Service: {task.timeOfExpectedService}<br />
+            Balance: {task.balance}<br />
+            TaskId: {task.taskId}
+        </li></Link>
 
 const mapStateToProps = (state) => ({
     internalQueue: taskSelectors.getActiveSortedTasks(state),
