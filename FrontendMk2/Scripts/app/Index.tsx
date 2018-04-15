@@ -21,7 +21,7 @@ export const pageTypeReducer = (state = null, action = { type: "", payload: { id
         case routesEnum.HOME:
         case NOT_FOUND:
         case routesEnum.TASKLIST:
-            return routesEnum.HOME
+            return routesEnum.TASKLIST
         case routesEnum.TASK:
             return routesEnum.TASK
         case routesEnum.NEWTASK:
@@ -51,7 +51,7 @@ function machineBalance(state = 25.6, action) {
     }
 }
 
-function currentTask(state = "", action  ) {
+function currentTask(state = "", action) {
     switch (action.type) {
         case "TASK":
             return action.payload.taskID;
@@ -68,19 +68,26 @@ export enum routesEnum {
     TASKLIST = "TASKLIST",
     NEWTASK = "NEWTASK"
 }
+//TODO: Move this out into its own file.
 const routesMap = {
-    HOME: '/home',      // action <-> url path
+    TASKLIST: {
+        path: '/home', thunk: (dispatch, getState) => {
+            const { tasks } = getState();
+
+            if (tasks.length)
+                return;
+            dispatch(taskOperations.loadCurrentTasks());
+        }
+    },  // action <-> url path
     TASK: {
         path: '/task/:taskID',
         thunk: (dispatch, getState) => {
-            console.log("RUNNING THUNK")
             const { location: { payload: { taskID } }, tasks } = getState();
 
             if (tasks.find(function (element) { return element.taskID = currentTask; }))
                 return;
             const task = JobQueueApi.getTask(taskID);
             task.then(function (data) {
-                console.log("UPDATING TASKS")
                 dispatch({ type: "app/task/LOAD_SINGLE_TASK_SUCCESS", newQueue: [data] });
             })
         }
@@ -108,9 +115,8 @@ const rootComponents = {
     [routesEnum.NEWTASK]: <ConnectedNewTask />
 }
 
-const App = ({ pageType, onClick }) => {
+const App = ({ pageType }) => {
     return <div>
-        <a onClick={onClick}>Task List</a>
         <Header />
         <span>{pageType}</span>
         {
@@ -119,14 +125,9 @@ const App = ({ pageType, onClick }) => {
     </div>
 };
 const mapStateToProps = ({ pageType }) => ({ pageType });
-const mapDispatchToProps = (dispatch) => ({
-    onClick: () => dispatch({ type: routesEnum.TASKLIST })
-});
 
-const AppContainer = connect(mapStateToProps, mapDispatchToProps)(App);
+const AppContainer = connect(mapStateToProps)(App);
 
-store.dispatch(loadJobs());
-store.dispatch(taskOperations.loadCurrentTasks());
 ReactDOM.render(
     <Provider store={store}>
         <AppContainer />
