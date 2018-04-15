@@ -20,6 +20,6 @@ function loadTasksSuccess(jobList) {
     return { type: types.LOAD_TASKS_SUCCESS, newQueue: jobList };
 }
 function loadSingleTaskSuccess(jobList) {
-    return { type: types.LOAD_SINGLE_TASK_SUCCESS, newQueue: [].push(jobList )};
+    return { type: types.LOAD_SINGLE_TASK_SUCCESS, newQueue: [jobList] };
 }
 export { createTaskSuccess, loadTasksSuccess, updateTaskSuccess, loadSingleTaskSuccess }

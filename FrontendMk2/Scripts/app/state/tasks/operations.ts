@@ -41,4 +41,4 @@ function updateTask(task) {
     };
 }
 
-export {submitTask, loadCurrentTasks }
+export {submitTask, loadCurrentTasks, loadSingleTask, updateTask }

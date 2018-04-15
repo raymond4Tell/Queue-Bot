@@ -86,10 +86,7 @@ const routesMap = {
 
             if (tasks.find(function (element) { return element.taskID = currentTask; }))
                 return;
-            const task = JobQueueApi.getTask(taskID);
-            task.then(function (data) {
-                dispatch({ type: "app/task/LOAD_SINGLE_TASK_SUCCESS", newQueue: [data] });
-            })
+            dispatch(taskOperations.loadSingleTask(taskID));
         }
     },
     NEWTASK: "/newtask"
