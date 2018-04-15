@@ -74,8 +74,9 @@ const routesMap = {
         path: '/home', thunk: (dispatch, getState) => {
             const { tasks } = getState();
 
-            if (tasks.length)
+            if (tasks.length) {
                 return;
+            }
             dispatch(taskOperations.loadCurrentTasks());
         }
     },  // action <-> url path
@@ -84,12 +85,23 @@ const routesMap = {
         thunk: (dispatch, getState) => {
             const { location: { payload: { taskID } }, tasks } = getState();
 
-            if (tasks.find(function (element) { return element.taskID = currentTask; }))
+            if (tasks.find(function (element) { return element.taskID = currentTask; })) {
                 return;
+            }
             dispatch(taskOperations.loadSingleTask(taskID));
         }
     },
-    NEWTASK: "/newtask"
+    NEWTASK: {
+        path: "/newtask",
+        thunk: (dispatch, getState) => {
+            const { jobs } = getState();
+
+            if (jobs.length) {
+                return;
+            }
+            dispatch(loadJobs());
+        }
+    }
 };
 
 const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
