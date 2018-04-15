@@ -32,3 +32,30 @@ export class QueueDTO {
 	bewt: Moment.Duration;
 	internalQueue: Task[];
 }
+
+export const emptyTask: Task = {
+    customer: {
+        name: "",
+        authId: "",
+        requestedJobs: []
+    },
+    authId: "",
+    taskId: "",
+    waitTime: Moment.duration({ hours: 0 }),
+    job: {
+        name: "",
+        jobId: 1,
+        length: Moment.duration({ hours: 0 }),
+        description: ""
+    },
+    deposit: 0,
+    timePrice: 0,
+    balance: 0,
+    jobId: 1,
+    timeEnqueued: 0,
+    timeOfExpectedService: 0,
+    taskStatus: 0,
+    customerNotes: "",
+    adminNotes: "",
+
+}
