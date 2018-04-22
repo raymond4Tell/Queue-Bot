@@ -17,32 +17,7 @@ type NewTaskState = {
 
 class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
     state: NewTaskState = {
-        // Really ought to do this with `newTask : new QBot.Task()`, but CBA to add a proper constructor to that type.
-        newTask: {
-            timeEnqueued: moment.now(),
-            customer: {
-                name: "Alfred",
-                authId: "klkjlk",
-                requestedJobs: []
-            },
-            authId: "klkjlk",
-            jobId: 1,
-            job: {
-                jobId: 1,
-                length: moment.duration({ hours: 1 }),
-                description: "asdfadfkl",
-                name: "sdasdfkjlkk"
-            },
-            taskId: "asdfasdfasdf",
-            taskStatus: 1,
-            waitTime: moment.duration({ hours: 1 }),
-            deposit: 0,
-            timePrice: 0,
-            timeOfExpectedService: moment.now(),
-            balance: 0,
-            customerNotes: "",
-            adminNotes: ""
-        }
+        newTask: QBot.emptyTask
     };
 
     handleIncrement = (event) => {
