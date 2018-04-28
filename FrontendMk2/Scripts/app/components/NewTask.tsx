@@ -62,6 +62,9 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
 
 const mapStateToProps = (state) => ({ jobList: state.jobs });
 const mapDispatchToProps = (dispatch) => ({
-    createTask: (newTask) => dispatch(taskOperations.submitTask(newTask))
+    createTask: (newTask) => {
+        dispatch(taskOperations.submitTask(newTask));
+        dispatch({ type: "TASKLIST" });
+    }
 });
 export const ConnectedNewTask = connect(mapStateToProps, mapDispatchToProps)(NewTaskForm);

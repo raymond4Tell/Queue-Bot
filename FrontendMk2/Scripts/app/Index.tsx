@@ -2,7 +2,7 @@
 import * as ReactDOM from "react-dom";
 import { connect, Dispatch, Provider } from "react-redux";
 import Link from "redux-first-router-link";
-import { NOT_FOUND, connectRoutes } from "redux-first-router";
+import { NOT_FOUND, redirect, connectRoutes } from "redux-first-router";
 import { combineReducers, createStore, applyMiddleware, compose } from "redux";
 import createHistory from 'history/createBrowserHistory';
 import { Header } from "./components/Header";
@@ -70,8 +70,14 @@ export enum routesEnum {
 }
 //TODO: Move this out into its own file.
 const routesMap = {
+    HOME: {
+        path: "/",
+        thunk: (dispatch, getState) => {
+            dispatch(redirect({ type: routesEnum.TASKLIST }));
+        }
+    },
     TASKLIST: {
-        path: '/home', thunk: (dispatch, getState) => {
+        path: '/dashboard', thunk: (dispatch, getState) => {
             const { tasks } = getState();
 
             if (tasks.length) {
@@ -118,7 +124,6 @@ const middlewares = applyMiddleware(middleware, thunk);
 const store = createStore(rootReducer, compose(enhancer, middlewares));
 
 const rootComponents = {
-    [routesEnum.HOME]: <ConnectedDashboard />,
     [routesEnum.TASK]: <ConnectedTaskDetail />,
     [routesEnum.TASKLIST]: <ConnectedDashboard />,
     [routesEnum.NEWTASK]: <ConnectedNewTask />
