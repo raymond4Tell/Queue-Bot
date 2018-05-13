@@ -8,7 +8,8 @@ import { taskOperations } from "../state/tasks/";
 
 export interface NewTaskFormProps {
     createTask: any,
-    jobList: QBot.Job[]
+    jobList: QBot.Job[],
+    customerList: QBot.Customer[]
 }
 
 type NewTaskState = {
@@ -34,7 +35,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
 
     render() {
         const { handleIncrement } = this;
-        const { createTask, jobList } = this.props;
+        const { createTask, jobList, customerList } = this.props;
         return <div>
             <h2>New Task</h2>
             <fieldset>
@@ -48,9 +49,14 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
                 )
                 }
             </fieldset>
-            <label >Task ID
-                <input type="text" name="authId" onChange={this.handleIncrement} value={this.state.newTask.authId} />
-            </label>
+            // TODO: Make this into an "insert current details here, or insert new details" sort of thing.
+            <label>Customer AuthID
+                <select value={this.state.newTask.authId} name="authId" onChange={this.handleIncrement}>
+                    {customerList.map(customer =>
+                        <option key={customer.authId} value={customer.authId} > { customer.name } </option>)}
+                </select>
+                </label>
+           
             <label>Time Price
                 <input type="number" name="timePrice" onChange={this.handleIncrement} value={this.state.newTask.timePrice} />
             </label>
@@ -60,7 +66,7 @@ class NewTaskForm extends React.Component<NewTaskFormProps, NewTaskState> {
     }
 }
 
-const mapStateToProps = (state) => ({ jobList: state.jobs });
+const mapStateToProps = (state) => ({ jobList: state.jobs, customerList: state.customers });
 const mapDispatchToProps = (dispatch) => ({
     createTask: (newTask) => {
         dispatch(taskOperations.submitTask(newTask));

@@ -100,12 +100,13 @@ const routesMap = {
     NEWTASK: {
         path: "/newtask",
         thunk: (dispatch, getState) => {
-            const { jobs } = getState();
+            const { jobs, customers } = getState();
 
-            if (jobs.length) {
+            if (jobs.length && customers.length) {
                 return;
             }
             dispatch(loadJobs());
+            dispatch(loadCustomers());
         }
     }
 };
@@ -114,11 +115,12 @@ const { reducer, middleware, enhancer } = connectRoutes(history, routesMap);
 // and you already know how the story ends:
 import tasks from "./state/tasks";
 import jobs from "./state/jobActions";
+import customers, { loadCustomers } from "./state/customerActions";
 import { ConnectedTaskDetail } from "./components/TaskDetail";
 import JobQueueApi from "./JobQueueAPI";
 const rootReducer = combineReducers({
     location: reducer, pageType: pageTypeReducer, tasks, bewt,
-    machineBalance, jobs, currentTask
+    customers, machineBalance, jobs, currentTask
 });
 const middlewares = applyMiddleware(middleware, thunk);
 const store = createStore(rootReducer, compose(enhancer, middlewares));

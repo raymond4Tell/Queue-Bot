@@ -3,8 +3,8 @@
 import jobQueueAPI from '../JobQueueAPI';
 export default function customerReducer(state = [], action) {
     switch (action.type) {
-        case "LOAD_JOBS_SUCCESS":
-            return action.jobs;
+        case "LOAD_CUSTOMERS_SUCCESS":
+            return action.customers;
         default:
             return state;
     }
@@ -12,13 +12,13 @@ export default function customerReducer(state = [], action) {
 export function loadCustomers() {
     return function (dispatch) {
         return jobQueueAPI.getCustomers().then(jobList => {
-            dispatch(loadJobsSuccess(jobList));
+            dispatch(loadCustomersSuccess(jobList));
         }).catch(error => {
             throw (error);
         });
     };
 }
 
-export function loadJobsSuccess(jobList) {
-    return { type: "LOAD_JOBS_SUCCESS", jobs: jobList };
+export function loadCustomersSuccess(customerList) {
+    return { type: "LOAD_CUSTOMERS_SUCCESS", customers: customerList };
 }
